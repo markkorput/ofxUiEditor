@@ -5,9 +5,12 @@
 namespace ofxUiEditor {
     class MeshDataManager {
 
+    public: // common methods
+        void draw();
+
     public: // getters/setters
-        MeshData* find(const string &id);
-        MeshData* get(const string &id);
+        shared_ptr<MeshData> find(const string &id);
+        shared_ptr<MeshData> get(const string &id);
 
     private: // callbacks
         void onItemChange(MeshData &item);
@@ -16,6 +19,6 @@ namespace ofxUiEditor {
         ofEvent<MeshData> newItemEvent, itemUpdatedEvent;
 
     private: // attributes
-        map<string, MeshData> items;
+        map<string, shared_ptr<MeshData>> items;
     };
 };

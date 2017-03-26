@@ -2,24 +2,30 @@
 
 using namespace ofxUiEditor;
 
-MeshData* MeshDataManager::find(const string &id){
+void MeshDataManager::draw(){
+    
+}
+
+shared_ptr<MeshData> MeshDataManager::find(const string &id){
     auto it = items.find(id);
     if(it == items.end())
         return NULL;
-    return &it->second;
+    return it->second;
 }
 
-MeshData* MeshDataManager::get(const string &id){
+shared_ptr<MeshData> MeshDataManager::get(const string &id){
     auto existing = find(id);
 
     if(existing)
         return existing;
 
     // create new
-    MeshData *pNew = &items[id];
-    ofNotifyEvent(newItemEvent, *pNew);
-    ofAddListener(pNew->changeEvent, this, &MeshDataManager::onItemChange);
-    return pNew;
+    auto newItem = make_shared<MeshData>();
+    ofAddListener(newItem->changeEvent, this, &MeshDataManager::onItemChange);
+
+    items[id] = newItem;
+    ofNotifyEvent(newItemEvent, *newItem);
+    return newItem;
 }
 
 void MeshDataManager::onItemChange(MeshData &item){
