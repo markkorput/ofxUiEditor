@@ -25,10 +25,6 @@ public:
     void keyPressed(int key);
     void exit(ofEventArgs &args);
 
-public: // params
-    ofParameterGroup params;
-    ofParameter<int> oscPortParam;
-
 private: // attributes
     ofxOscReceiver oscReceiver;
     MeshDataManager meshDataManager;
@@ -46,21 +42,12 @@ void ofApp::setup(){
     ofSetWindowTitle("ofxUiEditor - example");
     ofSetWindowShape(400,300);
 
-    // params
-    params.setName("ofxUiEditor-example");
-    params.add(oscPortParam.set("osc-port", 8080, 0, 9999));
-
-    // load params.xml
-    ofLog() << "Loading params from: " << paramsFile;
-    ofXml xml;
-    xml.load(paramsFile);
-    xml.deserialize(params);
-    
     // load layout
+    ofLog() << "Loading layouts from " << layoutFile;
     meshDataManager.loadFromFile(layoutFile);
     
     // setup osc message listener
-    oscReceiver.setup(oscPortParam.get());
+    oscReceiver.setup(8080);
 }
 
 void ofApp::update(){
@@ -73,46 +60,7 @@ void ofApp::update(){
         ofxOscMessage msg;
         oscReceiver.getNextMessage(msg);
 
-        // ofLog() << msg.getAddress();
-
-        if(msg.getAddress() == "/ui-editor/mesh/position"){
-            // args; [s, f,f,f] // Mesh-id and Vec3f
-            meshDataManager.get(msg.getArgAsString(0))->setPosition(
-                ofVec3f(msg.getArgAsFloat(1),
-                        msg.getArgAsFloat(2),
-                        msg.getArgAsFloat(3)));
-            continue;
-        }
-
-        if(msg.getAddress() == "/ui-editor/mesh/rotation"){
-            // args; [s, f,f,f] // Mesh-id and Vec3f
-            meshDataManager.get(msg.getArgAsString(0))->setRotation(
-                ofVec3f(msg.getArgAsFloat(1),
-                        msg.getArgAsFloat(2),
-                        msg.getArgAsFloat(3)));
-            continue;
-        }
-
-        if(msg.getAddress() == "/ui-editor/mesh/scale"){
-            // args; [s, f,f,f] // Mesh-id and Vec3f
-            meshDataManager.get(msg.getArgAsString(0))->setScale(
-                ofVec3f(msg.getArgAsFloat(1),
-                        msg.getArgAsFloat(2),
-                        msg.getArgAsFloat(3)));
-            continue;
-        }
-        
-        if(msg.getAddress() == "/ui-editor/mesh/vertices"){
-            // args; [s ,f,f,f ,f,f,f ,...] // Mesh-id and X-times Vec3f
-            auto pItem = meshDataManager.get(msg.getArgAsString(0));
-            for(int idx=0; msg.getNumArgs() >= 1+(idx+1)*3; idx++){
-                pItem->setVertex(idx,
-                                 ofVec3f(msg.getArgAsFloat(1+idx*3),
-                                         msg.getArgAsFloat(1+idx*3+1),
-                                         msg.getArgAsFloat(1+idx*3+2)));
-            }
-            continue;
-        }
+        meshDataManager.processOscMessage(msg);
     }
 }
 
@@ -130,13 +78,8 @@ void ofApp::keyPressed(int key){
 }
 
 void ofApp::exit(ofEventArgs &args){
-    ofLog() << "Saving layout to " << layoutFile;
+    ofLog() << "Saving layouts to " << layoutFile;
     meshDataManager.saveToFile(layoutFile);
-
-    ofLog() << "Saving params to " << paramsFile;
-    ofXml xml;
-    xml.serialize(params);
-//    xml.save(paramsFile);
 }
 
 //--------------------------------------------------------------

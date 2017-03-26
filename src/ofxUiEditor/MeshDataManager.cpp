@@ -1,8 +1,9 @@
 #include "MeshDataManager.h"
 #include "ofxJSON.h"
 
-using namespace ofxUiEditor;
-
+//
+// Local helper methods
+//
 
 ofVec3f getVec3f(const Json::Value & jsonValue){
     if(jsonValue.isNull())
@@ -16,6 +17,11 @@ ofVec3f getVec3f(const Json::Value & jsonValue){
     return ofVec3f(ofToFloat(floats[0]), ofToFloat(floats[1]), ofToFloat(floats[2]));
 }
 
+//
+// MeshDataManager implementation
+//
+
+using namespace ofxUiEditor;
 
 void MeshDataManager::draw(){
     vector<shared_ptr<MeshData>> rootItems = getRootItems();
@@ -94,7 +100,6 @@ bool MeshDataManager::loadFromFile(const string& filePath){
         return false;
     }
 
-    ofLog() << "json loaded: ";
     for(auto it=json.begin(); it!=json.end(); it++){
         if(it.key().asString() == "meshes"){
             auto meshesJson = json[it.key().asString()];
@@ -164,8 +169,8 @@ vector<shared_ptr<MeshData>> MeshDataManager::getRootItems(){
     shared_ptr<MeshData> itemRef = nullptr;
 
     for(auto it=items.begin(); it!=items.end(); it++){
-        // only includes items that have an ID that does not start with the
-        // last found root item's id
+        // only includes items that have an ID that does not
+        // start with the last found root item's id
         if(itemRef == nullptr || it->second->getId().find(itemRef->getId()) != 0)
             rootItems.push_back(itemRef = it->second);
     }
@@ -190,3 +195,53 @@ vector<shared_ptr<MeshData>> MeshDataManager::getChildren(const string &parentId
 
     return childItems;
 }
+
+#ifdef OFX_UI_EDITOR_OSC
+bool MeshDataManager::processOscMessage(ofxOscMessage msg){
+    // ofLog() << msg.getAddress();
+    
+    if(msg.getAddress() == "/ui-editor/mesh/position"){
+        // args; [s, f,f,f] // Mesh-id and Vec3f
+        get(msg.getArgAsString(0))->setPosition(ofVec3f(msg.getArgAsFloat(1),
+                                                        msg.getArgAsFloat(2),
+                                                        msg.getArgAsFloat(3)));
+        // yes, we processed the message
+        return true;
+    }
+    
+    if(msg.getAddress() == "/ui-editor/mesh/rotation"){
+        // args; [s, f,f,f] // Mesh-id and Vec3f
+        get(msg.getArgAsString(0))->setRotation(ofVec3f(msg.getArgAsFloat(1),
+                                                        msg.getArgAsFloat(2),
+                                                        msg.getArgAsFloat(3)));
+        // yes, we processed the message
+        return true;
+    }
+    
+    if(msg.getAddress() == "/ui-editor/mesh/scale"){
+        // args; [s, f,f,f] // Mesh-id and Vec3f
+        get(msg.getArgAsString(0))->setScale(ofVec3f(msg.getArgAsFloat(1),
+                                                     msg.getArgAsFloat(2),
+                                                     msg.getArgAsFloat(3)));
+        // yes, we processed the message
+        return true;
+    }
+    
+    if(msg.getAddress() == "/ui-editor/mesh/vertices"){
+        // args; [s ,f,f,f ,f,f,f ,...] // Mesh-id and X-times Vec3f
+        auto itemRef = get(msg.getArgAsString(0));
+
+        for(int idx=0; msg.getNumArgs() >= 1+(idx+1)*3; idx++){
+            itemRef->setVertex(idx, ofVec3f(msg.getArgAsFloat(1+idx*3),
+                                             msg.getArgAsFloat(1+idx*3+1),
+                                             msg.getArgAsFloat(1+idx*3+2)));
+        }
+        
+        // yes, we processed the message
+        return true;
+    }
+    
+    return false;
+}
+
+#endif // #ifdef OFX_UI_EDITOR_OSC

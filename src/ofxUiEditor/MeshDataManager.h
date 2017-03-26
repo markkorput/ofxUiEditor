@@ -2,6 +2,10 @@
 
 #include "MeshData.h"
 
+#ifdef OFX_UI_EDITOR_OSC
+#include "ofxOscMessage.h"
+#endif
+
 namespace ofxUiEditor {
 
     class MeshDataManager {
@@ -21,6 +25,11 @@ namespace ofxUiEditor {
         vector<shared_ptr<MeshData>> getRootItems();
         vector<shared_ptr<MeshData>> getChildren(const string &parentId);
 
+#ifdef OFX_UI_EDITOR_OSC
+    public: // helper methods
+        bool processOscMessage(ofxOscMessage msg);
+#endif
+        
     private: // callbacks
         void onItemChange(MeshData &item);
 
