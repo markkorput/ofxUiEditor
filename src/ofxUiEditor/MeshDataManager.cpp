@@ -1,6 +1,21 @@
 #include "MeshDataManager.h"
+#include "ofxJSON.h"
 
 using namespace ofxUiEditor;
+
+
+ofVec3f getVec3f(const Json::Value & jsonValue){
+    if(jsonValue.isNull())
+        return ofVec3f(0.0f);
+
+    vector<string> floats = ofSplitString(jsonValue.asString(), ", ");
+
+    if(floats.size() != 3)
+        return ofVec3f(0.0f);
+
+    return ofVec3f(ofToFloat(floats[0]), ofToFloat(floats[1]), ofToFloat(floats[2]));
+}
+
 
 void MeshDataManager::draw(){
     vector<shared_ptr<MeshData>> rootItems = getRootItems();
@@ -45,6 +60,69 @@ void MeshDataManager::drawItem(shared_ptr<MeshData> item){
         }
     }
     ofPopMatrix();
+}
+
+void MeshDataManager::saveToFile(const string& filePath){
+    ofxJSONElement json, meshesEl;
+
+    for(auto it=items.begin(); it!=items.end(); it++){
+        auto data = it->second;
+
+        ofxJSONElement el;
+        el["position"] = ofToString(data->getPosition());
+        el["rotation"] = ofToString(data->getRotation());
+        el["scale"] = ofToString(data->getScale());
+
+        Json::Value verticesJson(Json::arrayValue);
+        auto& verts = data->getVertices();
+        for(int i=0; i<verts.size(); i++)
+            verticesJson[i] = ofToString(verts[i]);
+        el["vertices"] = verticesJson;
+
+        meshesEl[it->first] = el;
+    }
+
+    json["meshes"] = meshesEl;
+    json.save(filePath, true);
+}
+
+bool MeshDataManager::loadFromFile(const string& filePath){
+    ofxJSONElement json;
+
+    if(!json.open(filePath)){
+        ofLogWarning() << "Could not load file: " << filePath;
+        return false;
+    }
+
+    ofLog() << "json loaded: ";
+    for(auto it=json.begin(); it!=json.end(); it++){
+        if(it.key().asString() == "meshes"){
+            auto meshesJson = json[it.key().asString()];
+            for(auto it2=meshesJson.begin(); it2!=meshesJson.end(); it2++){
+                string id = it2.key().asString();
+                auto itemJson = meshesJson[id];
+                
+                auto item = get(id);
+                item->setPosition(getVec3f(itemJson["position"]));
+                item->setRotation(getVec3f(itemJson["rotation"]));
+                item->setScale(getVec3f(itemJson["scale"]));
+                
+                auto vertsJson = itemJson["vertices"];
+                if(!vertsJson.isArray())
+                    continue;
+            
+                for(int i=0; i<vertsJson.size(); i++){
+                    item->setVertex(i, getVec3f(vertsJson[i]));
+                }
+            }
+            continue;
+        }
+        
+        
+        ofLogWarning() << "Unknown JSON key: " << it.key().asString();
+    }
+    
+    return true;
 }
 
 shared_ptr<MeshData> MeshDataManager::find(const string &id){

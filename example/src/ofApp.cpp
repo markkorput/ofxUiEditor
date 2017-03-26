@@ -4,13 +4,17 @@
 
 #include "ofMain.h"
 
-// ofxOsc
+// ofxGui addon
+#include "ofXml.h"
+// ofxOsc addon
 #include "ofxOscReceiver.h"
-
-// ofxUiEditor
+// ofxUiEditor addon
 #include "ofxUiEditor.h"
 
 using namespace ofxUiEditor;
+
+const string paramsFile = "params.xml";
+const string layoutFile = "layout.json";
 
 class ofApp : public ofBaseApp{
 
@@ -19,6 +23,11 @@ public:
     void update();
     void draw();
     void keyPressed(int key);
+    void exit(ofEventArgs &args);
+
+public: // params
+    ofParameterGroup params;
+    ofParameter<int> oscPortParam;
 
 private: // attributes
     ofxOscReceiver oscReceiver;
@@ -33,10 +42,25 @@ private: // attributes
 
 
 void ofApp::setup(){
+    // window
     ofSetWindowTitle("ofxUiEditor - example");
     ofSetWindowShape(400,300);
+
+    // params
+    params.setName("ofxUiEditor-example");
+    params.add(oscPortParam.set("osc-port", 8080, 0, 9999));
+
+    // load params.xml
+    ofLog() << "Loading params from: " << paramsFile;
+    ofXml xml;
+    xml.load(paramsFile);
+    xml.deserialize(params);
     
-    oscReceiver.setup(8080);
+    // load layout
+    meshDataManager.loadFromFile(layoutFile);
+    
+    // setup osc message listener
+    oscReceiver.setup(oscPortParam.get());
 }
 
 void ofApp::update(){
@@ -105,6 +129,15 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 }
 
+void ofApp::exit(ofEventArgs &args){
+    ofLog() << "Saving layout to " << layoutFile;
+    meshDataManager.saveToFile(layoutFile);
+
+    ofLog() << "Saving params to " << paramsFile;
+    ofXml xml;
+    xml.serialize(params);
+//    xml.save(paramsFile);
+}
 
 //--------------------------------------------------------------
 // main.cpp

@@ -3,7 +3,7 @@
 #include "ofMain.h"
 
 namespace ofxUiEditor {
-    class MeshData {
+    class MeshData : public ofParameterGroup {
 
     public: // getters/setters
         const string& getId(){ return id; }
@@ -22,6 +22,8 @@ namespace ofxUiEditor {
         const ofVec3f& getVertBoundsOrigin(){ return vertBoundsOrigin; }
         const ofVec3f& getVertBoundsSize(){ return vertBoundsSize; }
 
+        const vector<ofVec3f>& getVertices(){ return vertices; }
+
     private: // helpers methods
         
         void updateVertBounds();
@@ -33,8 +35,7 @@ namespace ofxUiEditor {
         string id;
         ofVec3f position, rotation, scale;
         vector<ofVec3f> vertices;
-        
-        ofVec3f vertBoundsOrigin, vertBoundsSize;
 
+        ofVec3f vertBoundsOrigin, vertBoundsSize;
     };
 };

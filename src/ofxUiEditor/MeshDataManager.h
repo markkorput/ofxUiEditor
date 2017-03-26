@@ -3,11 +3,16 @@
 #include "MeshData.h"
 
 namespace ofxUiEditor {
+
     class MeshDataManager {
 
     public: // common methods
+
         void draw();
         void drawItem(shared_ptr<MeshData> item);
+
+        void saveToFile(const string& filePath);
+        bool loadFromFile(const string& filePath);
 
     public: // getters/setters
         shared_ptr<MeshData> find(const string &id);
