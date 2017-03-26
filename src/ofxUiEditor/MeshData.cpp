@@ -24,5 +24,25 @@ void MeshData::setVertex(int idx, const ofVec3f &vert){
     }
 
     vertices[idx] = vert;
+    updateVertBounds();
     ofNotifyEvent(changeEvent, *this);
+}
+
+void MeshData::updateVertBounds(){
+    auto x = minmax_element(vertices.begin(), vertices.end(),
+                               [](const ofPoint& a, const ofPoint& b) {
+                                   return a.x < b.x;
+                               });
+    auto y = minmax_element(vertices.begin(), vertices.end(),
+                               [](const ofPoint& a, const ofPoint& b) {
+                                   return a.y < b.y;
+                               });
+    auto z = minmax_element(vertices.begin(), vertices.end(),
+                               [](const ofPoint& a, const ofPoint& b) {
+                                   return a.z < b.z;
+                               });
+    
+    vertBoundsOrigin = ofVec3f(x.first->x, y.first->y, z.first->z);
+    ofVec3f max = ofVec3f(x.second->x, y.second->y, z.second->z);
+    vertBoundsSize = max - vertBoundsOrigin;
 }

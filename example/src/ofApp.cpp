@@ -14,15 +14,17 @@ using namespace ofxUiEditor;
 
 class ofApp : public ofBaseApp{
 
-    public:
-        void setup();
-        void update();
-        void draw();
-        void keyPressed(int key);
+public:
+    void setup();
+    void update();
+    void draw();
+    void keyPressed(int key);
 
-    private: // attributes
-        ofxOscReceiver oscReceiver;
-        MeshDataManager meshDataManager;
+private: // attributes
+    ofxOscReceiver oscReceiver;
+    MeshDataManager meshDataManager;
+
+    ofEasyCam cam;
 };
 
 //--------------------------------------------------------------
@@ -46,7 +48,9 @@ void ofApp::update(){
 
         ofxOscMessage msg;
         oscReceiver.getNextMessage(msg);
-        
+
+        // ofLog() << msg.getAddress();
+
         if(msg.getAddress() == "/ui-editor/mesh/position"){
             // args; [s, f,f,f] // Mesh-id and Vec3f
             meshDataManager.get(msg.getArgAsString(0))->setPosition(
@@ -89,7 +93,13 @@ void ofApp::update(){
 }
 
 void ofApp::draw(){
-    ofBackground(ofColor::lightGreen);
+    ofBackground(ofColor::gray);
+    
+    cam.begin();
+    ofScale(50.0f, 50.0f, 50.0f);
+    ofDrawRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+    meshDataManager.draw();
+    cam.end();
 }
 
 void ofApp::keyPressed(int key){
