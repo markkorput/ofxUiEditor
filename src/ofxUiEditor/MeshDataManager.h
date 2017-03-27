@@ -15,7 +15,7 @@ namespace ofxUiEditor {
         void draw();
         void drawItem(shared_ptr<MeshData> item);
 
-        void saveToFile(const string& filePath);
+        bool saveToFile(const string& filePath);
         bool loadFromFile(const string& filePath);
 
     public: // getters/setters

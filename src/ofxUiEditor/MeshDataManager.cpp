@@ -68,7 +68,7 @@ void MeshDataManager::drawItem(shared_ptr<MeshData> item){
     ofPopMatrix();
 }
 
-void MeshDataManager::saveToFile(const string& filePath){
+bool MeshDataManager::saveToFile(const string& filePath){
     ofxJSONElement json, meshesEl;
 
     for(auto it=items.begin(); it!=items.end(); it++){
@@ -89,7 +89,7 @@ void MeshDataManager::saveToFile(const string& filePath){
     }
 
     json["meshes"] = meshesEl;
-    json.save(filePath, true);
+    return json.save(filePath, true);
 }
 
 bool MeshDataManager::loadFromFile(const string& filePath){

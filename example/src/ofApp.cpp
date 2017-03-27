@@ -25,6 +25,9 @@ public:
     void keyPressed(int key);
     void exit(ofEventArgs &args);
 
+    bool loadLayouts(const string& createSceneNode="");
+    bool saveLayouts();
+
 private: // attributes
     ofxOscReceiver oscReceiver;
     ofxUiEditor::MeshDataManager meshDataManager;
@@ -39,34 +42,22 @@ private: // attributes
 // ofApp.cpp
 //--------------------------------------------------------------
 
-
 void ofApp::setup(){
     // window
     ofSetWindowTitle("ofxUiEditor - example");
     ofSetWindowShape(400,300);
 
-    // load layouts
-    ofLog() << "Loading layouts from " << layoutFile;
-//    meshDataManager.loadFromFile(layoutFile);
-    
     // create scene
     sceneRef = make_shared<ofxInterface::Node>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("ofxUiEditor-example-scene");
 
-    // populate scene with layout
-    auto layoutNode = meshDataManager.generateNode<ofxInterface::Node>("frame.panel");
-    if(layoutNode){
-        sceneRef->addChild(layoutNode);
-        layoutNode->setPosition(1, 1);
-    }
+    loadLayouts("panel.frame");
 
     // setup osc message listener
     oscReceiver.setup(8080);
     bDrawManager = false;
     bDrawDebug = true;
-    
-    ofSetRectMode(OF_RECTMODE_CENTER);
 }
 
 void ofApp::update(){
@@ -103,17 +94,53 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
     if(key == 'd'){
         bDrawDebug = !bDrawDebug;
+        return;
     }
     
     if(key == 'm'){
         bDrawManager = !bDrawManager;
+        return;
+    }
+    
+    if(key=='l'){
+        loadLayouts("panel.frame");
+        return;
+    }
+
+    if(key=='s'){
+        saveLayouts();
+        return;
     }
 }
 
 void ofApp::exit(ofEventArgs &args){
-    ofLog() << "Saving layouts to " << layoutFile;
-    meshDataManager.saveToFile(layoutFile);
+//    saveLayouts();
 }
+
+bool ofApp::loadLayouts(const string& createSceneNode){
+    // clear scene
+    while(sceneRef->getNumChildren() > 0)
+        sceneRef->removeChild(0);
+
+    ofLog() << "Loading layouts from " << layoutFile;
+    if(!meshDataManager.loadFromFile(layoutFile))
+        return false;
+
+    if(createSceneNode != ""){
+        auto layoutNode = meshDataManager.generateNode<ofxInterface::Node>(createSceneNode);
+        if(layoutNode){
+            layoutNode->setPosition(0,0,0);
+            sceneRef->addChild(layoutNode);
+        }
+    }
+    return true;
+}
+
+bool ofApp::saveLayouts(){
+    ofLog() << "Saving layouts to " << layoutFile;
+    return meshDataManager.saveToFile(layoutFile);
+}
+
 
 //--------------------------------------------------------------
 // main.cpp
