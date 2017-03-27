@@ -84,8 +84,6 @@ void ofApp::draw(){
     if(bCamEnabled)
         cam.begin();
 
-    ofScale(5.0f, 5.0f, 5.0f);
-
     if(bDrawManager)
         meshDataManager.draw();
 

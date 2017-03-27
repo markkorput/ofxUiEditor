@@ -36,11 +36,6 @@ void MeshDataManager::drawItem(shared_ptr<MeshData> item){
     ofVec3f min = item->getVertBoundsOrigin();
     ofVec3f size = item->getVertBoundsSize();
 
-//     ofLog() << "drawItem: " << item->getId()
-//        << "\npos: " << item->getPosition()
-//        << ", min: " << min
-//        << ", size: " << size;
-
     ofPushMatrix();
     {
         ofTranslate(item->getPosition());
@@ -50,16 +45,11 @@ void MeshDataManager::drawItem(shared_ptr<MeshData> item){
         ofRotateY(rot.y);
         ofRotateZ(rot.z);
 
-        ofPushMatrix();
-            auto matrix = ofGetCurrentMatrix(OF_MATRIX_MODELVIEW);
-            ofTranslate(min);
-            // red stroke
-            ofSetColor(ofColor::red);
-            ofDrawRectangle(0.0f, 0.0f, size.x, size.y);
-            // black fill
-            ofSetColor(ofColor::black);
-            ofDrawRectangle(1.0f/matrix.getScale().x, 1.0/matrix.getScale().y, size.x-2.0f/matrix.getScale().x, size.y-2.0f/matrix.getScale().y);
-        ofPopMatrix();
+        ofSetLineWidth(1);
+        ofNoFill();
+        ofSetColor(ofColor::red);
+        ofDrawRectangle(0.0f, 0.0f, size.x, size.y);
+
         // children
         for(auto &child : getChildren(item->getId())){
             drawItem(child);
