@@ -65,6 +65,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4D4D7AF31E89DA2300DF7814 /* NodeGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeGenerator.h; sourceTree = "<group>"; };
 		4DA48B4D1E8836BD00CDF4EC /* json-forwards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "json-forwards.h"; sourceTree = "<group>"; };
 		4DA48B4E1E8836BD00CDF4EC /* json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
 		4DA48B501E8836BD00CDF4EC /* jsoncpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jsoncpp.cpp; sourceTree = "<group>"; };
@@ -369,6 +370,7 @@
 				4DD34EDA1E87ED3600BC03FA /* MeshData.h */,
 				4DD34EDB1E87ED3600BC03FA /* MeshDataManager.cpp */,
 				4DD34EDC1E87ED3600BC03FA /* MeshDataManager.h */,
+				4D4D7AF31E89DA2300DF7814 /* NodeGenerator.h */,
 			);
 			path = ofxUiEditor;
 			sourceTree = "<group>";

@@ -31,6 +31,7 @@ public:
 private: // attributes
     ofxOscReceiver oscReceiver;
     ofxUiEditor::MeshDataManager meshDataManager;
+    ofxUiEditor::NodeGenerator<ofxInterface::Node> nodeGenerator;
 
     shared_ptr<ofxInterface::Node> sceneRef;
     ofxInterface::Node* layoutNode;
@@ -52,6 +53,8 @@ void ofApp::setup(){
     bDrawManager = false;
     bDrawDebug = bCamEnabled = true;
 
+    nodeGenerator.setup(meshDataManager);
+
     // create scene
     sceneRef = make_shared<ofxInterface::Node>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
@@ -62,6 +65,8 @@ void ofApp::setup(){
 
     // setup osc message listener
     oscReceiver.setup(8080);
+
+    
 }
 
 void ofApp::update(){
@@ -143,11 +148,18 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         return false;
 
     if(createSceneNode != ""){
+        auto nodeRef = nodeGenerator.generateNode(createSceneNode);
+
+        if(nodeRef == nullptr){
+            // loading the file succeeded, so we're still returning true
+            return true;
+        }
+
         // remove current layoutNode
         if(layoutNode)
             delete layoutNode;
-
-        layoutNode = meshDataManager.generateNode<ofxInterface::Node>(createSceneNode);
+        
+        layoutNode = nodeRef.get();
 
         if(!layoutNode){
             ofLogWarning() << "Could not generate layout node with id: " << createSceneNode;
