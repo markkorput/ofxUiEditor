@@ -116,9 +116,13 @@ bool MeshDataManager::loadFromFile(const string& filePath){
                 if(!vertsJson.isArray())
                     continue;
 
+                vector<ofVec3f> verts;
                 for(int i=0; i<vertsJson.size(); i++){
-                    item->setVertex(i, getVec3f(vertsJson[i]));
+                    // item->setVertex(i, getVec3f(vertsJson[i]));
+                    verts.push_back(getVec3f(vertsJson[i]));
                 }
+                
+                item->setVertices(verts);
             }
             continue;
         }

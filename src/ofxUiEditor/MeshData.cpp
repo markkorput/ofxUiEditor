@@ -18,14 +18,27 @@ void MeshData::setScale(const ofVec3f &scale){
     ofNotifyEvent(changeEvent, *this);
 }
 
-void MeshData::setVertex(int idx, const ofVec3f &vert){
+void MeshData::setVertex(int idx, const ofVec3f &vert, bool update, bool notify){
     // grow list if necessary
     for(int i=vertices.size(); i<(idx+1); i++){
         vertices.push_back(ofVec3f());
     }
 
+    // overwrite specified vertex
     vertices[idx] = vert;
+
+    // recalculate vertex-dependent bounds attributes
     updateVertBounds();
+    // notify
+    ofNotifyEvent(changeEvent, *this);
+}
+
+void MeshData::setVertices(const vector<ofVec3f>& verts){
+    vertices.clear();
+    vertices = verts;
+    // recalculate vertex-dependent bounds attributes
+    updateVertBounds();
+    // notify
     ofNotifyEvent(changeEvent, *this);
 }
 

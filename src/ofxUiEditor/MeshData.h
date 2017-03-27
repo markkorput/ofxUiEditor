@@ -23,7 +23,9 @@ namespace ofxUiEditor {
         const ofVec3f& getScale(){ return scale; }
         void setScale(const ofVec3f &scale);
 
-        void setVertex(int idx, const ofVec3f &vert);
+        void setVertex(int idx, const ofVec3f &vert, bool update=true, bool notify=true);
+        void setVertices(const vector<ofVec3f>& verts);
+
         const ofVec3f& getVertBoundsOrigin(){ return vertBoundsOrigin; }
         const ofVec3f& getVertBoundsSize(){ return vertBoundsSize; }
 
