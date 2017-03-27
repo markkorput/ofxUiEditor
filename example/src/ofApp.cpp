@@ -33,6 +33,7 @@ private: // attributes
     ofxUiEditor::MeshDataManager meshDataManager;
 
     shared_ptr<ofxInterface::Node> sceneRef;
+    ofxInterface::Node* layoutNode;
 
     ofEasyCam cam;
     bool bDrawDebug, bDrawManager, bCamEnabled;
@@ -47,17 +48,20 @@ void ofApp::setup(){
     ofSetWindowTitle("ofxUiEditor - example");
     ofSetWindowShape(800,600);
 
+    // attributes
+    bDrawManager = false;
+    bDrawDebug = bCamEnabled = true;
+
     // create scene
     sceneRef = make_shared<ofxInterface::Node>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("ofxUiEditor-example-scene");
 
+    layoutNode = NULL;
     loadLayouts("panel.frame");
 
     // setup osc message listener
     oscReceiver.setup(8080);
-    bDrawManager = false;
-    bDrawDebug = bCamEnabled = true;
 }
 
 void ofApp::update(){
@@ -80,7 +84,7 @@ void ofApp::draw(){
     if(bCamEnabled)
         cam.begin();
 
-    ofScale(50.0f, 50.0f, 50.0f);
+    ofScale(5.0f, 5.0f, 5.0f);
 
     if(bDrawManager)
         meshDataManager.draw();
@@ -89,7 +93,7 @@ void ofApp::draw(){
     
     if(bDrawDebug)
         sceneRef->renderDebug();
-
+    
     if(bCamEnabled)
         cam.end();
 }
@@ -117,6 +121,12 @@ void ofApp::keyPressed(int key){
 
     if(key=='/'){
         bCamEnabled = !bCamEnabled;
+
+        if(layoutNode && sceneRef->haveChild(layoutNode)){
+            sceneRef->invertY(layoutNode);
+            layoutNode->setPosition(0,0,0);
+        }
+
         return;
     }
 }
@@ -135,10 +145,23 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         return false;
 
     if(createSceneNode != ""){
-        auto layoutNode = meshDataManager.generateNode<ofxInterface::Node>(createSceneNode);
-        if(layoutNode){
-            layoutNode->setPosition(0,0,0);
+        // remove current layoutNode
+        if(layoutNode)
+            delete layoutNode;
+
+        layoutNode = meshDataManager.generateNode<ofxInterface::Node>(createSceneNode);
+
+        if(!layoutNode){
+            ofLogWarning() << "Could not generate layout node with id: " << createSceneNode;
+        } else {
+            // layoutNode->setPosition(0,0,0);
             sceneRef->addChild(layoutNode);
+            // not using 3d renderer, but 2d renderer?
+            // flip Y axis
+            if(!bCamEnabled){
+                sceneRef->invertY(layoutNode);
+                layoutNode->setPosition(0,0,0);
+            }
         }
     }
     return true;
