@@ -35,7 +35,7 @@ private: // attributes
     shared_ptr<ofxInterface::Node> sceneRef;
 
     ofEasyCam cam;
-    bool bDrawDebug, bDrawManager;
+    bool bDrawDebug, bDrawManager, bCamEnabled;
 };
 
 //--------------------------------------------------------------
@@ -45,7 +45,7 @@ private: // attributes
 void ofApp::setup(){
     // window
     ofSetWindowTitle("ofxUiEditor - example");
-    ofSetWindowShape(400,300);
+    ofSetWindowShape(800,600);
 
     // create scene
     sceneRef = make_shared<ofxInterface::Node>();
@@ -57,7 +57,7 @@ void ofApp::setup(){
     // setup osc message listener
     oscReceiver.setup(8080);
     bDrawManager = false;
-    bDrawDebug = true;
+    bDrawDebug = bCamEnabled = true;
 }
 
 void ofApp::update(){
@@ -77,8 +77,10 @@ void ofApp::update(){
 void ofApp::draw(){
     ofBackground(ofColor::gray);
     
-    cam.begin();
-    ofScale(100.0f, 100.0f, 100.0f);
+    if(bCamEnabled)
+        cam.begin();
+
+    ofScale(50.0f, 50.0f, 50.0f);
 
     if(bDrawManager)
         meshDataManager.draw();
@@ -88,7 +90,8 @@ void ofApp::draw(){
     if(bDrawDebug)
         sceneRef->renderDebug();
 
-    cam.end();
+    if(bCamEnabled)
+        cam.end();
 }
 
 void ofApp::keyPressed(int key){
@@ -109,6 +112,11 @@ void ofApp::keyPressed(int key){
 
     if(key=='s'){
         saveLayouts();
+        return;
+    }
+
+    if(key=='/'){
+        bCamEnabled = !bCamEnabled;
         return;
     }
 }
