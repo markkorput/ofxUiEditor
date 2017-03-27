@@ -6,12 +6,12 @@ namespace ofxUiEditor {
     class DataToNodeActuator {
       
         
-//    private: // callbacks
-//        
-//        void onDataChange(NodeType& node){
-//            performApply();
-//        }
-//        
+    private: // callbacks
+        
+        void onDataChange(MeshData& data){
+            performApply();
+        }
+        
     public:
         DataToNodeActuator() : meshDataRef(nullptr), nodeRef(nullptr){
         }
@@ -23,12 +23,12 @@ namespace ofxUiEditor {
         void setup(shared_ptr<MeshData> meshData, shared_ptr<NodeType> node){
             meshDataRef = meshData;
             nodeRef = node;
-            //            ofAddListener(meshDataRef->changeEvent, this, &DataToNodeActuator<NodeType>::onDataChange);
+            ofAddListener(meshDataRef->changeEvent, this, &DataToNodeActuator<NodeType>::onDataChange);
         }
         
         void destroy(){
-            //            if(meshDataRef)
-            //                ofRemoveListener(meshDataRef->changeEvent, this, &DataToNodeActuator<NodeType>::onDataChange);
+            if(meshDataRef)
+                ofRemoveListener(meshDataRef->changeEvent, this, &DataToNodeActuator<NodeType>::onDataChange);
             
             nodeRef = nullptr;
             meshDataRef = nullptr;
@@ -53,7 +53,7 @@ namespace ofxUiEditor {
             nodeRef->setPosition(meshDataRef->getPosition());
             nodeRef->setSize(meshDataRef->getVertBoundsSize());
         }
-        
+
     private:
         shared_ptr<MeshData> meshDataRef;
         shared_ptr<NodeType> nodeRef;
