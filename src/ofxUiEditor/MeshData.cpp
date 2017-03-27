@@ -2,6 +2,31 @@
 
 using namespace ofxUiEditor;
 
+string MeshData::getLocalId() const {
+    auto parts = ofSplitString(id, CHILD_SEPARATOR);
+
+    if(parts.size() < 1)
+        return "";
+
+    // return last part
+    return parts.back();
+}
+string MeshData::getName() const {
+    auto parts = ofSplitString(getLocalId(), TYPE_SEPARATOR);
+    if(parts.size() < 1)
+        return "";
+    
+    return parts[0];
+}
+
+string MeshData::getType() const {
+    auto parts = ofSplitString(getLocalId(), TYPE_SEPARATOR);
+    if(parts.size() < 2)
+        return "";
+    
+    return parts[1];
+}
+
 void MeshData::setPosition(const ofVec3f &pos){
     position = pos;
     ofNotifyEvent(changeEvent, *this);
@@ -60,7 +85,7 @@ void MeshData::updateVertBounds(){
                                [](const ofPoint& a, const ofPoint& b) {
                                    return a.z < b.z;
                                });
-    
+
     vertBoundsOrigin = ofVec3f(x.first->x, y.first->y, z.first->z);
     vertBoundsSize = ofVec3f(x.second->x, y.second->y, z.second->z) - vertBoundsOrigin;
 }

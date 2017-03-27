@@ -70,6 +70,7 @@ template<class NodeType>
 NodeType* MeshDataManager::generateNode(shared_ptr<MeshData> meshDataRef, bool recursive){
     // generate node and apply orientation, scale, position and size
     auto node = new NodeType();
+    node->setName(meshDataRef->getName());
     node->setOrientation(meshDataRef->getRotation());
     node->setScale(meshDataRef->getScale());
     node->setPosition(meshDataRef->getPosition());
