@@ -14,6 +14,7 @@ void MeshData::setRotation(const ofVec3f &rot){
 
 void MeshData::setScale(const ofVec3f &scale){
     this->scale = scale;
+    updateVertBounds();
     ofNotifyEvent(changeEvent, *this);
 }
 
@@ -29,6 +30,11 @@ void MeshData::setVertex(int idx, const ofVec3f &vert){
 }
 
 void MeshData::updateVertBounds(){
+    if(vertices.empty()){
+        vertBoundsOrigin = vertBoundsSize = ofVec3f(0.0f);
+        return;
+    }
+
     auto x = minmax_element(vertices.begin(), vertices.end(),
                                [](const ofPoint& a, const ofPoint& b) {
                                    return a.x < b.x;
@@ -43,6 +49,11 @@ void MeshData::updateVertBounds(){
                                });
     
     vertBoundsOrigin = ofVec3f(x.first->x, y.first->y, z.first->z);
-    ofVec3f max = ofVec3f(x.second->x, y.second->y, z.second->z);
-    vertBoundsSize = max - vertBoundsOrigin;
+    vertBoundsSize = ofVec3f(x.second->x, y.second->y, z.second->z) - vertBoundsOrigin;
+}
+
+ofVec3f MeshData::getOrigin(){
+    ofVec3f boundsOrigin = vertBoundsOrigin;
+    boundsOrigin.rotate(rotation.x, rotation.y, rotation.z);
+    return boundsOrigin+position;
 }

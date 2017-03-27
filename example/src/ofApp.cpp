@@ -8,10 +8,10 @@
 #include "ofXml.h"
 // ofxOsc addon
 #include "ofxOscReceiver.h"
+// ofxInterface
+#include "ofxInterface.h"
 // ofxUiEditor addon
 #include "ofxUiEditor.h"
-
-using namespace ofxUiEditor;
 
 const string paramsFile = "params.xml";
 const string layoutFile = "layout.json";
@@ -27,9 +27,12 @@ public:
 
 private: // attributes
     ofxOscReceiver oscReceiver;
-    MeshDataManager meshDataManager;
+    ofxUiEditor::MeshDataManager meshDataManager;
+
+    shared_ptr<ofxInterface::Node> sceneRef;
 
     ofEasyCam cam;
+    bool bDrawDebug, bDrawManager;
 };
 
 //--------------------------------------------------------------
@@ -42,12 +45,28 @@ void ofApp::setup(){
     ofSetWindowTitle("ofxUiEditor - example");
     ofSetWindowShape(400,300);
 
-    // load layout
+    // load layouts
     ofLog() << "Loading layouts from " << layoutFile;
-    meshDataManager.loadFromFile(layoutFile);
+//    meshDataManager.loadFromFile(layoutFile);
     
+    // create scene
+    sceneRef = make_shared<ofxInterface::Node>();
+    sceneRef->setSize(ofGetWidth(), ofGetHeight());
+    sceneRef->setName("ofxUiEditor-example-scene");
+
+    // populate scene with layout
+    auto layoutNode = meshDataManager.generateNode<ofxInterface::Node>("frame.panel");
+    if(layoutNode){
+        sceneRef->addChild(layoutNode);
+        layoutNode->setPosition(1, 1);
+    }
+
     // setup osc message listener
     oscReceiver.setup(8080);
+    bDrawManager = false;
+    bDrawDebug = true;
+    
+    ofSetRectMode(OF_RECTMODE_CENTER);
 }
 
 void ofApp::update(){
@@ -68,13 +87,27 @@ void ofApp::draw(){
     ofBackground(ofColor::gray);
     
     cam.begin();
-    ofScale(50.0f, 50.0f, 50.0f);
-    ofDrawRectangle(0.0f, 0.0f, 1.0f, 1.0f);
-    meshDataManager.draw();
+    ofScale(100.0f, 100.0f, 100.0f);
+
+    if(bDrawManager)
+        meshDataManager.draw();
+
+    sceneRef->render();
+    
+    if(bDrawDebug)
+        sceneRef->renderDebug();
+
     cam.end();
 }
 
 void ofApp::keyPressed(int key){
+    if(key == 'd'){
+        bDrawDebug = !bDrawDebug;
+    }
+    
+    if(key == 'm'){
+        bDrawManager = !bDrawManager;
+    }
 }
 
 void ofApp::exit(ofEventArgs &args){

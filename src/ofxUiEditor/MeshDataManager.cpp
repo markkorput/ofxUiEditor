@@ -25,8 +25,8 @@ using namespace ofxUiEditor;
 
 void MeshDataManager::draw(){
     vector<shared_ptr<MeshData>> rootItems = getRootItems();
-    ofSetRectMode(OF_RECTMODE_CORNER);
-    
+    // ofSetRectMode(OF_RECTMODE_CORNER);
+
     for(auto &item : rootItems){
         drawItem(item);
     }
@@ -35,7 +35,7 @@ void MeshDataManager::draw(){
 void MeshDataManager::drawItem(shared_ptr<MeshData> item){
     ofVec3f min = item->getVertBoundsOrigin();
     ofVec3f size = item->getVertBoundsSize();
-    
+
 //     ofLog() << "drawItem: " << item->getId()
 //        << "\npos: " << item->getPosition()
 //        << ", min: " << min
@@ -106,27 +106,27 @@ bool MeshDataManager::loadFromFile(const string& filePath){
             for(auto it2=meshesJson.begin(); it2!=meshesJson.end(); it2++){
                 string id = it2.key().asString();
                 auto itemJson = meshesJson[id];
-                
+
                 auto item = get(id);
                 item->setPosition(getVec3f(itemJson["position"]));
                 item->setRotation(getVec3f(itemJson["rotation"]));
                 item->setScale(getVec3f(itemJson["scale"]));
-                
+
                 auto vertsJson = itemJson["vertices"];
                 if(!vertsJson.isArray())
                     continue;
-            
+
                 for(int i=0; i<vertsJson.size(); i++){
                     item->setVertex(i, getVec3f(vertsJson[i]));
                 }
             }
             continue;
         }
-        
-        
+
+
         ofLogWarning() << "Unknown JSON key: " << it.key().asString();
     }
-    
+
     return true;
 }
 
@@ -148,7 +148,7 @@ shared_ptr<MeshData> MeshDataManager::get(const string &id){
     newItem->setId(id);
 
     ofAddListener(newItem->changeEvent, this, &MeshDataManager::onItemChange);
-    
+
     items[id] = newItem;
     ofNotifyEvent(newItemEvent, *newItem);
 
@@ -180,7 +180,7 @@ vector<shared_ptr<MeshData>> MeshDataManager::getRootItems(){
 
 vector<shared_ptr<MeshData>> MeshDataManager::getChildren(const string &parentId){
     vector<shared_ptr<MeshData>> childItems;
-    
+
     string prefix = parentId;
     if(parentId.find("/") != (parentId.length()-1)){
         prefix += "/";
@@ -199,7 +199,7 @@ vector<shared_ptr<MeshData>> MeshDataManager::getChildren(const string &parentId
 #ifdef OFX_UI_EDITOR_OSC
 bool MeshDataManager::processOscMessage(ofxOscMessage msg){
     // ofLog() << msg.getAddress();
-    
+
     if(msg.getAddress() == "/ui-editor/mesh/position"){
         // args; [s, f,f,f] // Mesh-id and Vec3f
         get(msg.getArgAsString(0))->setPosition(ofVec3f(msg.getArgAsFloat(1),
@@ -208,7 +208,7 @@ bool MeshDataManager::processOscMessage(ofxOscMessage msg){
         // yes, we processed the message
         return true;
     }
-    
+
     if(msg.getAddress() == "/ui-editor/mesh/rotation"){
         // args; [s, f,f,f] // Mesh-id and Vec3f
         get(msg.getArgAsString(0))->setRotation(ofVec3f(msg.getArgAsFloat(1),
@@ -217,7 +217,7 @@ bool MeshDataManager::processOscMessage(ofxOscMessage msg){
         // yes, we processed the message
         return true;
     }
-    
+
     if(msg.getAddress() == "/ui-editor/mesh/scale"){
         // args; [s, f,f,f] // Mesh-id and Vec3f
         get(msg.getArgAsString(0))->setScale(ofVec3f(msg.getArgAsFloat(1),
@@ -226,7 +226,7 @@ bool MeshDataManager::processOscMessage(ofxOscMessage msg){
         // yes, we processed the message
         return true;
     }
-    
+
     if(msg.getAddress() == "/ui-editor/mesh/vertices"){
         // args; [s ,f,f,f ,f,f,f ,...] // Mesh-id and X-times Vec3f
         auto itemRef = get(msg.getArgAsString(0));
@@ -236,11 +236,11 @@ bool MeshDataManager::processOscMessage(ofxOscMessage msg){
                                              msg.getArgAsFloat(1+idx*3+1),
                                              msg.getArgAsFloat(1+idx*3+2)));
         }
-        
+
         // yes, we processed the message
         return true;
     }
-    
+
     return false;
 }
 

@@ -5,6 +5,11 @@
 namespace ofxUiEditor {
     class MeshData : public ofParameterGroup {
 
+    public:
+        MeshData() : position(ofVec3f(0.0f)),
+                        rotation(ofVec3f(0.0f)),
+                        scale(ofVec3f(1.0f)){}
+
     public: // getters/setters
         const string& getId(){ return id; }
         void setId(const string &newId){ id = newId; }
@@ -23,6 +28,8 @@ namespace ofxUiEditor {
         const ofVec3f& getVertBoundsSize(){ return vertBoundsSize; }
 
         const vector<ofVec3f>& getVertices(){ return vertices; }
+
+        ofVec3f getOrigin();
 
     private: // helpers methods
         
