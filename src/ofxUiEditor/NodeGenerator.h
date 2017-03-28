@@ -9,6 +9,7 @@ namespace ofxUiEditor {
         
         void onDataChange(MeshData& data){
             performApply();
+            ofNotifyEvent(appliedEvent, *this);
         }
         
     public:
@@ -32,16 +33,23 @@ namespace ofxUiEditor {
             nodeRef = nullptr;
             meshDataRef = nullptr;
         }
-        
-        void apply(){
+
+        void apply(bool notify=true){
             if(nodeRef == nullptr || meshDataRef == nullptr){
                 ofLogWarning() << "DataToNodeActuator can't apply when either node or mesh data is missing";
                 return;
             }
             
             performApply();
+            
+            if(notify)
+                ofNotifyEvent(appliedEvent, *this);
         }
         
+        shared_ptr<NodeType> getNode() const {
+            return nodeRef;
+        }
+
     private:
         
         void performApply(){
@@ -52,12 +60,18 @@ namespace ofxUiEditor {
             nodeRef->setPosition(meshDataRef->getPosition());
             nodeRef->setSize(meshDataRef->getVertBoundsSize());
         }
+        
+    public: // events
+        
+        ofEvent<DataToNodeActuator<NodeType>> appliedEvent;
 
     private:
         shared_ptr<MeshData> meshDataRef;
         shared_ptr<NodeType> nodeRef;
     };
 
+    
+    
     template<class NodeType>
     class NodeGenerator {
     public:
@@ -67,8 +81,18 @@ namespace ofxUiEditor {
             params.add(realtimeUpdatesParam.set("realtime-updates", true));
         }
         
+        ~NodeGenerator(){
+            destroy();
+        }
+        
         void setup(MeshDataManager& meshDataManager){
             this->meshDataManager = &meshDataManager;
+        }
+
+        void destroy(){
+            for(auto actuator : actuators){
+                ofRemoveListener(actuator->appliedEvent, this, &NodeGenerator<NodeType>::onActuatorApplied);
+            }
         }
 
         shared_ptr<NodeType> generateNode(const string& layoutId, bool recursive=true){
@@ -85,6 +109,7 @@ namespace ofxUiEditor {
         shared_ptr<NodeType> generateNode(shared_ptr<MeshData> meshDataRef, bool recursive=true){
             // generate node
             auto node = make_shared<NodeType>();
+
             generatedNodes.push_back(node);
 
             // the actuator monitors changes in the Meshdata instance
@@ -93,12 +118,14 @@ namespace ofxUiEditor {
                 auto actuator = make_shared<DataToNodeActuator<NodeType>>();
                 actuator->setup(meshDataRef, node);
                 // the actuator knows how to "apply" meshData to the node
-                actuator->apply();
+                actuator->apply(false);
 
                 // if we don't store the actuator in our actuators list
                 // the shared ptr will go out of scope and de-allocate,
                 // destroying the realtime update link inside the actuator
                 if(realtimeUpdatesParam.get()){
+                    // register listener to forward events to our nodeUpdatedEvent
+                    ofAddListener(actuator->appliedEvent, this, &NodeGenerator<NodeType>::onActuatorApplied);
                     actuators.push_back(actuator);
                 }
             }
@@ -119,7 +146,15 @@ namespace ofxUiEditor {
             return node;
         }
 
+    private: // callbacks
         
+        void onActuatorApplied(DataToNodeActuator<NodeType>& actuator){
+            ofNotifyEvent(nodeUpdatedEvent, *actuator.getNode().get());
+        }
+
+    public: // events
+        ofEvent<NodeType> nodeUpdatedEvent;
+
     public: // params
         ofParameterGroup params;
         ofParameter<bool> realtimeUpdatesParam;
