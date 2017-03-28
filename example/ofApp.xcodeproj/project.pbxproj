@@ -9,6 +9,14 @@
 /* Begin PBXBuildFile section */
 		4DA48B631E8836BD00CDF4EC /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48B501E8836BD00CDF4EC /* jsoncpp.cpp */; };
 		4DA48B661E8836BD00CDF4EC /* ofxJSONElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48B551E8836BD00CDF4EC /* ofxJSONElement.cpp */; };
+		4DA48BCE1E88681500CDF4EC /* BitmapTextButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48BB81E88681500CDF4EC /* BitmapTextButton.cpp */; };
+		4DA48BCF1E88681500CDF4EC /* LambdaView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48BBA1E88681500CDF4EC /* LambdaView.cpp */; };
+		4DA48BD01E88681500CDF4EC /* SolidColorPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48BBC1E88681500CDF4EC /* SolidColorPanel.cpp */; };
+		4DA48BD11E88681500CDF4EC /* TextureButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48BBE1E88681500CDF4EC /* TextureButton.cpp */; };
+		4DA48BD21E88681500CDF4EC /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48BC01E88681500CDF4EC /* Node.cpp */; };
+		4DA48BD31E88681500CDF4EC /* TouchEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48BC31E88681500CDF4EC /* TouchEvent.cpp */; };
+		4DA48BD41E88681500CDF4EC /* TouchManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48BC51E88681500CDF4EC /* TouchManager.cpp */; };
+		4DA48BD51E88681500CDF4EC /* VirtualTouch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA48BC71E88681500CDF4EC /* VirtualTouch.cpp */; };
 		4DD34EB01E87E03700BC03FA /* IpEndpointName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD34E8A1E87E03700BC03FA /* IpEndpointName.cpp */; };
 		4DD34EB11E87E03700BC03FA /* NetworkingUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD34E8F1E87E03700BC03FA /* NetworkingUtils.cpp */; };
 		4DD34EB21E87E03700BC03FA /* UdpSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD34E901E87E03700BC03FA /* UdpSocket.cpp */; };
@@ -57,12 +65,30 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4D4D7AF31E89DA2300DF7814 /* NodeGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeGenerator.h; sourceTree = "<group>"; };
 		4DA48B4D1E8836BD00CDF4EC /* json-forwards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "json-forwards.h"; sourceTree = "<group>"; };
 		4DA48B4E1E8836BD00CDF4EC /* json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
 		4DA48B501E8836BD00CDF4EC /* jsoncpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jsoncpp.cpp; sourceTree = "<group>"; };
 		4DA48B541E8836BD00CDF4EC /* ofxJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxJSON.h; sourceTree = "<group>"; };
 		4DA48B551E8836BD00CDF4EC /* ofxJSONElement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxJSONElement.cpp; sourceTree = "<group>"; };
 		4DA48B561E8836BD00CDF4EC /* ofxJSONElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxJSONElement.h; sourceTree = "<group>"; };
+		4DA48BB81E88681500CDF4EC /* BitmapTextButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BitmapTextButton.cpp; sourceTree = "<group>"; };
+		4DA48BB91E88681500CDF4EC /* BitmapTextButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BitmapTextButton.h; sourceTree = "<group>"; };
+		4DA48BBA1E88681500CDF4EC /* LambdaView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LambdaView.cpp; sourceTree = "<group>"; };
+		4DA48BBB1E88681500CDF4EC /* LambdaView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LambdaView.h; sourceTree = "<group>"; };
+		4DA48BBC1E88681500CDF4EC /* SolidColorPanel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SolidColorPanel.cpp; sourceTree = "<group>"; };
+		4DA48BBD1E88681500CDF4EC /* SolidColorPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SolidColorPanel.h; sourceTree = "<group>"; };
+		4DA48BBE1E88681500CDF4EC /* TextureButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextureButton.cpp; sourceTree = "<group>"; };
+		4DA48BBF1E88681500CDF4EC /* TextureButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextureButton.h; sourceTree = "<group>"; };
+		4DA48BC01E88681500CDF4EC /* Node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Node.cpp; sourceTree = "<group>"; };
+		4DA48BC11E88681500CDF4EC /* Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Node.h; sourceTree = "<group>"; };
+		4DA48BC21E88681500CDF4EC /* ofxInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxInterface.h; sourceTree = "<group>"; };
+		4DA48BC31E88681500CDF4EC /* TouchEvent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TouchEvent.cpp; sourceTree = "<group>"; };
+		4DA48BC41E88681500CDF4EC /* TouchEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchEvent.h; sourceTree = "<group>"; };
+		4DA48BC51E88681500CDF4EC /* TouchManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TouchManager.cpp; sourceTree = "<group>"; };
+		4DA48BC61E88681500CDF4EC /* TouchManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchManager.h; sourceTree = "<group>"; };
+		4DA48BC71E88681500CDF4EC /* VirtualTouch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VirtualTouch.cpp; sourceTree = "<group>"; };
+		4DA48BC81E88681500CDF4EC /* VirtualTouch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualTouch.h; sourceTree = "<group>"; };
 		4DD34E8A1E87E03700BC03FA /* IpEndpointName.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IpEndpointName.cpp; sourceTree = "<group>"; };
 		4DD34E8B1E87E03700BC03FA /* IpEndpointName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IpEndpointName.h; sourceTree = "<group>"; };
 		4DD34E8C1E87E03700BC03FA /* NetworkingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkingUtils.h; sourceTree = "<group>"; };
@@ -180,6 +206,47 @@
 				4DA48B561E8836BD00CDF4EC /* ofxJSONElement.h */,
 			);
 			path = src;
+			sourceTree = "<group>";
+		};
+		4DA48BA01E88681500CDF4EC /* ofxInterface */ = {
+			isa = PBXGroup;
+			children = (
+				4DA48BB61E88681500CDF4EC /* src */,
+			);
+			name = ofxInterface;
+			path = ../../ofxInterface;
+			sourceTree = "<group>";
+		};
+		4DA48BB61E88681500CDF4EC /* src */ = {
+			isa = PBXGroup;
+			children = (
+				4DA48BB71E88681500CDF4EC /* components */,
+				4DA48BC01E88681500CDF4EC /* Node.cpp */,
+				4DA48BC11E88681500CDF4EC /* Node.h */,
+				4DA48BC21E88681500CDF4EC /* ofxInterface.h */,
+				4DA48BC31E88681500CDF4EC /* TouchEvent.cpp */,
+				4DA48BC41E88681500CDF4EC /* TouchEvent.h */,
+				4DA48BC51E88681500CDF4EC /* TouchManager.cpp */,
+				4DA48BC61E88681500CDF4EC /* TouchManager.h */,
+				4DA48BC71E88681500CDF4EC /* VirtualTouch.cpp */,
+				4DA48BC81E88681500CDF4EC /* VirtualTouch.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		4DA48BB71E88681500CDF4EC /* components */ = {
+			isa = PBXGroup;
+			children = (
+				4DA48BB81E88681500CDF4EC /* BitmapTextButton.cpp */,
+				4DA48BB91E88681500CDF4EC /* BitmapTextButton.h */,
+				4DA48BBA1E88681500CDF4EC /* LambdaView.cpp */,
+				4DA48BBB1E88681500CDF4EC /* LambdaView.h */,
+				4DA48BBC1E88681500CDF4EC /* SolidColorPanel.cpp */,
+				4DA48BBD1E88681500CDF4EC /* SolidColorPanel.h */,
+				4DA48BBE1E88681500CDF4EC /* TextureButton.cpp */,
+				4DA48BBF1E88681500CDF4EC /* TextureButton.h */,
+			);
+			path = components;
 			sourceTree = "<group>";
 		};
 		4DD34E841E87E03700BC03FA /* ofxOsc */ = {
@@ -303,6 +370,7 @@
 				4DD34EDA1E87ED3600BC03FA /* MeshData.h */,
 				4DD34EDB1E87ED3600BC03FA /* MeshDataManager.cpp */,
 				4DD34EDC1E87ED3600BC03FA /* MeshDataManager.h */,
+				4D4D7AF31E89DA2300DF7814 /* NodeGenerator.h */,
 			);
 			path = ofxUiEditor;
 			sourceTree = "<group>";
@@ -310,6 +378,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				4DA48BA01E88681500CDF4EC /* ofxInterface */,
 				4DA48B221E8836BD00CDF4EC /* ofxJSON */,
 				4DD34EC01E87ED3600BC03FA /* ofxUiEditor */,
 				4DD34E841E87E03700BC03FA /* ofxOsc */,
@@ -441,8 +510,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4DA48BD41E88681500CDF4EC /* TouchManager.cpp in Sources */,
+				4DA48BD21E88681500CDF4EC /* Node.cpp in Sources */,
 				4DD34EB71E87E03700BC03FA /* OscReceivedElements.cpp in Sources */,
 				4DD34EBA1E87E03700BC03FA /* ofxOscMessage.cpp in Sources */,
+				4DA48BD31E88681500CDF4EC /* TouchEvent.cpp in Sources */,
 				4DD34EB21E87E03700BC03FA /* UdpSocket.cpp in Sources */,
 				4DD34EB91E87E03700BC03FA /* ofxOscBundle.cpp in Sources */,
 				4DA48B661E8836BD00CDF4EC /* ofxJSONElement.cpp in Sources */,
@@ -450,12 +522,17 @@
 				4DD34EE31E87ED3600BC03FA /* MeshDataManager.cpp in Sources */,
 				4DA48B631E8836BD00CDF4EC /* jsoncpp.cpp in Sources */,
 				4DD34EBD1E87E03700BC03FA /* ofxOscSender.cpp in Sources */,
+				4DA48BD01E88681500CDF4EC /* SolidColorPanel.cpp in Sources */,
 				4DD34EB11E87E03700BC03FA /* NetworkingUtils.cpp in Sources */,
 				4DD34EB61E87E03700BC03FA /* OscPrintReceivedElements.cpp in Sources */,
 				4DD34EBC1E87E03700BC03FA /* ofxOscReceiver.cpp in Sources */,
+				4DA48BD11E88681500CDF4EC /* TextureButton.cpp in Sources */,
+				4DA48BD51E88681500CDF4EC /* VirtualTouch.cpp in Sources */,
 				4DD34EB51E87E03700BC03FA /* OscOutboundPacketStream.cpp in Sources */,
 				4DD34EBF1E87EC1F00BC03FA /* ofApp.cpp in Sources */,
+				4DA48BCE1E88681500CDF4EC /* BitmapTextButton.cpp in Sources */,
 				4DD34EE21E87ED3600BC03FA /* MeshData.cpp in Sources */,
+				4DA48BCF1E88681500CDF4EC /* LambdaView.cpp in Sources */,
 				4DD34EB01E87E03700BC03FA /* IpEndpointName.cpp in Sources */,
 				4DD34EB81E87E03700BC03FA /* OscTypes.cpp in Sources */,
 			);
@@ -544,6 +621,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = NONE;
+				GCC_PREPROCESSOR_DEFINITIONS = OFX_UI_EDITOR_OSC;
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
 					"$(OF_ADDONS)/ofxOsc/libs/oscpack/src",
@@ -575,6 +653,7 @@
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../libs/glut/lib/osx\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = NONE;
+				GCC_PREPROCESSOR_DEFINITIONS = OFX_UI_EDITOR_OSC;
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
 					"$(OF_ADDONS)/ofxOsc/libs/oscpack/src",

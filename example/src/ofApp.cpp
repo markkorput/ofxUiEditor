@@ -8,10 +8,10 @@
 #include "ofXml.h"
 // ofxOsc addon
 #include "ofxOscReceiver.h"
+// ofxInterface
+#include "ofxInterface.h"
 // ofxUiEditor addon
 #include "ofxUiEditor.h"
-
-using namespace ofxUiEditor;
 
 const string paramsFile = "params.xml";
 const string layoutFile = "layout.json";
@@ -25,42 +25,54 @@ public:
     void keyPressed(int key);
     void exit(ofEventArgs &args);
 
-public: // params
-    ofParameterGroup params;
-    ofParameter<int> oscPortParam;
+private:
+
+    bool loadLayouts(const string& createSceneNode="");
+    bool saveLayouts();
+
+    void onGeneratedNodeUpdated(ofxInterface::Node& node);
 
 private: // attributes
     ofxOscReceiver oscReceiver;
-    MeshDataManager meshDataManager;
+    ofxUiEditor::MeshDataManager meshDataManager;
+    ofxUiEditor::NodeGenerator<ofxInterface::Node> nodeGenerator;
+
+    shared_ptr<ofxInterface::Node> sceneRef;
+    ofxInterface::Node* layoutNode;
 
     ofEasyCam cam;
+    bool bDrawDebug, bDrawManager, bCamEnabled;
 };
 
 //--------------------------------------------------------------
 // ofApp.cpp
 //--------------------------------------------------------------
 
-
 void ofApp::setup(){
     // window
     ofSetWindowTitle("ofxUiEditor - example");
-    ofSetWindowShape(400,300);
+    ofSetWindowShape(800,600);
 
-    // params
-    params.setName("ofxUiEditor-example");
-    params.add(oscPortParam.set("osc-port", 8080, 0, 9999));
+    // attributes
+    bDrawManager = false;
+    bDrawDebug = bCamEnabled = true;
 
-    // load params.xml
-    ofLog() << "Loading params from: " << paramsFile;
-    ofXml xml;
-    xml.load(paramsFile);
-    xml.deserialize(params);
-    
-    // load layout
-    meshDataManager.loadFromFile(layoutFile);
-    
+    nodeGenerator.setup(meshDataManager);
+    ofAddListener(nodeGenerator.nodeUpdatedEvent, this, &ofApp::onGeneratedNodeUpdated);
+
+    // create scene
+    sceneRef = make_shared<ofxInterface::Node>();
+    sceneRef->setSize(ofGetWidth(), ofGetHeight());
+    sceneRef->setName("ofxUiEditor-example-scene");
+//    sceneRef->setDeleteChildren(false);
+
+    layoutNode = NULL;
+    loadLayouts("panel.frame");
+
     // setup osc message listener
-    oscReceiver.setup(oscPortParam.get());
+    oscReceiver.setup(8080);
+
+    
 }
 
 void ofApp::update(){
@@ -73,70 +85,128 @@ void ofApp::update(){
         ofxOscMessage msg;
         oscReceiver.getNextMessage(msg);
 
-        // ofLog() << msg.getAddress();
-
-        if(msg.getAddress() == "/ui-editor/mesh/position"){
-            // args; [s, f,f,f] // Mesh-id and Vec3f
-            meshDataManager.get(msg.getArgAsString(0))->setPosition(
-                ofVec3f(msg.getArgAsFloat(1),
-                        msg.getArgAsFloat(2),
-                        msg.getArgAsFloat(3)));
-            continue;
-        }
-
-        if(msg.getAddress() == "/ui-editor/mesh/rotation"){
-            // args; [s, f,f,f] // Mesh-id and Vec3f
-            meshDataManager.get(msg.getArgAsString(0))->setRotation(
-                ofVec3f(msg.getArgAsFloat(1),
-                        msg.getArgAsFloat(2),
-                        msg.getArgAsFloat(3)));
-            continue;
-        }
-
-        if(msg.getAddress() == "/ui-editor/mesh/scale"){
-            // args; [s, f,f,f] // Mesh-id and Vec3f
-            meshDataManager.get(msg.getArgAsString(0))->setScale(
-                ofVec3f(msg.getArgAsFloat(1),
-                        msg.getArgAsFloat(2),
-                        msg.getArgAsFloat(3)));
-            continue;
-        }
-        
-        if(msg.getAddress() == "/ui-editor/mesh/vertices"){
-            // args; [s ,f,f,f ,f,f,f ,...] // Mesh-id and X-times Vec3f
-            auto pItem = meshDataManager.get(msg.getArgAsString(0));
-            for(int idx=0; msg.getNumArgs() >= 1+(idx+1)*3; idx++){
-                pItem->setVertex(idx,
-                                 ofVec3f(msg.getArgAsFloat(1+idx*3),
-                                         msg.getArgAsFloat(1+idx*3+1),
-                                         msg.getArgAsFloat(1+idx*3+2)));
-            }
-            continue;
-        }
+        meshDataManager.processOscMessage(msg);
     }
 }
 
 void ofApp::draw(){
     ofBackground(ofColor::gray);
     
-    cam.begin();
-    ofScale(50.0f, 50.0f, 50.0f);
-    ofDrawRectangle(0.0f, 0.0f, 1.0f, 1.0f);
-    meshDataManager.draw();
-    cam.end();
+    if(bCamEnabled)
+        cam.begin();
+
+    if(bDrawManager)
+        meshDataManager.draw();
+
+    sceneRef->render();
+    
+    if(bDrawDebug)
+        sceneRef->renderDebug();
+    
+    if(bCamEnabled)
+        cam.end();
 }
 
 void ofApp::keyPressed(int key){
+    if(key == 'd'){
+        bDrawDebug = !bDrawDebug;
+        return;
+    }
+    
+    if(key == 'm'){
+        bDrawManager = !bDrawManager;
+        return;
+    }
+    
+    if(key=='l'){
+        loadLayouts("panel.frame");
+        return;
+    }
+
+    if(key=='s'){
+        saveLayouts();
+        return;
+    }
+
+    if(key=='/'){
+        bCamEnabled = !bCamEnabled;
+
+        if(layoutNode && sceneRef->haveChild(layoutNode)){
+            sceneRef->invertY(*layoutNode);
+            layoutNode->setPosition(0,0,0);
+        }
+
+        return;
+    }
 }
 
 void ofApp::exit(ofEventArgs &args){
-    ofLog() << "Saving layout to " << layoutFile;
-    meshDataManager.saveToFile(layoutFile);
+    // remove our layoutNode so it doesn't get auto-deallocated
+    // when our sceneRef instance goes out of scope
+    if(layoutNode){
+        sceneRef->removeChild(layoutNode);
+    }
 
-    ofLog() << "Saving params to " << paramsFile;
-    ofXml xml;
-    xml.serialize(params);
-//    xml.save(paramsFile);
+    // saveLayouts();
+}
+
+bool ofApp::loadLayouts(const string& createSceneNode){
+    // clear scene
+    while(sceneRef->getNumChildren() > 0)
+        sceneRef->removeChild(0);
+
+    ofLog() << "Loading layouts from " << layoutFile;
+    if(!meshDataManager.loadFromFile(layoutFile))
+        return false;
+
+    if(createSceneNode != ""){
+        auto nodeRef = nodeGenerator.generateNode(createSceneNode);
+
+        if(nodeRef == nullptr){
+            // loading the file succeeded, so we're still returning true
+            return true;
+        }
+
+        // remove current layoutNode
+        if(layoutNode)
+            delete layoutNode;
+        
+        layoutNode = nodeRef.get();
+
+        if(!layoutNode){
+            ofLogWarning() << "Could not generate layout node with id: " << createSceneNode;
+        } else {
+            // layoutNode->setPosition(0,0,0);
+            sceneRef->addChild(layoutNode);
+            // not using 3d renderer, but 2d renderer?
+            // flip Y axis
+            if(!bCamEnabled){
+                sceneRef->invertY(*layoutNode);
+                layoutNode->setPosition(0,0,0);
+            }
+        }
+    }
+    return true;
+}
+
+bool ofApp::saveLayouts(){
+    ofLog() << "Saving layouts to " << layoutFile;
+    return meshDataManager.saveToFile(layoutFile);
+}
+
+void ofApp::onGeneratedNodeUpdated(ofxInterface::Node& node){
+    // only invert when NOT using ofEasyCam
+    if(bCamEnabled)
+        return;
+
+    auto pParent = (ofxInterface::Node*)node.getParent();
+    if(!pParent)
+        return;
+
+    pParent->invertY(node, false /* not recursive */);
+    
+    if(&node == layoutNode)
+        layoutNode->setPosition(0,0,0);
 }
 
 //--------------------------------------------------------------
