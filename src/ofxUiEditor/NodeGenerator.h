@@ -1,10 +1,9 @@
 #include "MeshDataManager.h"
 
 namespace ofxUiEditor {
-    
+
     template<class NodeType>
     class DataToNodeActuator {
-      
         
     private: // callbacks
         
@@ -62,6 +61,12 @@ namespace ofxUiEditor {
     template<class NodeType>
     class NodeGenerator {
     public:
+        
+        NodeGenerator(){
+            params.setName("NodeGenerator");
+            params.add(realtimeUpdatesParam.set("realtime-updates", true));
+        }
+        
         void setup(MeshDataManager& meshDataManager){
             this->meshDataManager = &meshDataManager;
         }
@@ -80,13 +85,23 @@ namespace ofxUiEditor {
         shared_ptr<NodeType> generateNode(shared_ptr<MeshData> meshDataRef, bool recursive=true){
             // generate node
             auto node = make_shared<NodeType>();
-            
+            generatedNodes.push_back(node);
+
             // the actuator monitors changes in the Meshdata instance
             // and applies them to the generated node in realtime
-            auto actuator = make_shared<DataToNodeActuator<NodeType>>();
-            actuator->setup(meshDataRef, node);
-            actuator->apply();
-            actuators.push_back(actuator);
+            {
+                auto actuator = make_shared<DataToNodeActuator<NodeType>>();
+                actuator->setup(meshDataRef, node);
+                // the actuator knows how to "apply" meshData to the node
+                actuator->apply();
+
+                // if we don't store the actuator in our actuators list
+                // the shared ptr will go out of scope and de-allocate,
+                // destroying the realtime update link inside the actuator
+                if(realtimeUpdatesParam.get()){
+                    actuators.push_back(actuator);
+                }
+            }
 
             if(recursive){
                 // get layout data for child elements
@@ -105,8 +120,13 @@ namespace ofxUiEditor {
         }
 
         
+    public: // params
+        ofParameterGroup params;
+        ofParameter<bool> realtimeUpdatesParam;
     private:
+        
         MeshDataManager* meshDataManager;
         vector<shared_ptr<DataToNodeActuator<NodeType>>> actuators;
+        vector<shared_ptr<NodeType>> generatedNodes;
     };
 }
