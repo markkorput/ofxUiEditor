@@ -25,8 +25,12 @@ public:
     void keyPressed(int key);
     void exit(ofEventArgs &args);
 
+private:
+
     bool loadLayouts(const string& createSceneNode="");
     bool saveLayouts();
+
+    void onGeneratedNodeUpdated(ofxInterface::Node& node);
 
 private: // attributes
     ofxOscReceiver oscReceiver;
@@ -54,11 +58,13 @@ void ofApp::setup(){
     bDrawDebug = bCamEnabled = true;
 
     nodeGenerator.setup(meshDataManager);
+    ofAddListener(nodeGenerator.nodeUpdatedEvent, this, &ofApp::onGeneratedNodeUpdated);
 
     // create scene
     sceneRef = make_shared<ofxInterface::Node>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("ofxUiEditor-example-scene");
+//    sceneRef->setDeleteChildren(false);
 
     layoutNode = NULL;
     loadLayouts("panel.frame");
@@ -126,7 +132,7 @@ void ofApp::keyPressed(int key){
         bCamEnabled = !bCamEnabled;
 
         if(layoutNode && sceneRef->haveChild(layoutNode)){
-            sceneRef->invertY(layoutNode);
+            sceneRef->invertY(*layoutNode);
             layoutNode->setPosition(0,0,0);
         }
 
@@ -135,7 +141,13 @@ void ofApp::keyPressed(int key){
 }
 
 void ofApp::exit(ofEventArgs &args){
-//    saveLayouts();
+    // remove our layoutNode so it doesn't get auto-deallocated
+    // when our sceneRef instance goes out of scope
+    if(layoutNode){
+        sceneRef->removeChild(layoutNode);
+    }
+
+    // saveLayouts();
 }
 
 bool ofApp::loadLayouts(const string& createSceneNode){
@@ -169,7 +181,7 @@ bool ofApp::loadLayouts(const string& createSceneNode){
             // not using 3d renderer, but 2d renderer?
             // flip Y axis
             if(!bCamEnabled){
-                sceneRef->invertY(layoutNode);
+                sceneRef->invertY(*layoutNode);
                 layoutNode->setPosition(0,0,0);
             }
         }
@@ -182,6 +194,20 @@ bool ofApp::saveLayouts(){
     return meshDataManager.saveToFile(layoutFile);
 }
 
+void ofApp::onGeneratedNodeUpdated(ofxInterface::Node& node){
+    // only invert when NOT using ofEasyCam
+    if(bCamEnabled)
+        return;
+
+    auto pParent = (ofxInterface::Node*)node.getParent();
+    if(!pParent)
+        return;
+
+    pParent->invertY(node, false /* not recursive */);
+    
+    if(&node == layoutNode)
+        layoutNode->setPosition(0,0,0);
+}
 
 //--------------------------------------------------------------
 // main.cpp
