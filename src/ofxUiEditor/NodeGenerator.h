@@ -12,7 +12,8 @@ namespace ofxUiEditor {
             ofNotifyEvent(appliedEvent, *this);
         }
         
-    public:
+    public: // commond methods
+
         DataToNodeActuator() : meshDataRef(nullptr), nodeRef(nullptr){
         }
         
@@ -70,8 +71,7 @@ namespace ofxUiEditor {
         shared_ptr<NodeType> nodeRef;
     };
 
-    
-    
+
     template<class NodeType>
     class NodeGenerator {
     public:
@@ -136,14 +136,15 @@ namespace ofxUiEditor {
                 }
             }
 
+            // also generate all child elements?
             if(recursive){
-                // get layout data for child elements
+                // get data
                 vector<shared_ptr<MeshData>> childMeshDataRefs = meshDataManager->getChildren(meshDataRef->getId());
                 
                 for(auto childMeshDataRef : childMeshDataRefs){
                     // recursively call this method to generate child elements
                     auto childNode = generateNode(childMeshDataRef, recursive);
-                    
+
                     if(childNode)
                         node->addChild(childNode.get());
                 }
