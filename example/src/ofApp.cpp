@@ -29,6 +29,10 @@ public:
     void keyPressed(int key);
     void exit(ofEventArgs &args);
 
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+
 private:
 
     bool loadLayouts(const string& createSceneNode="");
@@ -68,10 +72,12 @@ void ofApp::setup(){
     sceneRef = make_shared<ofxInterface::Node>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("ofxUiEditor-example-scene");
+    ofxInterface::TouchManager::one().setup(sceneRef.get());
 
     layoutNode = NULL;
     loadLayouts("panel.frame");
 
+    
     // setup osc message listener
     oscReceiver.setup(8080);
 
@@ -79,6 +85,8 @@ void ofApp::setup(){
 }
 
 void ofApp::update(){
+    ofxInterface::TouchManager::one().update();
+
     const int MAX_MESSAGES = 20;
 
     for(int i=0; i<MAX_MESSAGES; i++){
@@ -151,6 +159,18 @@ void ofApp::exit(ofEventArgs &args){
     }
 
     // saveLayouts();
+}
+
+void ofApp::mouseDragged(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchMove(button, ofVec2f(x, y));
+}
+
+void ofApp::mousePressed(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchDown(button, ofVec2f(x, y));
+}
+
+void ofApp::mouseReleased(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchUp(button, ofVec2f(x, y));
 }
 
 bool ofApp::loadLayouts(const string& createSceneNode){
