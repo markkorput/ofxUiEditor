@@ -37,7 +37,7 @@ public:
     void onAbortTouchDown(ofxInterface::TouchEvent& touchEvent);
 private:
 
-    bool loadLayouts(const string& createSceneNode="");
+    bool loadLayouts(const string& rootNodeName="");
     bool saveLayouts();
 
     void onGeneratedNodeUpdated(ofxInterface::Node& node);
@@ -46,6 +46,7 @@ private: // attributes
     ofxOscReceiver oscReceiver;
     ofxUiEditor::MeshDataManager meshDataManager;
     ofxUiEditor::NodeGenerator<ofxInterface::Node> nodeGenerator;
+    ofxUiEditor::Editor<ofxInterface::Node> editor;
 
     shared_ptr<ofxInterface::Node> sceneRef;
     ofxInterface::Node* layoutNode;
@@ -75,16 +76,15 @@ void ofApp::setup(){
     sceneRef = make_shared<ofxInterface::Node>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("ofxUiEditor-example-scene");
+
+    // setup touch interface
     ofxInterface::TouchManager::one().setup(sceneRef.get());
 
     layoutNode = NULL;
     loadLayouts("panel.frame");
 
-    
     // setup osc message listener
     oscReceiver.setup(8080);
-
-    
 }
 
 void ofApp::update(){
@@ -184,7 +184,7 @@ void ofApp::onAbortTouchDown(ofxInterface::TouchEvent& touchEvent){
     ofLog() << "abort";
 }
 
-bool ofApp::loadLayouts(const string& createSceneNode){
+bool ofApp::loadLayouts(const string& rootNodeName){
     ofLog() << "Loading layouts from " << layoutFile;
     if(!meshDataManager.loadFromFile(layoutFile))
         return false;
@@ -213,8 +213,8 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         return make_shared<ofxInterface::Node>();
     });
 
-    if(createSceneNode != ""){
-        auto nodeRef = nodeGenerator.generateNode(createSceneNode);
+    if(rootNodeName != ""){
+        auto nodeRef = nodeGenerator.generateNode(rootNodeName);
 
         if(nodeRef == nullptr){
             // loading the file succeeded, so we're still returning true
@@ -224,11 +224,11 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         // remove current layoutNode
         if(layoutNode)
             delete layoutNode;
-        
+
         layoutNode = nodeRef.get();
 
         if(!layoutNode){
-            ofLogWarning() << "Could not generate layout node with id: " << createSceneNode;
+            ofLogWarning() << "Could not generate layout node with id: " << rootNodeName;
         } else {
             // layoutNode->setPosition(0,0,0);
             sceneRef->addChild(layoutNode);
@@ -241,10 +241,21 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         }
     }
 
-    if(auto n = sceneRef->getChildWithName("cancel"))
-        ofAddListener(n->eventTouchDown, this, &ofApp::onAbortTouchDown);
-    if(auto n = sceneRef->getChildWithName("submit"))
-        ofAddListener(n->eventTouchDown, this, &ofApp::onSubmitTouchDown);
+    // setup scene editor
+    editor.setup(sceneRef);
+    // find the cancel node and register a touch listener
+    editor.node("cancel")->onTouchDown([](TouchEvent &e){
+       ofLog() << "Cancel touched down.";
+    });
+    // find the submit node and register a touch listener
+    editor.node("submit")->onTouchDown([](TouchEvent &e){
+        ofLog() << "SUBMIT touched down.";
+    });
+    // find the (non-existing) Foo node and try to register a touch listener
+    // this will simply abort quietly
+    editor.node("Foo")->onTouchDown([](TouchEvent &e){
+        ofLog() << "Foo touched down. Wait this is inpossible?!";
+    });
 
     return true;
 }
