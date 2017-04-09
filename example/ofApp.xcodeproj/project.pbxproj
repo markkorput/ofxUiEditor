@@ -32,6 +32,8 @@
 		4DD34EBF1E87EC1F00BC03FA /* ofApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD34EBE1E87EC1F00BC03FA /* ofApp.cpp */; };
 		4DD34EE21E87ED3600BC03FA /* MeshData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD34ED91E87ED3600BC03FA /* MeshData.cpp */; };
 		4DD34EE31E87ED3600BC03FA /* MeshDataManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD34EDB1E87ED3600BC03FA /* MeshDataManager.cpp */; };
+		4DEB65C11E9A0CD500482DCB /* AbortButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DEB65BD1E9A0CD500482DCB /* AbortButton.cpp */; };
+		4DEB65C21E9A0CD500482DCB /* SubmitButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DEB65BF1E9A0CD500482DCB /* SubmitButton.cpp */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
 /* End PBXBuildFile section */
 
@@ -127,6 +129,10 @@
 		4DD34EDB1E87ED3600BC03FA /* MeshDataManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeshDataManager.cpp; sourceTree = "<group>"; };
 		4DD34EDC1E87ED3600BC03FA /* MeshDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshDataManager.h; sourceTree = "<group>"; };
 		4DD34EDD1E87ED3600BC03FA /* ofxUiEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxUiEditor.h; sourceTree = "<group>"; };
+		4DEB65BD1E9A0CD500482DCB /* AbortButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AbortButton.cpp; sourceTree = "<group>"; };
+		4DEB65BE1E9A0CD500482DCB /* AbortButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbortButton.h; sourceTree = "<group>"; };
+		4DEB65BF1E9A0CD500482DCB /* SubmitButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SubmitButton.cpp; sourceTree = "<group>"; };
+		4DEB65C01E9A0CD500482DCB /* SubmitButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubmitButton.h; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../../of_v0.9.8_osx_release/libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E4B69B5B0A3A1756003C02F2 /* ofAppDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ofAppDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "openFrameworks-Info.plist"; sourceTree = "<group>"; };
@@ -375,6 +381,17 @@
 			path = ofxUiEditor;
 			sourceTree = "<group>";
 		};
+		4DEB65BC1E9A0CD500482DCB /* components */ = {
+			isa = PBXGroup;
+			children = (
+				4DEB65BD1E9A0CD500482DCB /* AbortButton.cpp */,
+				4DEB65BE1E9A0CD500482DCB /* AbortButton.h */,
+				4DEB65BF1E9A0CD500482DCB /* SubmitButton.cpp */,
+				4DEB65C01E9A0CD500482DCB /* SubmitButton.h */,
+			);
+			path = components;
+			sourceTree = "<group>";
+		};
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
@@ -409,6 +426,7 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				4DEB65BC1E9A0CD500482DCB /* components */,
 				4DD34EBE1E87EC1F00BC03FA /* ofApp.cpp */,
 			);
 			path = src;
@@ -528,8 +546,10 @@
 				4DD34EBC1E87E03700BC03FA /* ofxOscReceiver.cpp in Sources */,
 				4DA48BD11E88681500CDF4EC /* TextureButton.cpp in Sources */,
 				4DA48BD51E88681500CDF4EC /* VirtualTouch.cpp in Sources */,
+				4DEB65C21E9A0CD500482DCB /* SubmitButton.cpp in Sources */,
 				4DD34EB51E87E03700BC03FA /* OscOutboundPacketStream.cpp in Sources */,
 				4DD34EBF1E87EC1F00BC03FA /* ofApp.cpp in Sources */,
+				4DEB65C11E9A0CD500482DCB /* AbortButton.cpp in Sources */,
 				4DA48BCE1E88681500CDF4EC /* BitmapTextButton.cpp in Sources */,
 				4DD34EE21E87ED3600BC03FA /* MeshData.cpp in Sources */,
 				4DA48BCF1E88681500CDF4EC /* LambdaView.cpp in Sources */,
