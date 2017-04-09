@@ -79,6 +79,7 @@ namespace ofxUiEditor {
         NodeGenerator(){
             params.setName("NodeGenerator");
             params.add(realtimeUpdatesParam.set("realtime-updates", true));
+            instantiatorMethod = nullptr;
         }
         
         ~NodeGenerator(){
@@ -108,7 +109,12 @@ namespace ofxUiEditor {
 
         shared_ptr<NodeType> generateNode(shared_ptr<MeshData> meshDataRef, bool recursive=true){
             // generate node
-            auto node = make_shared<NodeType>();
+            shared_ptr<NodeType> node;
+
+            if(instantiatorMethod)
+                node = instantiatorMethod(meshDataRef);
+            else
+                node = make_shared<NodeType>();
 
             generatedNodes.push_back(node);
 
@@ -146,6 +152,10 @@ namespace ofxUiEditor {
             return node;
         }
 
+        void setInstantiator(std::function<shared_ptr<NodeType> (shared_ptr<MeshData>)> func){
+            instantiatorMethod = func;
+        }
+
     private: // callbacks
         
         void onActuatorApplied(DataToNodeActuator<NodeType>& actuator){
@@ -158,10 +168,11 @@ namespace ofxUiEditor {
     public: // params
         ofParameterGroup params;
         ofParameter<bool> realtimeUpdatesParam;
-    private:
-        
+
+    private: // attributes
         MeshDataManager* meshDataManager;
         vector<shared_ptr<DataToNodeActuator<NodeType>>> actuators;
         vector<shared_ptr<NodeType>> generatedNodes;
+        std::function<shared_ptr<NodeType> (shared_ptr<MeshData>)> instantiatorMethod;
     };
 }

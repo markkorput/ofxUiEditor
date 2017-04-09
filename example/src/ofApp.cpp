@@ -12,6 +12,10 @@
 #include "ofxInterface.h"
 // ofxUiEditor addon
 #include "ofxUiEditor.h"
+// local
+#include "components/AbortButton.h"
+#include "components/SubmitButton.h"
+
 
 const string paramsFile = "params.xml";
 const string layoutFile = "layout.json";
@@ -64,7 +68,6 @@ void ofApp::setup(){
     sceneRef = make_shared<ofxInterface::Node>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("ofxUiEditor-example-scene");
-//    sceneRef->setDeleteChildren(false);
 
     layoutNode = NULL;
     loadLayouts("panel.frame");
@@ -154,6 +157,26 @@ bool ofApp::loadLayouts(const string& createSceneNode){
     // clear scene
     while(sceneRef->getNumChildren() > 0)
         sceneRef->removeChild(0);
+
+    // register instantiator method that maps layout info to component classes
+    nodeGenerator.setInstantiator([this](shared_ptr<ofxUiEditor::MeshData> meshData) -> shared_ptr<ofxInterface::Node> {
+        string typ = meshData->getType();
+        
+        if(typ == "AbortButton"){
+            auto n = make_shared<AbortButton>();
+            n->setup("Abort");
+            return n;
+        }
+        
+        if(typ == "SubmitButton"){
+            auto n = make_shared<SubmitButton>();
+            n->setup("Submit");
+            return n;
+        }
+        
+        // default
+        return make_shared<ofxInterface::Node>();
+    });
 
     ofLog() << "Loading layouts from " << layoutFile;
     if(!meshDataManager.loadFromFile(layoutFile))

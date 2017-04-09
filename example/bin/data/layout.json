@@ -11,13 +11,13 @@
             "347.139, 173.793, 0"
          ]
       },
-      "panel.frame/cancel.btn" : {
+      "panel.frame/cancel.AbortButton" : {
          "position" : "241.559, 9.68035, 1e-05",
          "rotation" : "0, 0, 0",
          "scale" : "1, 1, 1",
          "vertices" : [ "0, 0, 0", "44.1964, 0, 0", "0, 11.3652, 0", "44.1964, 11.3652, 0" ]
       },
-      "panel.frame/submit.btn" : {
+      "panel.frame/submit.SubmitButton" : {
          "position" : "293.316, 9.68035, 1e-05",
          "rotation" : "0, 0, 0",
          "scale" : "1, 1, 1",
