@@ -32,24 +32,24 @@ namespace ofxUiEditor {
         void destroy(){ ofLogWarning() << "ofxUiEditor::Editor doesn't UNregister event listeners yet."; }
 
     public:
-        EditorSceneData<NodeType> getSceneData(){ return sceneData; }
+        shared_ptr<EditorSceneData<NodeType>> getSceneData() const { return sceneData; }
         // give the node that this editor instance points to
-        shared_ptr<NodeType> getNode(){ return current; }
-        shared_ptr<NodeType> getCurrent(){ return current; }
-        void setCurrent(shared_ptr<NodeType> newCurrent){ current = newCurrent; }
+        NodeType* getCurrent() const { return current; }
+        void setCurrent(NodeType* newCurrent){ current = newCurrent; }
 
-    public:
+        shared_ptr<Editor<NodeType>> node(const string& name) const;
+        
+    public: // register method for lambda register methods
         void onTouchDown(std::function<void (TouchEvent&)> func);
         
     protected:
-        shared_ptr<Editor<NodeType>> clone();
+        shared_ptr<Editor<NodeType>> clone() const;
         void clone(const Editor<NodeType> &original);
-
-        shared_ptr<Editor<NodeType>> node(const string& name);
+        shared_ptr<Editor<NodeType>> dummy() const;
 
     private:
         shared_ptr<EditorSceneData<NodeType>> sceneData;
-        shared_ptr<NodeType> current;
+        NodeType* current;
     };
 }
 
@@ -66,7 +66,7 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
     sceneData = make_shared<EditorSceneData<NodeType>>();
     sceneData->sceneRef = newScene;
     // set our current node pointer to the given scene node (root)
-    current = newScene;
+    current = newScene.get();
 }
 
 
@@ -78,22 +78,23 @@ void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
 
     // create lambdaEvent instance and store it in our scene's list
     auto lambdaE = make_shared<LambdaEvent<TouchEvent>>();
-    sceneData.lambdaTouchEvents.push_back(lambdaE);
+    
+    sceneData->lambdaTouchEvents.push_back(lambdaE);
     // make our new lambdaEvent listener for, and forward, our node's touchDown event
     lambdaE->forward(current->eventTouchDown);
     // finally register the given listener as listener for our lambda event
-    lambdaE->addListener(func, sceneData.get() /* use scene data as "owner" of the callback */);
+    lambdaE->addListener(func, (void*)sceneData.get() /* use scene data as "owner" of the callback */);
 }
 
 
 // returns new cloned instance, pointing at the specified node
 template<class NodeType>
-shared_ptr<Editor<NodeType>> Editor<NodeType>::node(const string& name){
+shared_ptr<Editor<NodeType>> Editor<NodeType>::node(const string& name) const {
     if(!current)
-        return make_shared<Node>();
+        return dummy();
 
     // TODO: support for more specific component path
-    NodeType n = current->getChildWithName(name);
+    NodeType* n = current->getChildWithName(name);
 
     auto result = clone();
     result->setCurrent(n);
@@ -103,9 +104,9 @@ shared_ptr<Editor<NodeType>> Editor<NodeType>::node(const string& name){
 
 // returns a new instance that is a clone of the current instance
 template<class NodeType>
-shared_ptr<Editor<NodeType>> Editor<NodeType>::clone(){
+shared_ptr<Editor<NodeType>> Editor<NodeType>::clone() const {
     auto c = make_shared<Editor<NodeType>>();
-    c.clone(*this);
+    c->clone(*this);
     return c;
 }
 
@@ -114,4 +115,10 @@ template<class NodeType>
 void Editor<NodeType>::clone(const Editor<NodeType> &original){
     sceneData = original.getSceneData();
     current = original.getCurrent();
+}
+
+template<class NodeType>
+shared_ptr<Editor<NodeType>> Editor<NodeType>::dummy() const {
+    auto c = make_shared<Editor<NodeType>>();
+    return c;
 }

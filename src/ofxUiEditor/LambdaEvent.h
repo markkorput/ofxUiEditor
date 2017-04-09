@@ -9,7 +9,7 @@
 namespace ofxUiEditor {
 
     template<typename Type>
-    class LambdaEvent : public ofEvent<Type>, ofxLiquidEvent<Type>  {
+    class LambdaEvent : public ofEvent<Type>, public ofxLiquidEvent<Type>  {
 
     public: // constructor etc.
         ~LambdaEvent(){ destroy(); }

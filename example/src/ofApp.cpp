@@ -37,7 +37,7 @@ public:
     void onAbortTouchDown(ofxInterface::TouchEvent& touchEvent);
 private:
 
-    bool loadLayouts(const string& createSceneNode="");
+    bool loadLayouts(const string& rootNodeName="");
     bool saveLayouts();
 
     void onGeneratedNodeUpdated(ofxInterface::Node& node);
@@ -80,9 +80,6 @@ void ofApp::setup(){
     // setup touch interface
     ofxInterface::TouchManager::one().setup(sceneRef.get());
 
-    // setup scene editor
-    editor.setup(sceneRef);
-    
     layoutNode = NULL;
     loadLayouts("panel.frame");
 
@@ -188,7 +185,7 @@ void ofApp::onAbortTouchDown(ofxInterface::TouchEvent& touchEvent){
     ofLog() << "abort";
 }
 
-bool ofApp::loadLayouts(const string& createSceneNode){
+bool ofApp::loadLayouts(const string& rootNodeName){
     ofLog() << "Loading layouts from " << layoutFile;
     if(!meshDataManager.loadFromFile(layoutFile))
         return false;
@@ -217,8 +214,8 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         return make_shared<ofxInterface::Node>();
     });
 
-    if(createSceneNode != ""){
-        auto nodeRef = nodeGenerator.generateNode(createSceneNode);
+    if(rootNodeName != ""){
+        auto nodeRef = nodeGenerator.generateNode(rootNodeName);
 
         if(nodeRef == nullptr){
             // loading the file succeeded, so we're still returning true
@@ -228,11 +225,11 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         // remove current layoutNode
         if(layoutNode)
             delete layoutNode;
-        
+
         layoutNode = nodeRef.get();
 
         if(!layoutNode){
-            ofLogWarning() << "Could not generate layout node with id: " << createSceneNode;
+            ofLogWarning() << "Could not generate layout node with id: " << rootNodeName;
         } else {
             // layoutNode->setPosition(0,0,0);
             sceneRef->addChild(layoutNode);
@@ -245,10 +242,16 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         }
     }
 
-    if(auto n = sceneRef->getChildWithName("cancel"))
-        ofAddListener(n->eventTouchDown, this, &ofApp::onAbortTouchDown);
-    if(auto n = sceneRef->getChildWithName("submit"))
-        ofAddListener(n->eventTouchDown, this, &ofApp::onSubmitTouchDown);
+    // setup scene editor
+    editor.setup(sceneRef);
+
+    editor.node("cancel")->onTouchDown([](TouchEvent &e){
+       ofLog() << "Cancel touched down.";
+    });
+//    if(auto n = sceneRef->getChildWithName("cancel"))
+//        ofAddListener(n->eventTouchDown, this, &ofApp::onAbortTouchDown);
+//    if(auto n = sceneRef->getChildWithName("submit"))
+//        ofAddListener(n->eventTouchDown, this, &ofApp::onSubmitTouchDown);
 
     return true;
 }
