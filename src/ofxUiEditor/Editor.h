@@ -1,4 +1,5 @@
 #include "ofxInterface.h"
+#include "LambdaEvent.h"
 
 using namespace ofxInterface;
 
@@ -16,6 +17,7 @@ namespace ofxUiEditor {
 
     public:
         shared_ptr<NodeType> sceneRef;
+        std::vector<shared_ptr<LambdaEvent<TouchEvent>>> lambdaTouchEvents;
     };
 
 
@@ -24,7 +26,10 @@ namespace ofxUiEditor {
 
     public:
         Editor() : sceneData(nullptr), current(nullptr){}
+        ~Editor(){ destroy(); }
+
         void setup(shared_ptr<NodeType> newScene);
+        void destroy(){ ofLogWarning() << "ofxUiEditor::Editor doesn't UNregister event listeners yet."; }
 
     public:
         EditorSceneData<NodeType> getSceneData(){ return sceneData; }
@@ -33,6 +38,9 @@ namespace ofxUiEditor {
         shared_ptr<NodeType> getCurrent(){ return current; }
         void setCurrent(shared_ptr<NodeType> newCurrent){ current = newCurrent; }
 
+    public:
+        void onTouchDown(std::function<void (TouchEvent&)> func);
+        
     protected:
         shared_ptr<Editor<NodeType>> clone();
         void clone(const Editor<NodeType> &original);
@@ -42,7 +50,6 @@ namespace ofxUiEditor {
     private:
         shared_ptr<EditorSceneData<NodeType>> sceneData;
         shared_ptr<NodeType> current;
-
     };
 }
 
@@ -61,6 +68,23 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
     // set our current node pointer to the given scene node (root)
     current = newScene;
 }
+
+
+template<class NodeType>
+void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
+    // we'll need a node to listen to
+    if(!current)
+        return;
+
+    // create lambdaEvent instance and store it in our scene's list
+    auto lambdaE = make_shared<LambdaEvent<TouchEvent>>();
+    sceneData.lambdaTouchEvents.push_back(lambdaE);
+    // make our new lambdaEvent listener for, and forward, our node's touchDown event
+    lambdaE->forward(current->eventTouchDown);
+    // finally register the given listener as listener for our lambda event
+    lambdaE->addListener(func, sceneData.get() /* use scene data as "owner" of the callback */);
+}
+
 
 // returns new cloned instance, pointing at the specified node
 template<class NodeType>

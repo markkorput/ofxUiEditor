@@ -134,6 +134,8 @@
 		4DEB65BF1E9A0CD500482DCB /* SubmitButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SubmitButton.cpp; sourceTree = "<group>"; };
 		4DEB65C01E9A0CD500482DCB /* SubmitButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubmitButton.h; sourceTree = "<group>"; };
 		4DEB65C61E9A70F900482DCB /* Editor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Editor.h; sourceTree = "<group>"; };
+		4DEB65C71E9A859900482DCB /* LambdaEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LambdaEvent.h; sourceTree = "<group>"; };
+		4DEB65E51E9A85F700482DCB /* ofxLiquidEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLiquidEvent.h; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../../of_v0.9.8_osx_release/libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E4B69B5B0A3A1756003C02F2 /* ofAppDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ofAppDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "openFrameworks-Info.plist"; sourceTree = "<group>"; };
@@ -373,6 +375,7 @@
 		4DD34ED81E87ED3600BC03FA /* ofxUiEditor */ = {
 			isa = PBXGroup;
 			children = (
+				4DEB65C71E9A859900482DCB /* LambdaEvent.h */,
 				4DEB65C61E9A70F900482DCB /* Editor.h */,
 				4DD34ED91E87ED3600BC03FA /* MeshData.cpp */,
 				4DD34EDA1E87ED3600BC03FA /* MeshData.h */,
@@ -394,9 +397,27 @@
 			path = components;
 			sourceTree = "<group>";
 		};
+		4DEB65C81E9A85F600482DCB /* ofxLiquidEvent */ = {
+			isa = PBXGroup;
+			children = (
+				4DEB65E41E9A85F600482DCB /* src */,
+			);
+			name = ofxLiquidEvent;
+			path = ../../ofxLiquidEvent;
+			sourceTree = "<group>";
+		};
+		4DEB65E41E9A85F600482DCB /* src */ = {
+			isa = PBXGroup;
+			children = (
+				4DEB65E51E9A85F700482DCB /* ofxLiquidEvent.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				4DEB65C81E9A85F600482DCB /* ofxLiquidEvent */,
 				4DA48BA01E88681500CDF4EC /* ofxInterface */,
 				4DA48B221E8836BD00CDF4EC /* ofxJSON */,
 				4DD34EC01E87ED3600BC03FA /* ofxUiEditor */,
