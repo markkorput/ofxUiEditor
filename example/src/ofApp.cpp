@@ -83,7 +83,6 @@ void ofApp::setup(){
     layoutNode = NULL;
     loadLayouts("panel.frame");
 
-    
     // setup osc message listener
     oscReceiver.setup(8080);
 }
@@ -248,10 +247,14 @@ bool ofApp::loadLayouts(const string& rootNodeName){
     editor.node("cancel")->onTouchDown([](TouchEvent &e){
        ofLog() << "Cancel touched down.";
     });
-//    if(auto n = sceneRef->getChildWithName("cancel"))
-//        ofAddListener(n->eventTouchDown, this, &ofApp::onAbortTouchDown);
-//    if(auto n = sceneRef->getChildWithName("submit"))
-//        ofAddListener(n->eventTouchDown, this, &ofApp::onSubmitTouchDown);
+
+    editor.node("submit")->onTouchDown([](TouchEvent &e){
+        ofLog() << "SUBMIT touched down.";
+    });
+
+    editor.node("Foo")->onTouchDown([](TouchEvent &e){
+        ofLog() << "Foo touched down. Wait this is inpossible?!";
+    });
 
     return true;
 }
