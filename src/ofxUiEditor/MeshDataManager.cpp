@@ -5,14 +5,14 @@
 // Local helper methods
 //
 
-ofVec3f getVec3f(const Json::Value & jsonValue){
+ofVec3f getVec3f(const Json::Value & jsonValue, ofVec3f defaultValue = ofVec3f(0.0f)){
     if(jsonValue.isNull())
-        return ofVec3f(0.0f);
+        return defaultValue;
 
     vector<string> floats = ofSplitString(jsonValue.asString(), ", ");
 
     if(floats.size() != 3)
-        return ofVec3f(0.0f);
+        return defaultValue;
 
     return ofVec3f(ofToFloat(floats[0]), ofToFloat(floats[1]), ofToFloat(floats[2]));
 }
@@ -100,7 +100,7 @@ bool MeshDataManager::loadFromFile(const string& filePath){
                 auto item = get(id);
                 item->setPosition(getVec3f(itemJson["position"]));
                 item->setRotation(getVec3f(itemJson["rotation"]));
-                item->setScale(getVec3f(itemJson["scale"]));
+                item->setScale(getVec3f(itemJson["scale"], ofVec3f(1.0f) /* default value */));
 
                 auto vertsJson = itemJson["vertices"];
                 if(!vertsJson.isArray())
@@ -111,7 +111,7 @@ bool MeshDataManager::loadFromFile(const string& filePath){
                     // item->setVertex(i, getVec3f(vertsJson[i]));
                     verts.push_back(getVec3f(vertsJson[i]));
                 }
-                
+
                 item->setVertices(verts);
             }
             continue;
