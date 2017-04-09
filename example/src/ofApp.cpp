@@ -8,7 +8,7 @@
 #include "ofXml.h"
 // ofxOsc addon
 #include "ofxOscReceiver.h"
-// ofxInterface
+// ofxInterface addon
 #include "ofxInterface.h"
 // ofxUiEditor addon
 #include "ofxUiEditor.h"
@@ -33,6 +33,8 @@ public:
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
 
+    void onSubmitTouchDown(ofxInterface::TouchEvent& touchEvent);
+    void onAbortTouchDown(ofxInterface::TouchEvent& touchEvent);
 private:
 
     bool loadLayouts(const string& createSceneNode="");
@@ -51,6 +53,7 @@ private: // attributes
     ofEasyCam cam;
     bool bDrawDebug, bDrawManager, bCamEnabled;
 };
+
 
 //--------------------------------------------------------------
 // ofApp.cpp
@@ -173,7 +176,19 @@ void ofApp::mouseReleased(int x, int y, int button){
     ofxInterface::TouchManager::one().touchUp(button, ofVec2f(x, y));
 }
 
+void ofApp::onSubmitTouchDown(ofxInterface::TouchEvent& touchEvent){
+    ofLog() << "submit";
+}
+
+void ofApp::onAbortTouchDown(ofxInterface::TouchEvent& touchEvent){
+    ofLog() << "abort";
+}
+
 bool ofApp::loadLayouts(const string& createSceneNode){
+    ofLog() << "Loading layouts from " << layoutFile;
+    if(!meshDataManager.loadFromFile(layoutFile))
+        return false;
+
     // clear scene
     while(sceneRef->getNumChildren() > 0)
         sceneRef->removeChild(0);
@@ -197,10 +212,6 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         // default
         return make_shared<ofxInterface::Node>();
     });
-
-    ofLog() << "Loading layouts from " << layoutFile;
-    if(!meshDataManager.loadFromFile(layoutFile))
-        return false;
 
     if(createSceneNode != ""){
         auto nodeRef = nodeGenerator.generateNode(createSceneNode);
@@ -229,6 +240,12 @@ bool ofApp::loadLayouts(const string& createSceneNode){
             }
         }
     }
+
+    if(auto n = sceneRef->getChildWithName("cancel"))
+        ofAddListener(n->eventTouchDown, this, &ofApp::onAbortTouchDown);
+    if(auto n = sceneRef->getChildWithName("submit"))
+        ofAddListener(n->eventTouchDown, this, &ofApp::onSubmitTouchDown);
+
     return true;
 }
 
@@ -251,6 +268,7 @@ void ofApp::onGeneratedNodeUpdated(ofxInterface::Node& node){
     if(&node == layoutNode)
         layoutNode->setPosition(0,0,0);
 }
+
 
 //--------------------------------------------------------------
 // main.cpp
