@@ -46,6 +46,7 @@ private: // attributes
     ofxOscReceiver oscReceiver;
     ofxUiEditor::MeshDataManager meshDataManager;
     ofxUiEditor::NodeGenerator<ofxInterface::Node> nodeGenerator;
+    ofxUiEditor::Editor<ofxInterface::Node> editor;
 
     shared_ptr<ofxInterface::Node> sceneRef;
     ofxInterface::Node* layoutNode;
@@ -75,16 +76,19 @@ void ofApp::setup(){
     sceneRef = make_shared<ofxInterface::Node>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("ofxUiEditor-example-scene");
+
+    // setup touch interface
     ofxInterface::TouchManager::one().setup(sceneRef.get());
 
+    // setup scene editor
+    editor.setup(sceneRef);
+    
     layoutNode = NULL;
     loadLayouts("panel.frame");
 
     
     // setup osc message listener
     oscReceiver.setup(8080);
-
-    
 }
 
 void ofApp::update(){
