@@ -243,15 +243,16 @@ bool ofApp::loadLayouts(const string& rootNodeName){
 
     // setup scene editor
     editor.setup(sceneRef);
-
+    // find the cancel node and register a touch listener
     editor.node("cancel")->onTouchDown([](TouchEvent &e){
        ofLog() << "Cancel touched down.";
     });
-
+    // find the submit node and register a touch listener
     editor.node("submit")->onTouchDown([](TouchEvent &e){
         ofLog() << "SUBMIT touched down.";
     });
-
+    // find the (non-existing) Foo node and try to register a touch listener
+    // this will simply abort quietly
     editor.node("Foo")->onTouchDown([](TouchEvent &e){
         ofLog() << "Foo touched down. Wait this is inpossible?!";
     });

@@ -73,8 +73,10 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
 template<class NodeType>
 void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
     // we'll need a node to listen to
-    if(!current)
+    if(!current){
+        ofLogWarning() << "onTouchDown without a current node";
         return;
+    }
 
     // create lambdaEvent instance and store it in our scene's list
     auto lambdaE = make_shared<LambdaEvent<TouchEvent>>();
@@ -95,6 +97,9 @@ shared_ptr<Editor<NodeType>> Editor<NodeType>::node(const string& name) const {
 
     // TODO: support for more specific component path
     NodeType* n = current->getChildWithName(name);
+
+    if(!n)
+        ofLogWarning() << "node(\""+name+"\"); doesn't exist.";
 
     auto result = clone();
     result->setCurrent(n);
