@@ -8,7 +8,7 @@
 #include "ofXml.h"
 // ofxOsc addon
 #include "ofxOscReceiver.h"
-// ofxInterface
+// ofxInterface addon
 #include "ofxInterface.h"
 // ofxUiEditor addon
 #include "ofxUiEditor.h"
@@ -29,9 +29,15 @@ public:
     void keyPressed(int key);
     void exit(ofEventArgs &args);
 
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+
+    void onSubmitTouchDown(ofxInterface::TouchEvent& touchEvent);
+    void onAbortTouchDown(ofxInterface::TouchEvent& touchEvent);
 private:
 
-    bool loadLayouts(const string& createSceneNode="");
+    bool loadLayouts(const string& rootNodeName="");
     bool saveLayouts();
 
     void onGeneratedNodeUpdated(ofxInterface::Node& node);
@@ -40,6 +46,7 @@ private: // attributes
     ofxOscReceiver oscReceiver;
     ofxUiEditor::MeshDataManager meshDataManager;
     ofxUiEditor::NodeGenerator<ofxInterface::Node> nodeGenerator;
+    ofxUiEditor::Editor<ofxInterface::Node> editor;
 
     shared_ptr<ofxInterface::Node> sceneRef;
     ofxInterface::Node* layoutNode;
@@ -47,6 +54,7 @@ private: // attributes
     ofEasyCam cam;
     bool bDrawDebug, bDrawManager, bCamEnabled;
 };
+
 
 //--------------------------------------------------------------
 // ofApp.cpp
@@ -69,16 +77,19 @@ void ofApp::setup(){
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("ofxUiEditor-example-scene");
 
+    // setup touch interface
+    ofxInterface::TouchManager::one().setup(sceneRef.get());
+
     layoutNode = NULL;
     loadLayouts("panel.frame");
 
     // setup osc message listener
     oscReceiver.setup(8080);
-
-    
 }
 
 void ofApp::update(){
+    ofxInterface::TouchManager::one().update();
+
     const int MAX_MESSAGES = 20;
 
     for(int i=0; i<MAX_MESSAGES; i++){
@@ -153,7 +164,31 @@ void ofApp::exit(ofEventArgs &args){
     // saveLayouts();
 }
 
-bool ofApp::loadLayouts(const string& createSceneNode){
+void ofApp::mouseDragged(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchMove(button, ofVec2f(x, y));
+}
+
+void ofApp::mousePressed(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchDown(button, ofVec2f(x, y));
+}
+
+void ofApp::mouseReleased(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchUp(button, ofVec2f(x, y));
+}
+
+void ofApp::onSubmitTouchDown(ofxInterface::TouchEvent& touchEvent){
+    ofLog() << "submit";
+}
+
+void ofApp::onAbortTouchDown(ofxInterface::TouchEvent& touchEvent){
+    ofLog() << "abort";
+}
+
+bool ofApp::loadLayouts(const string& rootNodeName){
+    ofLog() << "Loading layouts from " << layoutFile;
+    if(!meshDataManager.loadFromFile(layoutFile))
+        return false;
+
     // clear scene
     while(sceneRef->getNumChildren() > 0)
         sceneRef->removeChild(0);
@@ -178,12 +213,8 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         return make_shared<ofxInterface::Node>();
     });
 
-    ofLog() << "Loading layouts from " << layoutFile;
-    if(!meshDataManager.loadFromFile(layoutFile))
-        return false;
-
-    if(createSceneNode != ""){
-        auto nodeRef = nodeGenerator.generateNode(createSceneNode);
+    if(rootNodeName != ""){
+        auto nodeRef = nodeGenerator.generateNode(rootNodeName);
 
         if(nodeRef == nullptr){
             // loading the file succeeded, so we're still returning true
@@ -193,11 +224,11 @@ bool ofApp::loadLayouts(const string& createSceneNode){
         // remove current layoutNode
         if(layoutNode)
             delete layoutNode;
-        
+
         layoutNode = nodeRef.get();
 
         if(!layoutNode){
-            ofLogWarning() << "Could not generate layout node with id: " << createSceneNode;
+            ofLogWarning() << "Could not generate layout node with id: " << rootNodeName;
         } else {
             // layoutNode->setPosition(0,0,0);
             sceneRef->addChild(layoutNode);
@@ -209,6 +240,23 @@ bool ofApp::loadLayouts(const string& createSceneNode){
             }
         }
     }
+
+    // setup scene editor
+    editor.setup(sceneRef);
+    // find the cancel node and register a touch listener
+    editor.node("cancel")->onTouchDown([](TouchEvent &e){
+       ofLog() << "Cancel touched down.";
+    });
+    // find the submit node and register a touch listener
+    editor.node("submit")->onTouchDown([](TouchEvent &e){
+        ofLog() << "SUBMIT touched down.";
+    });
+    // find the (non-existing) Foo node and try to register a touch listener
+    // this will simply abort quietly
+    editor.node("Foo")->onTouchDown([](TouchEvent &e){
+        ofLog() << "Foo touched down. Wait this is inpossible?!";
+    });
+
     return true;
 }
 
@@ -231,6 +279,7 @@ void ofApp::onGeneratedNodeUpdated(ofxInterface::Node& node){
     if(&node == layoutNode)
         layoutNode->setPosition(0,0,0);
 }
+
 
 //--------------------------------------------------------------
 // main.cpp

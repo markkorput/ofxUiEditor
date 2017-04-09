@@ -11,6 +11,7 @@ string MeshData::getLocalId() const {
     // return last part
     return parts.back();
 }
+
 string MeshData::getName() const {
     auto parts = ofSplitString(getLocalId(), TYPE_SEPARATOR);
     if(parts.size() < 1)

@@ -4,7 +4,7 @@
 
 namespace ofxUiEditor {
     class MeshData : public ofParameterGroup {
-        
+
     public:
         const string CHILD_SEPARATOR = "/";
         const string TYPE_SEPARATOR = ".";
@@ -17,7 +17,7 @@ namespace ofxUiEditor {
     public: // getters/setters
         const string& getId() const { return id; }
         void setId(const string &newId){ id = newId; }
-        
+
         string getLocalId() const;
         string getName() const;
         string getType() const;
@@ -42,9 +42,9 @@ namespace ofxUiEditor {
         ofVec3f getOrigin();
 
     private: // helpers methods
-        
+
         void updateVertBounds();
-        
+
     public: // events
         ofEvent<MeshData> changeEvent;
 
