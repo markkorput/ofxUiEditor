@@ -1,1 +1,3 @@
 ofxUnitTests
+ofxInterface
+ofxLiquidEvent
