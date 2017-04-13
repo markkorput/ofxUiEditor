@@ -56,6 +56,7 @@ namespace ofxUiEditor {
     private:
         StructureManager* structureManager;
         shared_ptr<EditorSceneData<NodeType>> sceneData;
+        vector<shared_ptr<NodeType>> generatedNodes;
         NodeType* current;
     };
 }
@@ -95,10 +96,16 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     }
 
     auto node = make_shared<NodeType>();
+    // we need to cache our shared pointers, otherwise they'll auto-deallocate
+    generatedNodes.push_back(node);
     node->setName(infoRef->getName());
 
     if(recursive){
-
+        const vector<string>& childNames = infoRef->getChildNames();
+        for(auto& childName : childNames){
+            auto childNode = create(nodePath + StructureManager::SEPARATOR + childName, recursive);
+            node->addChild(childNode.get());
+        }
     }
 
     return node;

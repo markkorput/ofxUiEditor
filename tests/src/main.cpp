@@ -17,6 +17,7 @@ class ofApp: public ofxUnitTestsApp{
 
         test_eq(nodeRef->getName(), "window", "");
         auto& children =  nodeRef->getChildren();
+        test_eq(children.size(), 4, "");
         test_eq(children[0]->getName(), "titlebar", "");
         test_eq(children[0]->getChildren()[0]->getName(), "title", "");
         test_eq(children[0]->getChildren()[1]->getName(), "close", "");

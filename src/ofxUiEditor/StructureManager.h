@@ -6,13 +6,18 @@ namespace ofxUiEditor {
     class StructureInfo {
     public:
         string getName(){ return name; }
+        const vector<string>& getChildNames(){ return childNames; }
 
     public:
         string name;
-        vector<shared_ptr<StructureInfo>> children;
+        vector<string> childNames;
     };
 
     class StructureManager {
+
+    public:
+        static string SEPARATOR;
+
     public:
         void setup(const string& filename);
         shared_ptr<StructureInfo> get(const string& nodePath);
