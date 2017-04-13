@@ -43,7 +43,7 @@ namespace ofxUiEditor {
         shared_ptr<Editor<NodeType>> node(const string& name) const;
 
         void use(StructureManager& structureManager);
-        shared_ptr<NodeType> create(const string& nodePath);
+        shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
 
     public: // register method for lambda register methods
         void onTouchDown(std::function<void (TouchEvent&)> func);
@@ -82,9 +82,28 @@ void Editor<NodeType>::use(StructureManager& structureManager){
 }
 
 template<class NodeType>
-shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath){
-    return make_shared<NodeType>();
+shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
+    if(!structureManager){
+        ofLogWarning() << "Can't generate node without StructureManager";
+        return nullptr;
+    }
+
+    auto infoRef = structureManager->get(nodePath);
+    if(!infoRef){
+        ofLogWarning() << "Could not find structures entry for nodePath: " << nodePath;
+        return nullptr;
+    }
+
+    auto node = make_shared<NodeType>();
+    node->setName(infoRef->getName());
+
+    if(recursive){
+
+    }
+
 }
+
+
 
 
 template<class NodeType>
