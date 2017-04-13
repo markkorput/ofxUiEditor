@@ -101,6 +101,7 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
 
     }
 
+    return node;
 }
 
 
