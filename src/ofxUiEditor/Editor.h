@@ -1,5 +1,8 @@
+// ofxAddons
 #include "ofxInterface.h"
+// local
 #include "LambdaEvent.h"
+#include "StructureManager.h"
 
 using namespace ofxInterface;
 
@@ -25,7 +28,7 @@ namespace ofxUiEditor {
     class Editor {
 
     public:
-        Editor() : sceneData(nullptr), current(nullptr){}
+        Editor() : sceneData(nullptr), current(nullptr), structureManager(NULL){}
         ~Editor(){ destroy(); }
 
         void setup(shared_ptr<NodeType> newScene);
@@ -38,16 +41,20 @@ namespace ofxUiEditor {
         void setCurrent(NodeType* newCurrent){ current = newCurrent; }
 
         shared_ptr<Editor<NodeType>> node(const string& name) const;
-        
+
+        void use(StructureManager& structureManager);
+        shared_ptr<NodeType> create(const string& nodePath);
+
     public: // register method for lambda register methods
         void onTouchDown(std::function<void (TouchEvent&)> func);
-        
+
     protected:
         shared_ptr<Editor<NodeType>> clone() const;
         void clone(const Editor<NodeType> &original);
         shared_ptr<Editor<NodeType>> dummy() const;
 
     private:
+        StructureManager* structureManager;
         shared_ptr<EditorSceneData<NodeType>> sceneData;
         NodeType* current;
     };
@@ -69,6 +76,16 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
     current = newScene.get();
 }
 
+template<class NodeType>
+void Editor<NodeType>::use(StructureManager& structureManager){
+    this->structureManager = &structureManager;
+}
+
+template<class NodeType>
+shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath){
+    return make_shared<NodeType>();
+}
+
 
 template<class NodeType>
 void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
@@ -80,7 +97,7 @@ void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
 
     // create lambdaEvent instance and store it in our scene's list
     auto lambdaE = make_shared<LambdaEvent<TouchEvent>>();
-    
+
     sceneData->lambdaTouchEvents.push_back(lambdaE);
     // make our new lambdaEvent listener for, and forward, our node's touchDown event
     lambdaE->forward(current->eventTouchDown);
