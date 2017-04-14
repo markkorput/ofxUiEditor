@@ -12,8 +12,7 @@ class ofApp: public ofxUnitTestsApp{
         ofxUiEditor::Editor<ofxInterface::Node> editor;
         editor.use(strucman);
 
-        // verify node structure
-        {
+        {   // verify node structure
             shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
             test_eq(nodeRef->getName(), "window", "");
             auto& children =  nodeRef->getChildren();
@@ -36,8 +35,7 @@ class ofApp: public ofxUnitTestsApp{
         // start using properties manager
         editor.use(propman);
 
-        // verify node structure
-        {
+        {   // verify node structure
             shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
             test_eq(nodeRef->getName(), "window", "");
             auto& children = nodeRef->getChildren();
@@ -50,8 +48,13 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(children[3]->getName(), "submit", "");
             // verify properties ARE initialized
             test_eq(nodeRef->getSize(), ofVec2f(300.0f, 200.0f), "");
+            test_eq(nodeRef->getPosition(), ofVec3f(123.0f, 456.0f, 789.0f), "");
+            test_eq(nodeRef->getScale(), ofVec3f(0.5f, .25f, .1f), "");
+
         }
     }
+
+
 };
 
 

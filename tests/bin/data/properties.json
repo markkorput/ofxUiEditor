@@ -1,6 +1,12 @@
 {
     "window": {
         "width": 300,
-        "height": 200
+        "height": 200,
+        "position_x": 123,
+        "position_y": 456,
+        "position_z": 789,
+        "scale_x": 0.5,
+        "scale_y": 0.25,
+        "scale_z": 0.1
     }
 }

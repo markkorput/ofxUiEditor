@@ -120,6 +120,9 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
             float w = ofToFloat(propsItemRef->get("width", "0.0"));
             float h = ofToFloat(propsItemRef->get("height", "0.0"));
             node->setSize(w,h);
+            node->setPosition(propsItemRef->get("position", ofVec3f(0.0f)));
+
+            node->setScale(propsItemRef->get("scale", ofVec3f(0.0f)));
         }
     }
 
