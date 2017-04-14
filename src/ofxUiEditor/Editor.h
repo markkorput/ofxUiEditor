@@ -29,7 +29,10 @@ namespace ofxUiEditor {
     class Editor {
 
     public:
-        Editor() : sceneData(nullptr), current(nullptr), structureManager(NULL){}
+        Editor() : sceneData(nullptr),
+                    current(nullptr),
+                    structureManager(NULL),
+                    propertiesManager(NULL){}
         ~Editor(){ destroy(); }
 
         void setup(shared_ptr<NodeType> newScene);
@@ -92,21 +95,33 @@ void Editor<NodeType>::use(PropertiesManager& propertiesManager){
 
 template<class NodeType>
 shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
+    auto node = make_shared<NodeType>();
+    // we need to cache our shared pointers, otherwise they'll auto-deallocate
+    generatedNodes.push_back(node);
+
+    // try to find structure information
     if(!structureManager){
-        ofLogWarning() << "Can't generate node without StructureManager";
-        return nullptr;
+        ofLogWarning() << "no StructureManager available to initialize nodePath: " << nodePath;
+        return node;
     }
 
     auto infoRef = structureManager->get(nodePath);
     if(!infoRef){
-        ofLogWarning() << "Could not find structures entry for nodePath: " << nodePath;
-        return nullptr;
+        ofLogWarning() << "no structure data found for nodePath: " << nodePath;
+        return node;
     }
 
-    auto node = make_shared<NodeType>();
-    // we need to cache our shared pointers, otherwise they'll auto-deallocate
-    generatedNodes.push_back(node);
     node->setName(infoRef->getName());
+
+    // try to find and apply properties configuration
+    if(propertiesManager){
+        auto propsItemRef = propertiesManager->get(nodePath);
+        if(propsItemRef){
+            float w = ofToFloat(propsItemRef->get("width", "0.0"));
+            float h = ofToFloat(propsItemRef->get("height", "0.0"));
+            node->setSize(w,h);
+        }
+    }
 
     if(recursive){
         const vector<string>& childNames = infoRef->getChildNames();
