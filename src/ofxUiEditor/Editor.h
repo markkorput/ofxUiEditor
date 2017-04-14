@@ -3,6 +3,7 @@
 // local
 #include "LambdaEvent.h"
 #include "StructureManager.h"
+#include "PropertiesManager.h"
 
 using namespace ofxInterface;
 
@@ -43,6 +44,7 @@ namespace ofxUiEditor {
         shared_ptr<Editor<NodeType>> node(const string& name) const;
 
         void use(StructureManager& structureManager);
+        void use(PropertiesManager& propertiesManager);
         shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
 
     public: // register method for lambda register methods
@@ -55,6 +57,7 @@ namespace ofxUiEditor {
 
     private:
         StructureManager* structureManager;
+        PropertiesManager* propertiesManager;
         shared_ptr<EditorSceneData<NodeType>> sceneData;
         vector<shared_ptr<NodeType>> generatedNodes;
         NodeType* current;
@@ -80,6 +83,11 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
 template<class NodeType>
 void Editor<NodeType>::use(StructureManager& structureManager){
     this->structureManager = &structureManager;
+}
+
+template<class NodeType>
+void Editor<NodeType>::use(PropertiesManager& propertiesManager){
+    this->propertiesManager = &propertiesManager;
 }
 
 template<class NodeType>

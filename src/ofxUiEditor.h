@@ -3,3 +3,4 @@
 #include "ofxUiEditor/NodeGenerator.h"
 #include "ofxUiEditor/Editor.h"
 #include "ofxUiEditor/StructureManager.h"
+#include "ofxUiEditor/PropertiesManager.h"
