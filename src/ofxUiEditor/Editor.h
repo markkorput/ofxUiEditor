@@ -1,5 +1,9 @@
+// ofxAddons
 #include "ofxInterface.h"
+// local
 #include "LambdaEvent.h"
+#include "StructureManager.h"
+#include "PropertiesManager.h"
 
 using namespace ofxInterface;
 
@@ -25,7 +29,10 @@ namespace ofxUiEditor {
     class Editor {
 
     public:
-        Editor() : sceneData(nullptr), current(nullptr){}
+        Editor() : sceneData(nullptr),
+                    current(nullptr),
+                    structureManager(NULL),
+                    propertiesManager(NULL){}
         ~Editor(){ destroy(); }
 
         void setup(shared_ptr<NodeType> newScene);
@@ -38,17 +45,24 @@ namespace ofxUiEditor {
         void setCurrent(NodeType* newCurrent){ current = newCurrent; }
 
         shared_ptr<Editor<NodeType>> node(const string& name) const;
-        
+
+        void use(StructureManager& structureManager);
+        void use(PropertiesManager& propertiesManager);
+        shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
+
     public: // register method for lambda register methods
         void onTouchDown(std::function<void (TouchEvent&)> func);
-        
+
     protected:
         shared_ptr<Editor<NodeType>> clone() const;
         void clone(const Editor<NodeType> &original);
         shared_ptr<Editor<NodeType>> dummy() const;
 
     private:
+        StructureManager* structureManager;
+        PropertiesManager* propertiesManager;
         shared_ptr<EditorSceneData<NodeType>> sceneData;
+        vector<shared_ptr<NodeType>> generatedNodes;
         NodeType* current;
     };
 }
@@ -69,6 +83,59 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
     current = newScene.get();
 }
 
+template<class NodeType>
+void Editor<NodeType>::use(StructureManager& structureManager){
+    this->structureManager = &structureManager;
+}
+
+template<class NodeType>
+void Editor<NodeType>::use(PropertiesManager& propertiesManager){
+    this->propertiesManager = &propertiesManager;
+}
+
+template<class NodeType>
+shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
+    auto node = make_shared<NodeType>();
+    // we need to cache our shared pointers, otherwise they'll auto-deallocate
+    generatedNodes.push_back(node);
+
+    // try to find structure information
+    if(!structureManager){
+        ofLogWarning() << "no StructureManager available to initialize nodePath: " << nodePath;
+        return node;
+    }
+
+    auto infoRef = structureManager->get(nodePath);
+    if(!infoRef){
+        ofLogWarning() << "no structure data found for nodePath: " << nodePath;
+        return node;
+    }
+
+    node->setName(infoRef->getName());
+
+    // try to find and apply properties configuration
+    if(propertiesManager){
+        auto propsItemRef = propertiesManager->get(nodePath);
+        if(propsItemRef){
+            float w = ofToFloat(propsItemRef->get("width", "0.0"));
+            float h = ofToFloat(propsItemRef->get("height", "0.0"));
+            node->setSize(w,h);
+        }
+    }
+
+    if(recursive){
+        const vector<string>& childNames = infoRef->getChildNames();
+        for(auto& childName : childNames){
+            auto childNode = create(nodePath + StructureManager::SEPARATOR + childName, recursive);
+            node->addChild(childNode.get());
+        }
+    }
+
+    return node;
+}
+
+
+
 
 template<class NodeType>
 void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
@@ -80,7 +147,7 @@ void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
 
     // create lambdaEvent instance and store it in our scene's list
     auto lambdaE = make_shared<LambdaEvent<TouchEvent>>();
-    
+
     sceneData->lambdaTouchEvents.push_back(lambdaE);
     // make our new lambdaEvent listener for, and forward, our node's touchDown event
     lambdaE->forward(current->eventTouchDown);
