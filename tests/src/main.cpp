@@ -14,10 +14,11 @@ namespace CustomProgressBar{
     };
 
     class PropertiesActuator : public ofxUiEditor::BasePropertiesActuator<ofxInterface::Node> {
+    public:
         void actuate(shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
             auto progressBarRef = (shared_ptr<Component>) nodeRef;
             // let our parent class take care of the default properties (size, position, scale, rotation)
-            ofxUiEditor::BasePropertiesActuator::actuate(progressBarRef, propertiesRef);
+            ofxUiEditor::BasePropertiesActuator<ofxInterface::Node>::actuate(progressBarRef, propertiesRef);
             progressBarRef->emptyColor = propertiesRef->get("empty-color", ofColor(0.0f));
             progressBarRef->fullColor = propertiesRef->get("full-color", ofColor(255.0f));
         }
