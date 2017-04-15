@@ -4,6 +4,7 @@
 #include "LambdaEvent.h"
 #include "StructureManager.h"
 #include "PropertiesManager.h"
+#include "BasePropertiesActuator.h"
 
 using namespace ofxInterface;
 
@@ -48,6 +49,7 @@ namespace ofxUiEditor {
 
         void use(StructureManager& structureManager);
         void use(PropertiesManager& propertiesManager);
+        void addComponentPropertiesActuator(const string& componentId, shared_ptr<BasePropertiesActuator<NodeType>> actuatorRef);
         shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
 
     public: // register method for lambda register methods
@@ -64,6 +66,8 @@ namespace ofxUiEditor {
         shared_ptr<EditorSceneData<NodeType>> sceneData;
         vector<shared_ptr<NodeType>> generatedNodes;
         NodeType* current;
+
+        map<string, shared_ptr<BasePropertiesActuator<NodeType>>> componentPropertyActuators;
     };
 }
 
@@ -91,6 +95,13 @@ void Editor<NodeType>::use(StructureManager& structureManager){
 template<class NodeType>
 void Editor<NodeType>::use(PropertiesManager& propertiesManager){
     this->propertiesManager = &propertiesManager;
+}
+
+template<class NodeType>
+void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId,
+                        shared_ptr<BasePropertiesActuator<NodeType>> actuatorRef){
+    actuatorRef->setComponentId(componentId);
+    this->componentPropertyActuators[componentId] = actuatorRef;
 }
 
 template<class NodeType>
@@ -157,7 +168,6 @@ void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
     // finally register the given listener as listener for our lambda event
     lambdaE->addListener(func, (void*)sceneData.get() /* use scene data as "owner" of the callback */);
 }
-
 
 // returns new cloned instance, pointing at the specified node
 template<class NodeType>

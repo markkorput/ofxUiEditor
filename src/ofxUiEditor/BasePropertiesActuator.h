@@ -9,6 +9,12 @@ namespace ofxUiEditor {
     class BasePropertiesActuator {
     public:
         virtual void actuate(shared_ptr<NodeType> nodeRef, shared_ptr<PropertiesItem> propertiesRef);
+
+        const string& getComponentId(){ return componentId; }
+        void setComponentId(const string& newComponentId){ componentId = newComponentId; }
+
+    private:
+        string componentId;
     };
 }
 
