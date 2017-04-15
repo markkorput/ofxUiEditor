@@ -8,4 +8,8 @@
         <cancel />
         <submit />
     </window>
+
+    <popupDialog>
+        <CustomProgressBar />
+    </popupDialog>
 </structures>

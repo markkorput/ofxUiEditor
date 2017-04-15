@@ -103,7 +103,7 @@ public:
 
 CustomProgressBarComponentPropertiesActuator.hpp
 ```c++
-class CustomProgressBarComponentActuator : ofxUiEditor::BasePropertiesActuator<ofxInterface::Node> {
+class CustomProgressBarComponentPropertiesActuator : ofxUiEditor::BasePropertiesActuator<ofxInterface::Node> {
     void actuate(shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
         auto progressBarRef = (shared_ptr<CustomProgressBarComponent>) nodeRef;
         // let our parent class take care of the default properties (size, position, scale, rotation)
