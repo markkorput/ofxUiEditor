@@ -1,7 +1,7 @@
 {
     "window": {
-        "width": 300,
-        "height": 200,
+        "size_x": 300,
+        "size_y": 200,
         "position_x": 123,
         "position_y": 456,
         "position_z": 789,

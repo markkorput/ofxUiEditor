@@ -128,12 +128,16 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     if(propertiesManager){
         auto propsItemRef = propertiesManager->get(nodePath);
         if(propsItemRef){
-            float w = ofToFloat(propsItemRef->get("width", "0.0"));
-            float h = ofToFloat(propsItemRef->get("height", "0.0"));
-            node->setSize(w,h);
-            node->setPosition(propsItemRef->get("position", ofVec3f(0.0f)));
-
-            node->setScale(propsItemRef->get("scale", ofVec3f(0.0f)));
+            auto it = componentPropertyActuators.find(propsItemRef->getId());
+            if(it != componentPropertyActuators.end()){
+                ofLog() << "using custom actuator for: " << nodePath;
+                it->second->actuate(node, propsItemRef);
+            } else {
+                ofLog() << "using DEFAULT actuator for: " << nodePath;
+                // use default
+                auto actuatorRef = make_shared<BasePropertiesActuator<NodeType>>();
+                actuatorRef->actuate(node, propsItemRef);
+            }
         }
     }
 

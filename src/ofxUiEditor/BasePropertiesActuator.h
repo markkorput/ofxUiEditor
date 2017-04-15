@@ -27,5 +27,5 @@ void BasePropertiesActuator<NodeType>::actuate(
     nodeRef->setPosition(propertiesRef->get("position", ofPoint(0.0f)));
     nodeRef->setScale(propertiesRef->get("scale", ofVec3f(1.0f)));
     nodeRef->setOrientation(propertiesRef->get("orientation", ofVec3f(0.0f)));
-    nodeRef->setSize(propertiesRef->get("position", ofVec2f(200.0f, 100.0f)));
+    nodeRef->setSize(propertiesRef->get("size", ofVec2f(200.0f, 100.0f)));
 }
