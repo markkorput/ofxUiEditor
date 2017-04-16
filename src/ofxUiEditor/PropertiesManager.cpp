@@ -32,11 +32,17 @@ bool PropertiesManager::load(const string& filename){
     return true;
 }
 
-shared_ptr<PropertiesItem> PropertiesManager::get(const string& nodePath){
+shared_ptr<PropertiesItem> PropertiesManager::get(const string& nodePath, bool create){
+    // find existing
     for(auto item : items)
         if(item->getId() == nodePath)
             return item;
-    return nullptr;
+
+    // create
+    auto item = make_shared<PropertiesItem>();
+    item->setId(nodePath);
+    items.push_back(item);
+    return item;
 }
 
 void PropertiesManager::add(shared_ptr<PropertiesItem> itemRef){

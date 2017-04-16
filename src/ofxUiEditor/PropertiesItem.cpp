@@ -19,6 +19,7 @@ void PropertiesItem::set(const string& key, const string& value){
     if(value != previous){
         PropertyChange propChange(this, key);
         ofNotifyEvent(propertyChangeEvent, propChange);
+        changeEvent.notifyListeners(*this);
     }
 }
 

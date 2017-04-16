@@ -197,6 +197,7 @@ void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId,
 
 template<class NodeType>
 shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
+    ofLog() << "Editor::create: " << nodePath;
     shared_ptr<NodeType> node;
 
     // create our node instance
@@ -222,18 +223,18 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
 
     node->setName(infoRef->getName());
 
-    // try to find and apply properties configuration
-    auto propsItemRef = propertiesManager.get(nodePath);
-    if(propsItemRef){
+    {   // try to find and apply properties configuration
+        auto propsItemRef = propertiesManager.get(nodePath);
 
         // create "link" used to update nodes when properties change at runtime
         auto nodeLinkRef = make_shared<NodeLink>();
         nodeLinkRef->setup(node, propsItemRef, componentPropertiesActuators);
 
-        if(!sceneData){
-            ofLogWarning() << "Editor not setup-ed; no sceneData instance";
-        } else {
+        if(sceneData){
+            ofLog() << "link added";
             sceneData->nodeLinkRefs.push_back(nodeLinkRef);
+        } else {
+            ofLogWarning() << "Editor not setup-ed; no sceneData instance";
         }
     }
 

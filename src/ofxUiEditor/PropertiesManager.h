@@ -9,7 +9,7 @@ namespace ofxUiEditor {
 
     public:
         bool load(const string& filename);
-        shared_ptr<PropertiesItem> get(const string& id);
+        shared_ptr<PropertiesItem> get(const string& id, bool create=true);
         void add(shared_ptr<PropertiesItem> itemRef);
 
     private:
