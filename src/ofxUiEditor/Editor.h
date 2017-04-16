@@ -4,6 +4,7 @@
 #include "LambdaEvent.h"
 #include "StructureManager.h"
 #include "PropertiesManager.h"
+#include "PropertiesActuators.h"
 
 using namespace ofxInterface;
 
@@ -40,15 +41,6 @@ namespace ofxUiEditor {
             string componentId;
             COMPONENT_ACTUATOR_FUNC func;
         } ComponentActuator;
-
-    public: // static methods
-
-        static void actuateDefaultProperties(shared_ptr<NodeType> nodeRef, shared_ptr<PropertiesItem> propertiesRef){
-            nodeRef->setPosition(propertiesRef->get("position", ofPoint(0.0f)));
-            nodeRef->setScale(propertiesRef->get("scale", ofVec3f(1.0f)));
-            nodeRef->setOrientation(propertiesRef->get("orientation", ofVec3f(0.0f)));
-            nodeRef->setSize(propertiesRef->get("size", ofVec2f(200.0f, 100.0f)));
-        }
 
     public:
         Editor() : sceneData(nullptr),
@@ -207,7 +199,7 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
                     anyCustomerActuators = true;
                     // this could probably be optimized;
                     if(actuatorRef->actuateDefault)
-                        actuateDefaultProperties(node, propsItemRef);
+                        PropertiesActuators::actuateNode(node, propsItemRef);
 
                     // apply custom actuator
                     actuatorRef->func(node, propsItemRef);
@@ -216,7 +208,7 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
 
             // yes, sohuld probably optimize :/
             if(!anyCustomerActuators)
-                actuateDefaultProperties(node, propsItemRef);
+                PropertiesActuators::actuateNode(node, propsItemRef);
         }
     }
 

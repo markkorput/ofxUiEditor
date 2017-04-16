@@ -51,9 +51,17 @@ namespace ofxUiEditor {
             return ofToFloat(it->second);
         }
 
+        bool hasVec2f(const string &key){
+            return has(key+"_x") || has(key+"_y");
+        }
+        
         ofVec2f get(const string &key, const ofVec2f &defaultValue){
             return ofVec2f(get(key+"_x", defaultValue.x),
                            get(key+"_y", defaultValue.y));
+        }
+
+        bool hasVec3f(const string &key){
+            return has(key+"_x") || has(key+"_y") || has(key+"_z");
         }
 
         ofVec3f get(const string &key, const ofVec3f &defaultValue){
@@ -67,6 +75,10 @@ namespace ofxUiEditor {
                            get(key+"_g", defaultValue.y),
                            get(key+"_b", defaultValue.z),
                            get(key+"_a", defaultValue.w));
+        }
+
+        bool hasColor(const string &key){
+            return has(key+"_r") || has(key+"_g") || has(key+"_b") || has(key+"_a");
         }
 
         ofColor get(const string &key, const ofColor &defaultValue){

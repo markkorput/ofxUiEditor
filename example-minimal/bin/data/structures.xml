@@ -1,0 +1,11 @@
+<structures>
+    <window>
+        <titlebar>
+            <title />
+            <close />
+        </titlebar>
+        <message />
+        <cancel />
+        <submit />
+    </window>
+</structures>
