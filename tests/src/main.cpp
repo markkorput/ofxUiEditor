@@ -2,6 +2,13 @@
 #include "ofxUiEditor.h"
 
 class CustomProgressBar : public ofxInterface::Node {
+public: // static methods
+
+    static void actuateProperties(shared_ptr<CustomProgressBar> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+        nodeRef->emptyColor = propertiesRef->get("empty-color", ofColor::black);
+        nodeRef->fullColor = propertiesRef->get("full-color", ofColor::white);
+    }
+
 public: // attribute
     float progress;
     ofColor emptyColor, fullColor;
@@ -77,11 +84,7 @@ class ofApp: public ofxUnitTestsApp{
 
         // register our custom properties actuator
         editor.addComponentPropertiesActuator("popupDialog/CustomProgressBar", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-            // our custom properties are obviously not part of the base class,
-            // so we need to typecast the pointer
-            auto progressBarRef = static_pointer_cast<CustomProgressBar>(nodeRef);
-            progressBarRef->emptyColor = propertiesRef->get("empty-color", ofColor::black);
-            progressBarRef->fullColor = propertiesRef->get("full-color", ofColor::white);
+            CustomProgressBar::actuateProperties(static_pointer_cast<CustomProgressBar>(nodeRef), propertiesRef);
         });
 
         {   // verify custom properties ARE properly actuated
