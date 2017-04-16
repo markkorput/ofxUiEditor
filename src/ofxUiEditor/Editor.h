@@ -18,17 +18,6 @@ using namespace ofxInterface;
 namespace ofxUiEditor {
 
     template<class NodeType>
-    class EditorSceneData {
-    public:
-        EditorSceneData() : sceneRef(nullptr){}
-        EditorSceneData(shared_ptr<NodeType> scene) : sceneRef(scene){}
-
-    public:
-        shared_ptr<NodeType> sceneRef;
-        std::vector<shared_ptr<LambdaEvent<TouchEvent>>> lambdaTouchEvents;
-    };
-
-    template<class NodeType>
     class Editor {
 
         typedef std::function<shared_ptr<NodeType> ()> INSTANTIATOR_FUNC;
@@ -42,11 +31,65 @@ namespace ofxUiEditor {
             COMPONENT_ACTUATOR_FUNC func;
         } ComponentActuator;
 
-    public:
-        Editor() : sceneData(nullptr),
+        class NodeLink {
+            public:
+                void setup( shared_ptr<NodeType> _nodeRef,
+                            shared_ptr<PropertiesItem> _propsRef,
+                            std::vector<shared_ptr<ComponentActuator>> &componentPropertiesActuators){
+                    // ofLog() << "NodeLink::setup";
+                    nodeRef = _nodeRef;
+                    propertiesRef = _propsRef;
+                    actuatorRefs = &componentPropertiesActuators;
+
+                    propertiesRef->changeEvent.addListener([this](PropertiesItem &propsItem){
+                        // ofLog() << "actuate callback";
+                        this->actuateProperties();
+                    }, nodeRef.get());
+
+                    actuateProperties();
+                }
+
+                void actuateProperties(){
+                    ofLogVerbose() << "NodeLink::actuateProperties - updating node: " << nodeRef->getName();
+
+                    bool bCustom = false;
+                    for(auto actuatorRef : (*actuatorRefs)){
+                        if(actuatorRef->componentId == propertiesRef->getId()){
+                            bCustom = true;
+                            // this could probably be optimized;
+                            if(actuatorRef->actuateDefault)
+                                PropertiesActuators::actuateNode(nodeRef, propertiesRef);
+
+                            // apply custom actuator
+                            actuatorRef->func(nodeRef, propertiesRef);
+                        }
+                    }
+
+                    // yes, sohuld probably optimize :/
+                    if(!bCustom)
+                        PropertiesActuators::actuateNode(nodeRef, propertiesRef);
+                }
+
+                shared_ptr<NodeType> nodeRef;
+                shared_ptr<PropertiesItem> propertiesRef;
+                std::vector<shared_ptr<ComponentActuator>>* actuatorRefs;
+        };
+
+        class EditorSceneData {
+            public:
+                EditorSceneData() : sceneRef(nullptr){}
+                EditorSceneData(shared_ptr<NodeType> scene) : sceneRef(scene){}
+
+            public:
+                shared_ptr<NodeType> sceneRef;
+                std::vector<shared_ptr<LambdaEvent<TouchEvent>>> lambdaTouchEvents;
+                std::vector<shared_ptr<NodeLink>> nodeLinkRefs;
+        };
+
+    public: // common methods
+        Editor() :  sceneData(nullptr),
                     current(nullptr),
-                    structureManager(NULL),
-                    propertiesManager(NULL){}
+                    structureManager(NULL){}
         ~Editor(){ destroy(); }
 
         void setup();
@@ -54,12 +97,16 @@ namespace ofxUiEditor {
         void destroy(){ ofLogWarning() << "ofxUiEditor::Editor doesn't UNregister event listeners yet."; }
 
     public:
-        shared_ptr<EditorSceneData<NodeType>> getSceneData() const { return sceneData; }
+
+        shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
+        void remove(shared_ptr<NodeType> node);
+        void reload();
+
+        shared_ptr<Editor<NodeType>> node(const string& name) const;
+        shared_ptr<EditorSceneData> getSceneData() const { return sceneData; }
         // give the node that this editor instance points to
         NodeType* getCurrent() const { return current; }
         void setCurrent(NodeType* newCurrent){ current = newCurrent; }
-
-        shared_ptr<Editor<NodeType>> node(const string& name) const;
 
         void addStructureFile(const string& filePath){
             if(structureManager != NULL)
@@ -70,18 +117,12 @@ namespace ofxUiEditor {
         }
 
         void addPropertiesFile(const string& filePath){
-            if(propertiesManager != NULL)
-                ofLogWarning() << "For now only one properties file at-a-time supported";
-
-            privatePropertiesManager.setup(filePath);
-            use(privatePropertiesManager);
+            loadedPropertiesFiles.insert(filePath); // remember which files we have loaded, for ::reload
+            propertiesManager.load(filePath);
         }
 
         void use(StructureManager& structureManager);
-        void use(PropertiesManager& propertiesManager);
         void addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
-
-        shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
 
         void addInstantiator(const string& componentId, INSTANTIATOR_FUNC func){
             instantiator_funcs[componentId] = func;
@@ -91,6 +132,7 @@ namespace ofxUiEditor {
         void onTouchDown(std::function<void (TouchEvent&)> func);
 
     protected:
+
         shared_ptr<Editor<NodeType>> clone() const;
         void clone(const Editor<NodeType> &original);
         shared_ptr<Editor<NodeType>> dummy() const;
@@ -98,14 +140,15 @@ namespace ofxUiEditor {
     private:
         StructureManager* structureManager;
         StructureManager privateStructureManager;
-        PropertiesManager* propertiesManager;
-        PropertiesManager privatePropertiesManager;
-        shared_ptr<EditorSceneData<NodeType>> sceneData;
-        vector<shared_ptr<NodeType>> generatedNodes;
+        PropertiesManager propertiesManager;
+        shared_ptr<EditorSceneData> sceneData;
+
         NodeType* current;
 
         std::map<string, INSTANTIATOR_FUNC> instantiator_funcs;
         std::vector<shared_ptr<ComponentActuator>> componentPropertiesActuators;
+
+        std::set<string> loadedPropertiesFiles;
     };
 }
 
@@ -123,11 +166,11 @@ void Editor<NodeType>::setup(){
         addStructureFile(DEFAULT_STRUCTURE_FILE);
 
     // load default file
-    if(!propertiesManager && ofFile::doesFileExist(DEFAULT_PROPERTIES_FILE))
+    if(ofFile::doesFileExist(DEFAULT_PROPERTIES_FILE))
         addPropertiesFile(DEFAULT_PROPERTIES_FILE);
 
     // create scene data instance
-    sceneData = make_shared<EditorSceneData<NodeType>>();
+    sceneData = make_shared<EditorSceneData>();
 }
 
 template<class NodeType>
@@ -144,11 +187,6 @@ void Editor<NodeType>::use(StructureManager& structureManager){
 }
 
 template<class NodeType>
-void Editor<NodeType>::use(PropertiesManager& propertiesManager){
-    this->propertiesManager = &propertiesManager;
-}
-
-template<class NodeType>
 void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC func, bool actuateDefault){
     auto actuator = make_shared<ComponentActuator>();
     actuator->componentId = componentId;
@@ -162,16 +200,12 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     shared_ptr<NodeType> node;
 
     // create our node instance
-    ofLogVerbose() << "creating node for path: " << nodePath;
     auto iterator = instantiator_funcs.find(nodePath);
     if(iterator != instantiator_funcs.end()){
         node = (iterator->second)();
     } else {
         node = make_shared<NodeType>();
     }
-
-    // we need to cache our shared pointers, otherwise they'll auto-deallocate
-    generatedNodes.push_back(node);
 
     // try to find structure information
     if(!structureManager){
@@ -187,28 +221,18 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
 
     node->setName(infoRef->getName());
 
-    // try to find and apply properties configuration
-    if(propertiesManager){
-        auto propsItemRef = propertiesManager->get(nodePath);
-        if(propsItemRef){
+    {   // try to find and apply properties configuration
+        auto propsItemRef = propertiesManager.get(nodePath);
 
-            // look for any relveant registered custom properties actuators
-            bool anyCustomerActuators = false;
-            for(auto actuatorRef : componentPropertiesActuators){
-                if(actuatorRef->componentId == propsItemRef->getId()){
-                    anyCustomerActuators = true;
-                    // this could probably be optimized;
-                    if(actuatorRef->actuateDefault)
-                        PropertiesActuators::actuateNode(node, propsItemRef);
+        // create "link" used to update nodes when properties change at runtime
+        auto nodeLinkRef = make_shared<NodeLink>();
+        nodeLinkRef->setup(node, propsItemRef, componentPropertiesActuators);
 
-                    // apply custom actuator
-                    actuatorRef->func(node, propsItemRef);
-                }
-            }
-
-            // yes, sohuld probably optimize :/
-            if(!anyCustomerActuators)
-                PropertiesActuators::actuateNode(node, propsItemRef);
+        if(sceneData){
+            sceneData->nodeLinkRefs.push_back(nodeLinkRef);
+            // ofLog() << "link added";
+        } else {
+            ofLogWarning() << "Editor not setup-ed; no sceneData instance";
         }
     }
 
@@ -223,8 +247,29 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     return node;
 }
 
+template<class NodeType>
+void Editor<NodeType>::remove(shared_ptr<NodeType> node){
+    ofLog() << "Removing node: " << node->getName();
 
+    if(!sceneData){
+        ofLogWarning() << "no sceneData instance; setup should be called first";
+        return;
+    }
 
+    for(auto it=sceneData->nodeLinkRefs.begin(); it != sceneData->nodeLinkRefs.end(); it++){
+        if((*it)->nodeRef == node){
+            sceneData->nodeLinkRefs.erase(it);
+            return;
+        }
+    }
+}
+
+template<class NodeType>
+void Editor<NodeType>::reload(){
+    for(auto& filePath : loadedPropertiesFiles){
+        propertiesManager.load(filePath);
+    }
+}
 
 template<class NodeType>
 void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){

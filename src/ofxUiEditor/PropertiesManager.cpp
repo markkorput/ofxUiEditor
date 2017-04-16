@@ -5,20 +5,7 @@
 
 using namespace ofxUiEditor;
 
-void PropertiesManager::setup(const string& filename){
-    this->filename = filename;
-    items.clear();
-    load();
-}
-
-shared_ptr<PropertiesItem> PropertiesManager::get(const string& nodePath){
-    for(auto item : items)
-        if(item->getId() == nodePath)
-            return item;
-    return nullptr;
-}
-
-bool PropertiesManager::load(){
+bool PropertiesManager::load(const string& filename){
     ofxJSONElement json;
 
     if(!json.open(filename)){
@@ -30,17 +17,40 @@ bool PropertiesManager::load(){
     for(auto it=json.begin(); it!=json.end(); it++){
         // create item instance and set id
         auto itemRef = make_shared<PropertiesItem>();
-        itemRef->id = it.key().asString();
+        itemRef->setId(it.key().asString());
 
         // read all properties for this item
-        auto json2 = json[itemRef->id];
+        auto json2 = json[itemRef->getId()];
         for(auto it2=json2.begin(); it2!=json2.end(); it2++){
             string key = it2.key().asString();
-            itemRef->props[key] = json2[key].asString();
+            itemRef->set(key, json2[key].asString());
         }
 
-        items.push_back(itemRef);
+        add(itemRef);
     }
 
     return true;
+}
+
+shared_ptr<PropertiesItem> PropertiesManager::get(const string& nodePath, bool create){
+    // find existing
+    for(auto item : items)
+        if(item->getId() == nodePath)
+            return item;
+
+    // create
+    auto item = make_shared<PropertiesItem>();
+    item->setId(nodePath);
+    items.push_back(item);
+    return item;
+}
+
+void PropertiesManager::add(shared_ptr<PropertiesItem> itemRef){
+    auto existingItemRef = get(itemRef->getId());
+    if(existingItemRef){
+        existingItemRef->merge(*itemRef);
+        return;
+    }
+
+    items.push_back(itemRef);
 }
