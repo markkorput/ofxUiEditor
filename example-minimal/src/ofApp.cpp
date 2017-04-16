@@ -99,9 +99,7 @@ void ofApp::setup(){
 
 
 void ofApp::draw(){
-    // render like normal, see ofxInterface
-    sceneRef->render();
-    sceneRef->renderDebug();
+    sceneRef->render(); // render like normal, see ofxInterface
 }
 
 //--------------------------------------------------------------

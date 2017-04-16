@@ -1,6 +1,81 @@
 {
     "window": {
-        "size_x": 300,
-        "size_y": 200
+        "size_x": 600,
+        "size_y": 400,
+        "background_r": 255,
+        "background_g": 255,
+        "background_b": 255,
+        "background_a": 150,
+        "border_r": 0,
+        "border_g": 0,
+        "border_b": 0
+    },
+
+    "window/titlebar": {
+        "size_x": 600,
+        "size_y": 30,
+        "background_r": 100,
+        "background_g": 100,
+        "background_b": 100,
+        "background_a": 100,
+        "border_r": 0,
+        "border_g": 0,
+        "border_b": 0
+    },
+
+    "window/titlebar/title": {
+        "position_x": 3,
+        "position_y": 3,
+        "color_r": 0,
+        "color_g": 0,
+        "color_b": 0,
+        "text": "Hello World!"
+    },
+
+    "window/message": {
+        "position_x": 3,
+        "position_y": 40,
+        "text":
+"Lorem Ipsum is simply dummy text of the printing and typesetting
+industry. Lorem Ipsum has been the industry's standard dummy text
+ever since the 1500s, when an unknown printer took a galley of type and
+scrambled it to make a type specimen book. It has survived not only five
+centuries, but also the leap into electronic typesetting, remaining
+essentially unchanged. It was popularised in the 1960s with the release
+of Letraset sheets containing Lorem Ipsum passages, and more recently
+with desktop publishing software like Aldus PageMaker including
+versions of Lorem Ipsum."
+    },
+
+    "window/cancel": {
+        "text": "Cancel",
+        "size_x": 100,
+        "size_y": 40,
+        "position_x": 370,
+        "position_y": 340,
+        "background_r": 230,
+        "background_g": 230,
+        "background_b": 230,
+        "border_r": 0
+    },
+
+    "window/submit": {
+        "text": "OK",
+        "size_x": 100,
+        "size_y": 40,
+        "position_x": 480,
+        "position_y": 340,
+        "background_r": 230,
+        "background_g": 255,
+        "background_b": 230,
+        "border_r": 0
     }
 }
+
+
+bool bDrawBackground;
+bool bDrawBorder;
+
+ofColor borderColor;
+ofColor bgColor;
+ofColor labelColor;
