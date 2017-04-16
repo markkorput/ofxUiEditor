@@ -11,6 +11,7 @@ class ofApp : public ofBaseApp{
 public:
     void setup();
     void draw();
+    void keyPressed(int key);
 
 private: // attributes
     ofxUiEditor::Editor<ofxInterface::Node> editor;
@@ -100,6 +101,17 @@ void ofApp::setup(){
 
 void ofApp::draw(){
     sceneRef->render(); // render like normal, see ofxInterface
+}
+
+void ofApp::keyPressed(int key){
+    switch (key) {
+    case 'd':
+        bShowDebug = !bShowDebug;
+        return;
+    case 'r':
+        editor.reload();
+        return;
+    }
 }
 
 //--------------------------------------------------------------

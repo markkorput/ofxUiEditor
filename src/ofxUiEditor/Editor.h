@@ -45,8 +45,7 @@ namespace ofxUiEditor {
     public:
         Editor() : sceneData(nullptr),
                     current(nullptr),
-                    structureManager(NULL),
-                    propertiesManager(NULL){}
+                    structureManager(NULL){}
         ~Editor(){ destroy(); }
 
         void setup();
@@ -75,15 +74,11 @@ namespace ofxUiEditor {
         }
 
         void addPropertiesFile(const string& filePath){
-            if(propertiesManager != NULL)
-                ofLogWarning() << "For now only one properties file at-a-time supported";
-
-            privatePropertiesManager.setup(filePath);
-            use(privatePropertiesManager);
+            loadedPropertiesFiles.insert(filePath);
+            propertiesManager.load(filePath);
         }
 
         void use(StructureManager& structureManager);
-        void use(PropertiesManager& propertiesManager);
         void addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
 
 
@@ -102,14 +97,15 @@ namespace ofxUiEditor {
     private:
         StructureManager* structureManager;
         StructureManager privateStructureManager;
-        PropertiesManager* propertiesManager;
-        PropertiesManager privatePropertiesManager;
+        PropertiesManager propertiesManager;
         shared_ptr<EditorSceneData<NodeType>> sceneData;
         vector<shared_ptr<NodeType>> generatedNodes;
         NodeType* current;
 
         std::map<string, INSTANTIATOR_FUNC> instantiator_funcs;
         std::vector<shared_ptr<ComponentActuator>> componentPropertiesActuators;
+
+        std::set<string> loadedPropertiesFiles;
     };
 }
 
@@ -127,7 +123,7 @@ void Editor<NodeType>::setup(){
         addStructureFile(DEFAULT_STRUCTURE_FILE);
 
     // load default file
-    if(!propertiesManager && ofFile::doesFileExist(DEFAULT_PROPERTIES_FILE))
+    if(ofFile::doesFileExist(DEFAULT_PROPERTIES_FILE))
         addPropertiesFile(DEFAULT_PROPERTIES_FILE);
 
     // create scene data instance
@@ -145,11 +141,6 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
 template<class NodeType>
 void Editor<NodeType>::use(StructureManager& structureManager){
     this->structureManager = &structureManager;
-}
-
-template<class NodeType>
-void Editor<NodeType>::use(PropertiesManager& propertiesManager){
-    this->propertiesManager = &propertiesManager;
 }
 
 template<class NodeType>
@@ -192,27 +183,25 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     node->setName(infoRef->getName());
 
     // try to find and apply properties configuration
-    if(propertiesManager){
-        auto propsItemRef = propertiesManager->get(nodePath);
-        if(propsItemRef){
-            // look for any relveant registered custom properties actuators
-            bool anyCustomerActuators = false;
-            for(auto actuatorRef : componentPropertiesActuators){
-                if(actuatorRef->componentId == propsItemRef->getId()){
-                    anyCustomerActuators = true;
-                    // this could probably be optimized;
-                    if(actuatorRef->actuateDefault)
-                        PropertiesActuators::actuateNode(node, propsItemRef);
+    auto propsItemRef = propertiesManager.get(nodePath);
+    if(propsItemRef){
+        // look for any relveant registered custom properties actuators
+        bool anyCustomerActuators = false;
+        for(auto actuatorRef : componentPropertiesActuators){
+            if(actuatorRef->componentId == propsItemRef->getId()){
+                anyCustomerActuators = true;
+                // this could probably be optimized;
+                if(actuatorRef->actuateDefault)
+                    PropertiesActuators::actuateNode(node, propsItemRef);
 
-                    // apply custom actuator
-                    actuatorRef->func(node, propsItemRef);
-                }
+                // apply custom actuator
+                actuatorRef->func(node, propsItemRef);
             }
-
-            // yes, sohuld probably optimize :/
-            if(!anyCustomerActuators)
-                PropertiesActuators::actuateNode(node, propsItemRef);
         }
+
+        // yes, sohuld probably optimize :/
+        if(!anyCustomerActuators)
+            PropertiesActuators::actuateNode(node, propsItemRef);
     }
 
     if(recursive){
@@ -234,6 +223,13 @@ void Editor<NodeType>::remove(shared_ptr<NodeType> node){
             generatedNodes.erase(it);
             return;
         }
+    }
+}
+
+template<class NodeType>
+void Editor<NodeType>::reload(){
+    for(auto& filePath : loadedPropertiesFiles){
+        propertiesManager.load(filePath);
     }
 }
 

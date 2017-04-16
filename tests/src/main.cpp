@@ -71,16 +71,33 @@ class ofApp: public ofxUnitTestsApp{
             CustomProgressBar::actuateProperties(static_pointer_cast<CustomProgressBar>(nodeRef), propertiesRef);
         });
 
+        auto progressBarRef = static_pointer_cast<CustomProgressBar>(
+            editor.create("popupDialog/CustomProgressBar"));
+
         {   ofLog() << "Properties actuation";
-            auto progressBarRef = static_pointer_cast<CustomProgressBar>(
-                editor.create("popupDialog/CustomProgressBar"));
             test_eq(progressBarRef->getSize(), ofVec2f(420.0f, 25.0f), "");
             test_eq(progressBarRef->fullColor, ofColor(0, 200, 0), "");
             test_eq(progressBarRef->emptyColor, ofColor(140,130,130), "");
         }
 
+        {   ofLog() << "Reload";
+            // replace properties.json
+            ofFile::moveFromTo("properties.json", "properties.json.bak");
+            ofFile::moveFromTo("properties2.json", "properties.json");
+
+            // before reload
+            test_eq(progressBarRef->getSize(), ofVec2f(420.0f, 25.0f), "");
+            // reload
+            editor.reload();
+            // after
+            test_eq(progressBarRef->getSize(), ofVec2f(440.0f, 30.0f), "");
+
+            // restore original properties.json
+            ofFile::moveFromTo("properties.json", "properties2.json");
+            ofFile::moveFromTo("properties.json.bak", "properties.json");
+        }
+
         {   ofLog() << "Cleanup";
-            auto progressBarRef = static_pointer_cast<CustomProgressBar>(editor.create("popupDialog/CustomerProgressBar"));
             test_eq(progressBarRef.use_count() > 1, true, "");
             editor.remove(progressBarRef);
             test_eq(progressBarRef.use_count(), 1, "");
