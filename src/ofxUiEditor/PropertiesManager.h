@@ -70,7 +70,6 @@ namespace ofxUiEditor {
         }
 
         ofColor get(const string &key, const ofColor &defaultValue){
-            ofLog() << "clr: " << key;
             return ofColor(get(key+"_r", defaultValue.r),
                            get(key+"_g", defaultValue.g),
                            get(key+"_b", defaultValue.b),
@@ -79,6 +78,6 @@ namespace ofxUiEditor {
 
     public:
         string id;
-        map<string, string> props;
+        std::map<string, string> props;
     };
 }

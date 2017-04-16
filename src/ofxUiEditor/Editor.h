@@ -25,9 +25,11 @@ namespace ofxUiEditor {
         std::vector<shared_ptr<LambdaEvent<TouchEvent>>> lambdaTouchEvents;
     };
 
-
     template<class NodeType>
     class Editor {
+
+        // typedef std::function<shared_ptr<NodeType> (shared_ptr<MeshData>)> INSTANTIATOR_FUNC
+        typedef std::function<shared_ptr<NodeType> ()> INSTANTIATOR_FUNC;
 
     public:
         Editor() : sceneData(nullptr),
@@ -52,6 +54,10 @@ namespace ofxUiEditor {
         void addComponentPropertiesActuator(const string& componentId, shared_ptr<BasePropertiesActuator<NodeType>> actuatorRef);
         shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
 
+        void addInstantiator(const string& componentId, INSTANTIATOR_FUNC func){
+            instantiator_funcs[componentId] = func;
+        }
+
     public: // register method for lambda register methods
         void onTouchDown(std::function<void (TouchEvent&)> func);
 
@@ -68,6 +74,7 @@ namespace ofxUiEditor {
         NodeType* current;
 
         map<string, shared_ptr<BasePropertiesActuator<NodeType>>> componentPropertyActuators;
+        std::map<string, INSTANTIATOR_FUNC> instantiator_funcs;
     };
 }
 
@@ -106,7 +113,17 @@ void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId,
 
 template<class NodeType>
 shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
-    auto node = make_shared<NodeType>();
+    shared_ptr<NodeType> node;
+
+    // create our node instance
+    ofLogVerbose() << "creating node for path: " << nodePath;
+    auto iterator = instantiator_funcs.find(nodePath);
+    if(iterator != instantiator_funcs.end()){
+        node = (iterator->second)();
+    } else {
+        node = make_shared<NodeType>();
+    }
+
     // we need to cache our shared pointers, otherwise they'll auto-deallocate
     generatedNodes.push_back(node);
 
@@ -133,8 +150,8 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
                 ofLog() << "using custom actuator for: " << nodePath;
                 it->second->actuate(node, propsItemRef);
             } else {
-                ofLog() << "using DEFAULT actuator for: " << nodePath;
                 // use default
+                ofLog() << "using DEFAULT actuator for: " << nodePath;
                 auto actuatorRef = make_shared<BasePropertiesActuator<NodeType>>();
                 actuatorRef->actuate(node, propsItemRef);
             }
