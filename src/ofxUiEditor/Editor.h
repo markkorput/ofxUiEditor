@@ -4,7 +4,6 @@
 #include "LambdaEvent.h"
 #include "StructureManager.h"
 #include "PropertiesManager.h"
-#include "BasePropertiesActuator.h"
 
 using namespace ofxInterface;
 
@@ -28,8 +27,25 @@ namespace ofxUiEditor {
     template<class NodeType>
     class Editor {
 
-        // typedef std::function<shared_ptr<NodeType> (shared_ptr<MeshData>)> INSTANTIATOR_FUNC
         typedef std::function<shared_ptr<NodeType> ()> INSTANTIATOR_FUNC;
+        typedef std::function<void (shared_ptr<NodeType>, shared_ptr<PropertiesItem>)> COMPONENT_ACTUATOR_FUNC;
+
+    private: // sub-types
+
+        typedef struct {
+            bool actuateDefault;
+            string componentId;
+            COMPONENT_ACTUATOR_FUNC func;
+        } ComponentActuator;
+
+    public: // static methods
+
+        static void actuateDefaultProperties(shared_ptr<NodeType> nodeRef, shared_ptr<PropertiesItem> propertiesRef){
+            nodeRef->setPosition(propertiesRef->get("position", ofPoint(0.0f)));
+            nodeRef->setScale(propertiesRef->get("scale", ofVec3f(1.0f)));
+            nodeRef->setOrientation(propertiesRef->get("orientation", ofVec3f(0.0f)));
+            nodeRef->setSize(propertiesRef->get("size", ofVec2f(200.0f, 100.0f)));
+        }
 
     public:
         Editor() : sceneData(nullptr),
@@ -51,7 +67,8 @@ namespace ofxUiEditor {
 
         void use(StructureManager& structureManager);
         void use(PropertiesManager& propertiesManager);
-        void addComponentPropertiesActuator(const string& componentId, shared_ptr<BasePropertiesActuator<NodeType>> actuatorRef);
+        void addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
+
         shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
 
         void addInstantiator(const string& componentId, INSTANTIATOR_FUNC func){
@@ -73,8 +90,8 @@ namespace ofxUiEditor {
         vector<shared_ptr<NodeType>> generatedNodes;
         NodeType* current;
 
-        map<string, shared_ptr<BasePropertiesActuator<NodeType>>> componentPropertyActuators;
         std::map<string, INSTANTIATOR_FUNC> instantiator_funcs;
+        std::vector<shared_ptr<ComponentActuator>> componentPropertiesActuators;
     };
 }
 
@@ -105,10 +122,12 @@ void Editor<NodeType>::use(PropertiesManager& propertiesManager){
 }
 
 template<class NodeType>
-void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId,
-                        shared_ptr<BasePropertiesActuator<NodeType>> actuatorRef){
-    actuatorRef->setComponentId(componentId);
-    this->componentPropertyActuators[componentId] = actuatorRef;
+void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC func, bool actuateDefault){
+    auto actuator = make_shared<ComponentActuator>();
+    actuator->componentId = componentId;
+    actuator->actuateDefault = actuateDefault;
+    actuator->func = func;
+    componentPropertiesActuators.push_back(actuator);
 }
 
 template<class NodeType>
@@ -145,16 +164,24 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     if(propertiesManager){
         auto propsItemRef = propertiesManager->get(nodePath);
         if(propsItemRef){
-            auto it = componentPropertyActuators.find(propsItemRef->getId());
-            if(it != componentPropertyActuators.end()){
-                ofLog() << "using custom actuator for: " << nodePath;
-                it->second->actuate(node, propsItemRef);
-            } else {
-                // use default
-                ofLog() << "using DEFAULT actuator for: " << nodePath;
-                auto actuatorRef = make_shared<BasePropertiesActuator<NodeType>>();
-                actuatorRef->actuate(node, propsItemRef);
+
+            // look for any relveant registered custom properties actuators
+            bool anyCustomerActuators = false;
+            for(auto actuatorRef : componentPropertiesActuators){
+                if(actuatorRef->componentId == propsItemRef->getId()){
+                    anyCustomerActuators = true;
+                    // this could probably be optimized;
+                    if(actuatorRef->actuateDefault)
+                        actuateDefaultProperties(node, propsItemRef);
+
+                    // apply custom actuator
+                    actuatorRef->func(node, propsItemRef);
+                }
             }
+
+            // yes, sohuld probably optimize :/
+            if(!anyCustomerActuators)
+                actuateDefaultProperties(node, propsItemRef);
         }
     }
 

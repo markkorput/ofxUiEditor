@@ -12,17 +12,6 @@ namespace CustomProgressBar{
         Component() : progress(0.0f), emptyColor(ofColor::black), fullColor(ofColor::white){
         }
     };
-
-    class PropertiesActuator : public ofxUiEditor::BasePropertiesActuator<ofxInterface::Node> {
-    public:
-        virtual void actuate(shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-            auto progressBarRef = static_pointer_cast<Component>(nodeRef);
-            // let our parent class take care of the default properties (size, position, scale, rotation)
-            ofxUiEditor::BasePropertiesActuator<ofxInterface::Node>::actuate(nodeRef, propertiesRef);
-            progressBarRef->emptyColor = propertiesRef->get("empty-color", ofColor::blue);
-            progressBarRef->fullColor = propertiesRef->get("full-color", ofColor::purple);
-        }
-    };
 }
 
 using namespace CustomProgressBar;
@@ -92,7 +81,13 @@ class ofApp: public ofxUnitTestsApp{
         }
 
         // register our custom properties actuator
-        editor.addComponentPropertiesActuator("popupDialog/CustomProgressBar", make_shared<PropertiesActuator>());
+        editor.addComponentPropertiesActuator("popupDialog/CustomProgressBar", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+            // our custom properties are obviously not part of the base class,
+            // so we need to typecast the pointer
+            auto progressBarRef = static_pointer_cast<CustomProgressBar::Component>(nodeRef);
+            progressBarRef->emptyColor = propertiesRef->get("empty-color", ofColor::black);
+            progressBarRef->fullColor = propertiesRef->get("full-color", ofColor::white);
+        });
 
         {   // verify custom properties ARE properly actuated
             auto progressBarRef = static_pointer_cast<CustomProgressBar::Component>(
