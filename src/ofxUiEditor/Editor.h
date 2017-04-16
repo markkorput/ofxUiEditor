@@ -36,13 +36,13 @@ namespace ofxUiEditor {
             void setup( shared_ptr<NodeType> _nodeRef,
                         shared_ptr<PropertiesItem> _propsRef,
                         std::vector<shared_ptr<ComponentActuator>> &componentPropertiesActuators){
-                ofLog() << "NodeLink::setup";
+                // ofLog() << "NodeLink::setup";
                 nodeRef = _nodeRef;
                 propertiesRef = _propsRef;
                 actuatorRefs = &componentPropertiesActuators;
 
                 propertiesRef->changeEvent.addListener([this](PropertiesItem &propsItem){
-                    ofLog() << "actuate callback";
+                    // ofLog() << "actuate callback";
                     this->actuateProperties();
                 }, nodeRef.get());
 
@@ -50,7 +50,8 @@ namespace ofxUiEditor {
             }
 
             void actuateProperties(){
-                ofLog() << "NodeLink::actuateProperties";
+                ofLogVerbose() << "NodeLink::actuateProperties - updating node: " << nodeRef->getName();
+
                 bool bCustom = false;
                 for(auto actuatorRef : (*actuatorRefs)){
                     if(actuatorRef->componentId == propertiesRef->getId()){
@@ -197,11 +198,9 @@ void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId,
 
 template<class NodeType>
 shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
-    ofLog() << "Editor::create: " << nodePath;
     shared_ptr<NodeType> node;
 
     // create our node instance
-    ofLogVerbose() << "creating node for path: " << nodePath;
     auto iterator = instantiator_funcs.find(nodePath);
     if(iterator != instantiator_funcs.end()){
         node = (iterator->second)();
@@ -231,8 +230,8 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
         nodeLinkRef->setup(node, propsItemRef, componentPropertiesActuators);
 
         if(sceneData){
-            ofLog() << "link added";
             sceneData->nodeLinkRefs.push_back(nodeLinkRef);
+            // ofLog() << "link added";
         } else {
             ofLogWarning() << "Editor not setup-ed; no sceneData instance";
         }
