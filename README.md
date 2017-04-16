@@ -1,6 +1,8 @@
 # ofxUiEditor
 OF addon intended as extension to ofxInterface that provides tools for faster UI-layout design and implementation.
 
+_!! both the addon and this document are very much a work-in-progress !!_
+
 ## Usage - Basic
 
 Create a layout (similar to a website's html file)
@@ -45,7 +47,7 @@ Use ofxUiEditor to generate the node
 auto windowNodeRef = uiEditor.create("window");
 ```
 
-## Usage - Custom Properties for our CustomerProgressBar
+## Usage - Custom Properties for our CustomProgressBar
 
 structures.xml
 ```xml
