@@ -26,7 +26,7 @@ bool PropertiesManager::load(const string& filename){
             itemRef->set(key, json2[key].asString());
         }
 
-        items.push_back(itemRef);
+        add(itemRef);
     }
 
     return true;
@@ -37,4 +37,14 @@ shared_ptr<PropertiesItem> PropertiesManager::get(const string& nodePath){
         if(item->getId() == nodePath)
             return item;
     return nullptr;
+}
+
+void PropertiesManager::add(shared_ptr<PropertiesItem> itemRef){
+    auto existingItemRef = get(itemRef->getId());
+    if(existingItemRef){
+        existingItemRef->merge(*itemRef);
+        return;
+    }
+
+    items.push_back(itemRef);
 }
