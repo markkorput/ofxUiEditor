@@ -7,6 +7,9 @@
 
 using namespace ofxInterface;
 
+#define DEFAULT_STRUCTURE_FILE "structures.xml"
+#define DEFAULT_PROPERTIES_FILE "properties.json"
+
 //
 // Definition
 //
@@ -54,6 +57,7 @@ namespace ofxUiEditor {
                     propertiesManager(NULL){}
         ~Editor(){ destroy(); }
 
+        void setup();
         void setup(shared_ptr<NodeType> newScene);
         void destroy(){ ofLogWarning() << "ofxUiEditor::Editor doesn't UNregister event listeners yet."; }
 
@@ -64,6 +68,22 @@ namespace ofxUiEditor {
         void setCurrent(NodeType* newCurrent){ current = newCurrent; }
 
         shared_ptr<Editor<NodeType>> node(const string& name) const;
+
+        void addStructureFile(const string& filePath){
+            if(structureManager != NULL)
+                ofLogWarning() << "For now only one structures file at-a-time supported";
+
+            privateStructureManager.setup(filePath);
+            use(privateStructureManager);
+        }
+
+        void addPropertiesFile(const string& filePath){
+            if(propertiesManager != NULL)
+                ofLogWarning() << "For now only one properties file at-a-time supported";
+
+            privatePropertiesManager.setup(filePath);
+            use(privatePropertiesManager);
+        }
 
         void use(StructureManager& structureManager);
         void use(PropertiesManager& propertiesManager);
@@ -85,7 +105,9 @@ namespace ofxUiEditor {
 
     private:
         StructureManager* structureManager;
+        StructureManager privateStructureManager;
         PropertiesManager* propertiesManager;
+        PropertiesManager privatePropertiesManager;
         shared_ptr<EditorSceneData<NodeType>> sceneData;
         vector<shared_ptr<NodeType>> generatedNodes;
         NodeType* current;
@@ -103,9 +125,22 @@ namespace ofxUiEditor {
 using namespace ofxUiEditor;
 
 template<class NodeType>
-void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
+void Editor<NodeType>::setup(){
+    // load default file
+    if(!structureManager && ofFile::doesFileExist(DEFAULT_STRUCTURE_FILE))
+        addStructureFile(DEFAULT_STRUCTURE_FILE);
+
+    // load default file
+    if(!propertiesManager && ofFile::doesFileExist(DEFAULT_PROPERTIES_FILE))
+        addPropertiesFile(DEFAULT_PROPERTIES_FILE);
+
     // create scene data instance
     sceneData = make_shared<EditorSceneData<NodeType>>();
+}
+
+template<class NodeType>
+void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
+    setup();
     sceneData->sceneRef = newScene;
     // set our current node pointer to the given scene node (root)
     current = newScene.get();

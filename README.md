@@ -43,14 +43,15 @@ properties.json
 Use ofxUiEditor to generate the node
 
 ```c++
-// ... TODO ...
+ofxUiEditor::Editor uiEditor;
+uiEditor.setup(); // by default tries to load the files structures.xml and properties.json from the data folder
 auto windowNodeRef = uiEditor.create("window");
 ```
 
 ## Usage - Custom Properties for our CustomProgressBar
 
-structures.xml
 ```xml
+<!-- structures.xml -->
 <structures>
     <popupDialog>
         <CustomProgressBar />
@@ -58,8 +59,9 @@ structures.xml
 </structures>
 ```
 
-properties.json
+
 ```json
+# properties.json
 {
     "popupDialog/CustomProgressBar": {
         "size_x": 400,
@@ -74,10 +76,11 @@ properties.json
 }
 ```
 
-CustomProgressBarComponent.hpp
 
 ```c++
-class CustomProgressBarComponent : ofxInterface::Node {
+// CustomProgressBar.hpp
+
+class CustomProgressBar : ofxInterface::Node {
     // make the actuator class a friend, so we don't have to create
     // getter and setter methods for all private property variables
     friend CustomProgressBarComponentActuator;
@@ -87,7 +90,13 @@ private: // attribute
     ofColor emptyColor, fullColor;
 
 public:
-    drawCustomProgressBarComponent() : progress(0.0f){
+    static void actuateProperties(shared_ptr<CustomProgressBar> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+        nodeRef->emptyColor = propertiesRef->get("empty-color", ofColor::black);
+        nodeRef->fullColor = propertiesRef->get("full-color", ofColor::white);
+    }
+
+public:
+    drawCustomProgressBar() : progress(0.0f){
     }
 
     void draw(){
@@ -103,21 +112,24 @@ public:
 };
 ```
 
-CustomProgressBarComponentPropertiesActuator.hpp
-```c++
-class CustomProgressBarComponentPropertiesActuator : ofxUiEditor::BasePropertiesActuator<ofxInterface::Node> {
-    void actuate(shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-        auto progressBarRef = (shared_ptr<CustomProgressBarComponent>) nodeRef;
-        // let our parent class take care of the default properties (size, position, scale, rotation)
-        ofxUiEditor::BasePropertiesActuator::actuate(progressBarRef, propertiesRef);
-        progressBarRef->emptyColor = propertiesRef->get("empty-color", ofColor(0.0f));
-        progressBarRef->fullColor = propertiesRef->get("full-color", ofColor(255.0f));
-    }
-};
-```
+Register custom node instantiator and properties actuator
 
-SomeApplication.cpp
+_SomeApplication.cpp_
 ```c++
-// ...
-uiEditor.addComponentPropertiesActuator("popupDialog/CustomProgressBar", make_shared<CustomProgressBarComponentPropertiesActuator>());
+// create and setup editor
+ofxUiEditor::Editor uiEditor;
+uiEditor.setup();
+// register a custom node instantiator for this element
+uiEditor.addInstantiator("popupDialog/CustomProgressBar", []() -> shared_ptr<ofxInterface::Node> {
+    return make_shared<CustomProgressBar>();
+});
+// register a customer properties actuator
+uiEditor.addComponentPropertiesActuator("popupDialog/CustomProgressBar",
+    [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+        CustomProgressBar::actuateProperties(static_pointer_cast<CustomProgressBar>(nodeRef), propertiesRef);
+    }
+);
+
+// finally, we're ready to create our node
+auto popupNodeRef = uiEditor.create("popupDialog");
 ```

@@ -25,10 +25,18 @@ shared_ptr<StructureInfo> StructureManager::get(const string& nodePath){
 }
 
 shared_ptr<ofXml> StructureManager::load(){
-    ofFile file;
-    file.open(filename);
-    ofBuffer buffer = file.readToBuffer();
     auto xml = make_shared<ofXml>();
-    xml->loadFromBuffer( buffer.getText() );
+    ofFile file;
+
+    if(!file.open(filename)){
+        ofLogWarning() << "ofxUiEditor::StructureManager - couldn't open file: " << filename;
+        return xml;
+    }
+
+    ofBuffer buffer = file.readToBuffer();
+
+    if(!xml->loadFromBuffer( buffer.getText() ))
+        ofLogWarning() << "ofxUiEditor::StructureManager - could not load from file: " << filename;
+
     return xml;
 }
