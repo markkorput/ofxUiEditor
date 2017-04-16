@@ -1,0 +1,15 @@
+<structures>
+    <window>
+        <titlebar>
+            <title />
+            <close />
+        </titlebar>
+        <message />
+        <cancel />
+        <submit />
+    </window>
+
+    <popupDialog>
+        <CustomProgressBar />
+    </popupDialog>
+</structures>
