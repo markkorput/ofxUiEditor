@@ -4,4 +4,4 @@
 #include "ofxUiEditor/Editor.h"
 #include "ofxUiEditor/StructureManager.h"
 #include "ofxUiEditor/PropertiesManager.h"
-#include "ofxUiEditor/BasePropertiesActuator.h"
+#include "ofxUiEditor/BaseNode.h"

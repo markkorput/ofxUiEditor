@@ -13,8 +13,8 @@ public:
     void draw();
 
 private: // attributes
-    ofxUiEditor::Editor<ofxInterface::Node> uiEditor;
-    shared_ptr<ofxInterface::Node> sceneRef;
+    ofxUiEditor::Editor<ofxUiEditor::BaseNode> uiEditor;
+    shared_ptr<ofxUiEditor::BaseNode> sceneRef;
 };
 
 
@@ -27,7 +27,7 @@ void ofApp::setup(){
     ofSetWindowTitle("ofxUiEditor - example-simple-layout");
 
     // create our root scene node, see ofxInterface
-    sceneRef = make_shared<Node>();
+    sceneRef = make_shared<ofxUiEditor::BaseNode>();
     sceneRef->setSize(ofGetWidth(), ofGetHeight());
     sceneRef->setName("Scene");
 
