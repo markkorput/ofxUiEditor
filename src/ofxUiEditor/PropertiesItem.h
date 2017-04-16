@@ -1,6 +1,9 @@
 #pragma once
 
+// OF/addons
 #include "ofMain.h"
+// local/ofxUiEditor
+#include "LambdaEvent.h"
 
 namespace ofxUiEditor {
 
@@ -38,7 +41,8 @@ namespace ofxUiEditor {
 
     public: // events
         ofEvent<PropertyChange> newPropertyEvent;
-        ofEvent<PropertyChange> changeEvent;
+        ofEvent<PropertyChange> propertyChangeEvent;
+        LambdaEvent<PropertiesItem> changeEvent;
 
     private: // attributes
         string id;

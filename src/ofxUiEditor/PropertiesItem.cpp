@@ -10,6 +10,7 @@ void PropertiesItem::set(const string& key, const string& value){
         props[key] = value;
         PropertyChange propChange(this, key);
         ofNotifyEvent(newPropertyEvent, propChange);
+        changeEvent.notifyListeners(*this);
         return;
     }
 
@@ -17,7 +18,7 @@ void PropertiesItem::set(const string& key, const string& value){
     props[key] = value;
     if(value != previous){
         PropertyChange propChange(this, key);
-        ofNotifyEvent(changeEvent, propChange);
+        ofNotifyEvent(propertyChangeEvent, propChange);
     }
 }
 
