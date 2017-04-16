@@ -31,7 +31,8 @@ class ofApp: public ofxUnitTestsApp{
             return make_shared<CustomProgressBar>();
         });
 
-        {   // verify node structure
+        {   ofLog() << "Structure";
+            // verify node structure
             shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
             test_eq(nodeRef->getName(), "window", "");
             auto& children = nodeRef->getChildren();
@@ -44,14 +45,16 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(children[3]->getName(), "submit", "");
         }
 
-        {   // verify properties are initialized
+        {   ofLog() << "Default property actuation";
+            // verify properties are initialized
             shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
             test_eq(nodeRef->getSize(), ofVec2f(300.0f, 200.0f), "");
             test_eq(nodeRef->getPosition(), ofVec3f(123.0f, 456.0f, 789.0f), "");
             test_eq(nodeRef->getScale(), ofVec3f(0.5f, .25f, .1f), "");
         }
 
-        {   // verify custom properties are NOT properly actuated
+        {   ofLog() << "Custom property defaults";
+            // verify custom properties are NOT properly actuated
             // because we haven't registered a custom properties actuator
             // for these properties yet.
             auto nodeRef = editor.create("popupDialog");
@@ -68,7 +71,7 @@ class ofApp: public ofxUnitTestsApp{
             CustomProgressBar::actuateProperties(static_pointer_cast<CustomProgressBar>(nodeRef), propertiesRef);
         });
 
-        {   // verify custom properties ARE properly actuated
+        {   ofLog() << "Properties actuation";
             auto progressBarRef = static_pointer_cast<CustomProgressBar>(
                 editor.create("popupDialog/CustomProgressBar"));
             test_eq(progressBarRef->getSize(), ofVec2f(420.0f, 25.0f), "");
@@ -76,7 +79,12 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(progressBarRef->emptyColor, ofColor(140,130,130), "");
         }
 
-        // TODO; verify cleanup
+        {   ofLog() << "Cleanup";
+            auto progressBarRef = static_pointer_cast<CustomProgressBar>(editor.create("popupDialog/CustomerProgressBar"));
+            test_eq(progressBarRef.use_count() > 1, true, "");
+            editor.remove(progressBarRef);
+            test_eq(progressBarRef.use_count(), 1, "");
+        }
     }
 };
 

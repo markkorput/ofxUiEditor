@@ -54,6 +54,11 @@ namespace ofxUiEditor {
         void destroy(){ ofLogWarning() << "ofxUiEditor::Editor doesn't UNregister event listeners yet."; }
 
     public:
+
+        shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
+        void remove(shared_ptr<NodeType> node);
+        void reload();
+
         shared_ptr<EditorSceneData<NodeType>> getSceneData() const { return sceneData; }
         // give the node that this editor instance points to
         NodeType* getCurrent() const { return current; }
@@ -81,7 +86,6 @@ namespace ofxUiEditor {
         void use(PropertiesManager& propertiesManager);
         void addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
 
-        shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
 
         void addInstantiator(const string& componentId, INSTANTIATOR_FUNC func){
             instantiator_funcs[componentId] = func;
@@ -191,7 +195,6 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     if(propertiesManager){
         auto propsItemRef = propertiesManager->get(nodePath);
         if(propsItemRef){
-
             // look for any relveant registered custom properties actuators
             bool anyCustomerActuators = false;
             for(auto actuatorRef : componentPropertiesActuators){
@@ -223,8 +226,16 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     return node;
 }
 
-
-
+template<class NodeType>
+void Editor<NodeType>::remove(shared_ptr<NodeType> node){
+    ofLog() << "Removing node: " << node->getName();
+    for(auto it=generatedNodes.begin(); it != generatedNodes.end(); it++){
+        if(*it == node){
+            generatedNodes.erase(it);
+            return;
+        }
+    }
+}
 
 template<class NodeType>
 void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
