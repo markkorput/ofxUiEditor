@@ -1,6 +1,23 @@
 {
     "window": {
-        "width": 300,
-        "height": 200
+        "size_x": 300,
+        "size_y": 200,
+        "position_x": 123,
+        "position_y": 456,
+        "position_z": 789,
+        "scale_x": 0.5,
+        "scale_y": 0.25,
+        "scale_z": 0.1
+    },
+
+    "popupDialog/CustomProgressBar": {
+        "size_x": 420,
+        "size_y": 25,
+        "empty-color_r": 140,
+        "empty-color_g": 130,
+        "empty-color_b": 130,
+        "full-color_r": 0,
+        "full-color_g": 200,
+        "full-color_b": 0
     }
 }

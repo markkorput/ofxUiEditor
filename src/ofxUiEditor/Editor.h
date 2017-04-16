@@ -4,6 +4,7 @@
 #include "LambdaEvent.h"
 #include "StructureManager.h"
 #include "PropertiesManager.h"
+#include "BasePropertiesActuator.h"
 
 using namespace ofxInterface;
 
@@ -24,9 +25,11 @@ namespace ofxUiEditor {
         std::vector<shared_ptr<LambdaEvent<TouchEvent>>> lambdaTouchEvents;
     };
 
-
     template<class NodeType>
     class Editor {
+
+        // typedef std::function<shared_ptr<NodeType> (shared_ptr<MeshData>)> INSTANTIATOR_FUNC
+        typedef std::function<shared_ptr<NodeType> ()> INSTANTIATOR_FUNC;
 
     public:
         Editor() : sceneData(nullptr),
@@ -48,7 +51,12 @@ namespace ofxUiEditor {
 
         void use(StructureManager& structureManager);
         void use(PropertiesManager& propertiesManager);
+        void addComponentPropertiesActuator(const string& componentId, shared_ptr<BasePropertiesActuator<NodeType>> actuatorRef);
         shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
+
+        void addInstantiator(const string& componentId, INSTANTIATOR_FUNC func){
+            instantiator_funcs[componentId] = func;
+        }
 
     public: // register method for lambda register methods
         void onTouchDown(std::function<void (TouchEvent&)> func);
@@ -64,6 +72,9 @@ namespace ofxUiEditor {
         shared_ptr<EditorSceneData<NodeType>> sceneData;
         vector<shared_ptr<NodeType>> generatedNodes;
         NodeType* current;
+
+        map<string, shared_ptr<BasePropertiesActuator<NodeType>>> componentPropertyActuators;
+        std::map<string, INSTANTIATOR_FUNC> instantiator_funcs;
     };
 }
 
@@ -94,8 +105,25 @@ void Editor<NodeType>::use(PropertiesManager& propertiesManager){
 }
 
 template<class NodeType>
+void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId,
+                        shared_ptr<BasePropertiesActuator<NodeType>> actuatorRef){
+    actuatorRef->setComponentId(componentId);
+    this->componentPropertyActuators[componentId] = actuatorRef;
+}
+
+template<class NodeType>
 shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
-    auto node = make_shared<NodeType>();
+    shared_ptr<NodeType> node;
+
+    // create our node instance
+    ofLogVerbose() << "creating node for path: " << nodePath;
+    auto iterator = instantiator_funcs.find(nodePath);
+    if(iterator != instantiator_funcs.end()){
+        node = (iterator->second)();
+    } else {
+        node = make_shared<NodeType>();
+    }
+
     // we need to cache our shared pointers, otherwise they'll auto-deallocate
     generatedNodes.push_back(node);
 
@@ -117,9 +145,16 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     if(propertiesManager){
         auto propsItemRef = propertiesManager->get(nodePath);
         if(propsItemRef){
-            float w = ofToFloat(propsItemRef->get("width", "0.0"));
-            float h = ofToFloat(propsItemRef->get("height", "0.0"));
-            node->setSize(w,h);
+            auto it = componentPropertyActuators.find(propsItemRef->getId());
+            if(it != componentPropertyActuators.end()){
+                ofLog() << "using custom actuator for: " << nodePath;
+                it->second->actuate(node, propsItemRef);
+            } else {
+                // use default
+                ofLog() << "using DEFAULT actuator for: " << nodePath;
+                auto actuatorRef = make_shared<BasePropertiesActuator<NodeType>>();
+                actuatorRef->actuate(node, propsItemRef);
+            }
         }
     }
 
@@ -154,7 +189,6 @@ void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
     // finally register the given listener as listener for our lambda event
     lambdaE->addListener(func, (void*)sceneData.get() /* use scene data as "owner" of the callback */);
 }
-
 
 // returns new cloned instance, pointing at the specified node
 template<class NodeType>
