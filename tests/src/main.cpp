@@ -20,37 +20,13 @@ public:
 
 class ofApp: public ofxUnitTestsApp{
     void run(){
-        // StructureManager
-        ofxUiEditor::StructureManager strucman;
-        strucman.setup("structures.xml");
-        // TODO; StructureManager unit-tests?
-
-        // Editor with StructureManager
+        // Create our editor instance with the standard
+        // ofxInterface::Node as base Node type
         ofxUiEditor::Editor<ofxInterface::Node> editor;
-        editor.use(strucman);
+        editor.setup();
 
-        {   // verify node structure
-            shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
-            test_eq(nodeRef->getName(), "window", "");
-            auto& children =  nodeRef->getChildren();
-            test_eq(children.size(), 4, "");
-            test_eq(children[0]->getName(), "titlebar", "");
-            test_eq(children[0]->getChildren()[0]->getName(), "title", "");
-            test_eq(children[0]->getChildren()[1]->getName(), "close", "");
-            test_eq(children[1]->getName(), "message", "");
-            test_eq(children[2]->getName(), "cancel", "");
-            test_eq(children[3]->getName(), "submit", "");
-            // verify properties not initialized
-            test_eq(nodeRef->getSize(), ofVec2f(0.0f), "");
-        }
-
-        // PropertiesManager
-        ofxUiEditor::PropertiesManager propman;
-        propman.setup("properties.json");
-        // TODO; PropertiesManager unit-tests?
-
-        // start using custom components classes properties manager
-        editor.use(propman);
+        // We're using custom classes for component behaviour, so we need to register
+        // an instantiator callbacks the know how to instantiate the types of nodes
         editor.addInstantiator("popupDialog/CustomProgressBar", []() -> shared_ptr<ofxInterface::Node> {
             return make_shared<CustomProgressBar>();
         });
@@ -66,18 +42,23 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(children[1]->getName(), "message", "");
             test_eq(children[2]->getName(), "cancel", "");
             test_eq(children[3]->getName(), "submit", "");
-            // verify properties ARE initialized
+        }
+
+        {   // verify properties are initialized
+            shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
             test_eq(nodeRef->getSize(), ofVec2f(300.0f, 200.0f), "");
             test_eq(nodeRef->getPosition(), ofVec3f(123.0f, 456.0f, 789.0f), "");
             test_eq(nodeRef->getScale(), ofVec3f(0.5f, .25f, .1f), "");
         }
 
         {   // verify custom properties are NOT properly actuated
+            // because we haven't registered a custom properties actuator
+            // for these properties yet.
             auto nodeRef = editor.create("popupDialog");
             auto progressBar = (CustomProgressBar*)nodeRef->getChildWithName(
                 "CustomProgressBar");
             test_eq(progressBar->getName(), "CustomProgressBar", "");
-            test_eq(progressBar->getSize(), ofVec2f(420, 25), ""); // default property
+            test_eq(progressBar->getSize(), ofVec2f(420, 25), ""); // size IS default property
             test_eq(progressBar->fullColor, ofColor::white, ""); // custom
             test_eq(progressBar->emptyColor, ofColor::black, ""); // custom
         }
@@ -94,6 +75,8 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(progressBarRef->fullColor, ofColor(0, 200, 0), "");
             test_eq(progressBarRef->emptyColor, ofColor(140,130,130), "");
         }
+
+        // TODO; verify cleanup
     }
 };
 
