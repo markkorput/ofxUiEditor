@@ -1,31 +1,22 @@
 #include "ofxUnitTests.h"
 #include "ofxUiEditor.h"
 
-namespace CustomProgressBar{
-    class Component : public ofxInterface::Node {
+class CustomProgressBar : public ofxInterface::Node {
+public: // static methods
 
-    public: // attribute
-        float progress;
-        ofColor emptyColor, fullColor;
+    static void actuateProperties(shared_ptr<CustomProgressBar> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+        nodeRef->emptyColor = propertiesRef->get("empty-color", ofColor::black);
+        nodeRef->fullColor = propertiesRef->get("full-color", ofColor::white);
+    }
 
-    public:
-        Component() : progress(0.0f), emptyColor(ofColor::black), fullColor(ofColor::white){
-        }
-    };
+public: // attribute
+    float progress;
+    ofColor emptyColor, fullColor;
 
-    class PropertiesActuator : public ofxUiEditor::BasePropertiesActuator<ofxInterface::Node> {
-    public:
-        virtual void actuate(shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-            auto progressBarRef = static_pointer_cast<Component>(nodeRef);
-            // let our parent class take care of the default properties (size, position, scale, rotation)
-            ofxUiEditor::BasePropertiesActuator<ofxInterface::Node>::actuate(nodeRef, propertiesRef);
-            progressBarRef->emptyColor = propertiesRef->get("empty-color", ofColor::blue);
-            progressBarRef->fullColor = propertiesRef->get("full-color", ofColor::purple);
-        }
-    };
-}
-
-using namespace CustomProgressBar;
+public:
+    CustomProgressBar() : progress(0.0f), emptyColor(ofColor::black), fullColor(ofColor::white){
+    }
+};
 
 class ofApp: public ofxUnitTestsApp{
     void run(){
@@ -61,7 +52,7 @@ class ofApp: public ofxUnitTestsApp{
         // start using custom components classes properties manager
         editor.use(propman);
         editor.addInstantiator("popupDialog/CustomProgressBar", []() -> shared_ptr<ofxInterface::Node> {
-            return make_shared<CustomProgressBar::Component>();
+            return make_shared<CustomProgressBar>();
         });
 
         {   // verify node structure
@@ -83,7 +74,7 @@ class ofApp: public ofxUnitTestsApp{
 
         {   // verify custom properties are NOT properly actuated
             auto nodeRef = editor.create("popupDialog");
-            auto progressBar = (CustomProgressBar::Component*)nodeRef->getChildWithName(
+            auto progressBar = (CustomProgressBar*)nodeRef->getChildWithName(
                 "CustomProgressBar");
             test_eq(progressBar->getName(), "CustomProgressBar", "");
             test_eq(progressBar->getSize(), ofVec2f(420, 25), ""); // default property
@@ -92,10 +83,12 @@ class ofApp: public ofxUnitTestsApp{
         }
 
         // register our custom properties actuator
-        editor.addComponentPropertiesActuator("popupDialog/CustomProgressBar", make_shared<PropertiesActuator>());
+        editor.addComponentPropertiesActuator("popupDialog/CustomProgressBar", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+            CustomProgressBar::actuateProperties(static_pointer_cast<CustomProgressBar>(nodeRef), propertiesRef);
+        });
 
         {   // verify custom properties ARE properly actuated
-            auto progressBarRef = static_pointer_cast<CustomProgressBar::Component>(
+            auto progressBarRef = static_pointer_cast<CustomProgressBar>(
                 editor.create("popupDialog/CustomProgressBar"));
             test_eq(progressBarRef->getSize(), ofVec2f(420.0f, 25.0f), "");
             test_eq(progressBarRef->fullColor, ofColor(0, 200, 0), "");
