@@ -32,62 +32,62 @@ namespace ofxUiEditor {
         } ComponentActuator;
 
         class NodeLink {
-        public:
-            void setup( shared_ptr<NodeType> _nodeRef,
-                        shared_ptr<PropertiesItem> _propsRef,
-                        std::vector<shared_ptr<ComponentActuator>> &componentPropertiesActuators){
-                // ofLog() << "NodeLink::setup";
-                nodeRef = _nodeRef;
-                propertiesRef = _propsRef;
-                actuatorRefs = &componentPropertiesActuators;
+            public:
+                void setup( shared_ptr<NodeType> _nodeRef,
+                            shared_ptr<PropertiesItem> _propsRef,
+                            std::vector<shared_ptr<ComponentActuator>> &componentPropertiesActuators){
+                    // ofLog() << "NodeLink::setup";
+                    nodeRef = _nodeRef;
+                    propertiesRef = _propsRef;
+                    actuatorRefs = &componentPropertiesActuators;
 
-                propertiesRef->changeEvent.addListener([this](PropertiesItem &propsItem){
-                    // ofLog() << "actuate callback";
-                    this->actuateProperties();
-                }, nodeRef.get());
+                    propertiesRef->changeEvent.addListener([this](PropertiesItem &propsItem){
+                        // ofLog() << "actuate callback";
+                        this->actuateProperties();
+                    }, nodeRef.get());
 
-                actuateProperties();
-            }
-
-            void actuateProperties(){
-                ofLogVerbose() << "NodeLink::actuateProperties - updating node: " << nodeRef->getName();
-
-                bool bCustom = false;
-                for(auto actuatorRef : (*actuatorRefs)){
-                    if(actuatorRef->componentId == propertiesRef->getId()){
-                        bCustom = true;
-                        // this could probably be optimized;
-                        if(actuatorRef->actuateDefault)
-                            PropertiesActuators::actuateNode(nodeRef, propertiesRef);
-
-                        // apply custom actuator
-                        actuatorRef->func(nodeRef, propertiesRef);
-                    }
+                    actuateProperties();
                 }
 
-                // yes, sohuld probably optimize :/
-                if(!bCustom)
-                    PropertiesActuators::actuateNode(nodeRef, propertiesRef);
-            }
+                void actuateProperties(){
+                    ofLogVerbose() << "NodeLink::actuateProperties - updating node: " << nodeRef->getName();
 
-            shared_ptr<NodeType> nodeRef;
-            shared_ptr<PropertiesItem> propertiesRef;
-            std::vector<shared_ptr<ComponentActuator>>* actuatorRefs;
+                    bool bCustom = false;
+                    for(auto actuatorRef : (*actuatorRefs)){
+                        if(actuatorRef->componentId == propertiesRef->getId()){
+                            bCustom = true;
+                            // this could probably be optimized;
+                            if(actuatorRef->actuateDefault)
+                                PropertiesActuators::actuateNode(nodeRef, propertiesRef);
+
+                            // apply custom actuator
+                            actuatorRef->func(nodeRef, propertiesRef);
+                        }
+                    }
+
+                    // yes, sohuld probably optimize :/
+                    if(!bCustom)
+                        PropertiesActuators::actuateNode(nodeRef, propertiesRef);
+                }
+
+                shared_ptr<NodeType> nodeRef;
+                shared_ptr<PropertiesItem> propertiesRef;
+                std::vector<shared_ptr<ComponentActuator>>* actuatorRefs;
         };
 
         class EditorSceneData {
-        public:
-            EditorSceneData() : sceneRef(nullptr){}
-            EditorSceneData(shared_ptr<NodeType> scene) : sceneRef(scene){}
+            public:
+                EditorSceneData() : sceneRef(nullptr){}
+                EditorSceneData(shared_ptr<NodeType> scene) : sceneRef(scene){}
 
-        public:
-            shared_ptr<NodeType> sceneRef;
-            std::vector<shared_ptr<LambdaEvent<TouchEvent>>> lambdaTouchEvents;
-            std::vector<shared_ptr<NodeLink>> nodeLinkRefs;
+            public:
+                shared_ptr<NodeType> sceneRef;
+                std::vector<shared_ptr<LambdaEvent<TouchEvent>>> lambdaTouchEvents;
+                std::vector<shared_ptr<NodeLink>> nodeLinkRefs;
         };
 
-    public:
-        Editor() : sceneData(nullptr),
+    public: // common methods
+        Editor() :  sceneData(nullptr),
                     current(nullptr),
                     structureManager(NULL){}
         ~Editor(){ destroy(); }
@@ -102,12 +102,11 @@ namespace ofxUiEditor {
         void remove(shared_ptr<NodeType> node);
         void reload();
 
+        shared_ptr<Editor<NodeType>> node(const string& name) const;
         shared_ptr<EditorSceneData> getSceneData() const { return sceneData; }
         // give the node that this editor instance points to
         NodeType* getCurrent() const { return current; }
         void setCurrent(NodeType* newCurrent){ current = newCurrent; }
-
-        shared_ptr<Editor<NodeType>> node(const string& name) const;
 
         void addStructureFile(const string& filePath){
             if(structureManager != NULL)
@@ -118,13 +117,12 @@ namespace ofxUiEditor {
         }
 
         void addPropertiesFile(const string& filePath){
-            loadedPropertiesFiles.insert(filePath);
+            loadedPropertiesFiles.insert(filePath); // remember which files we have loaded, for ::reload
             propertiesManager.load(filePath);
         }
 
         void use(StructureManager& structureManager);
         void addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
-
 
         void addInstantiator(const string& componentId, INSTANTIATOR_FUNC func){
             instantiator_funcs[componentId] = func;
@@ -134,6 +132,7 @@ namespace ofxUiEditor {
         void onTouchDown(std::function<void (TouchEvent&)> func);
 
     protected:
+
         shared_ptr<Editor<NodeType>> clone() const;
         void clone(const Editor<NodeType> &original);
         shared_ptr<Editor<NodeType>> dummy() const;

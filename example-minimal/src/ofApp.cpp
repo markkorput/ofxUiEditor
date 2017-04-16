@@ -16,6 +16,7 @@ public:
 private: // attributes
     ofxUiEditor::Editor<ofxInterface::Node> editor;
     shared_ptr<ofxInterface::Node> sceneRef;
+    bool bShowDebug;
 };
 
 
@@ -26,6 +27,7 @@ private: // attributes
 void ofApp::setup(){
     // window
     ofSetWindowTitle("ofxUiEditor - example-simple-layout");
+    bShowDebug = false;
 
     // load our editor and create a node
     editor.setup(); // loads default data files, see structures.xml and properties.json
@@ -101,6 +103,9 @@ void ofApp::setup(){
 
 void ofApp::draw(){
     sceneRef->render(); // render like normal, see ofxInterface
+    
+    if(bShowDebug)
+        sceneRef->renderDebug();
 }
 
 void ofApp::keyPressed(int key){
@@ -109,7 +114,13 @@ void ofApp::keyPressed(int key){
         bShowDebug = !bShowDebug;
         return;
     case 'r':
+        sceneRef->setSize(ofGetWidth(), ofGetHeight());
         editor.reload();
+
+        if(auto windowNodePtr = sceneRef->getChildWithName("window")){
+            
+            windowNodePtr->setCentered();
+        }
         return;
     }
 }
