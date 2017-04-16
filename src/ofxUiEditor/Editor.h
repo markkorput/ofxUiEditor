@@ -127,11 +127,11 @@ using namespace ofxUiEditor;
 template<class NodeType>
 void Editor<NodeType>::setup(){
     // load default file
-    if(!structureManager)
+    if(!structureManager && ofFile::doesFileExist(DEFAULT_STRUCTURE_FILE))
         addStructureFile(DEFAULT_STRUCTURE_FILE);
 
     // load default file
-    if(!propertiesManager)
+    if(!propertiesManager && ofFile::doesFileExist(DEFAULT_PROPERTIES_FILE))
         addPropertiesFile(DEFAULT_PROPERTIES_FILE);
 
     // create scene data instance
