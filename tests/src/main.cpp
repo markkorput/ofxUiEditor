@@ -101,6 +101,13 @@ class ofApp: public ofxUnitTestsApp{
         {   ofLog() << "operator[]";
             test_eq((CustomProgressBar*)editor["CustomProgressBar"]->getCurrent(), progressBarRef.get(), "");
         }
+
+        {   ofLog() << ".animate";
+            editor["CustomProgressBar"].animate("flip");
+            test_eq(progressBarRef->getOrientationEuler().x, 0, "");
+            editor.update(0.5); // progress five seconds into the future
+            test_eq(progressBarRef->getOrientationEuler().x, 123, "");
+        }
     }
 };
 
