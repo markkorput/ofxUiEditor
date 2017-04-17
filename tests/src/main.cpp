@@ -101,6 +101,10 @@ class ofApp: public ofxUnitTestsApp{
             editor.remove(progressBarRef);
             test_eq(progressBarRef.use_count(), 1, "");
         }
+
+        {   ofLog() << "operator[]";
+            test_eq(editor["CustomProgressBar"], progressBarRef, "");
+        }
     }
 };
 
