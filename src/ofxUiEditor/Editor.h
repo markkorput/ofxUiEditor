@@ -5,6 +5,7 @@
 #include "StructureManager.h"
 #include "PropertiesManager.h"
 #include "PropertiesActuators.h"
+#include "macros.h"
 
 using namespace ofxInterface;
 
@@ -172,6 +173,14 @@ void Editor<NodeType>::setup(){
 
     // create scene data instance
     sceneData = make_shared<EditorSceneData>();
+
+    addType(".SolidColorPanel",
+        OFX_UI_EDITOR_INSTANTIATOR(ofxInterface::SolidColorPanel),
+        PropertiesActuators::actuateSolidColorPanel);
+    
+    addType(".BitmapTextButton",
+        OFX_UI_EDITOR_INSTANTIATOR(ofxInterface::BitmapTextButton),
+        PropertiesActuators::actuateBitmapTextButton);
 }
 
 template<class NodeType>
