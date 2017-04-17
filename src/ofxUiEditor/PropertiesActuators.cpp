@@ -9,7 +9,10 @@ namespace ofxUiEditor { namespace PropertiesActuators {
         nodeRef->setSize(propertiesRef->get("size", ofVec2f(200.0f, 100.0f)));
     }
 
-    void actuateSolidColorPanel(shared_ptr<ofxInterface::SolidColorPanel> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+    void actuateSolidColorPanel(shared_ptr<ofxInterface::Node> nRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+        actuateNode(nRef, propertiesRef);
+        auto nodeRef = static_pointer_cast<ofxInterface::SolidColorPanel>(nRef);
+
         bool hasBG = propertiesRef->hasColor("background");
         if(hasBG)
             nodeRef->setBGColor(propertiesRef->get("background", ofColor(255)));
@@ -21,7 +24,10 @@ namespace ofxUiEditor { namespace PropertiesActuators {
         nodeRef->setBorder(hasBorder);
     }
 
-    void actuateBitmapTextButton(shared_ptr<ofxInterface::BitmapTextButton> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+    void actuateBitmapTextButton(shared_ptr<ofxInterface::Node> nRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+        actuateNode(nRef, propertiesRef);
+        auto nodeRef = static_pointer_cast<ofxInterface::BitmapTextButton>(nRef);
+
         if(propertiesRef->has("text"))
             nodeRef->setup(propertiesRef->get("text", ""));
 
@@ -29,7 +35,7 @@ namespace ofxUiEditor { namespace PropertiesActuators {
         if(propertiesRef->hasVec2f("size")){
             nodeRef->setSize(propertiesRef->get("size", nodeRef->getSize()));
         }
-        
+
         bool hasBG = propertiesRef->hasColor("background");
         if(hasBG)
             nodeRef->setBGColor(propertiesRef->get("background", ofColor(255)));
