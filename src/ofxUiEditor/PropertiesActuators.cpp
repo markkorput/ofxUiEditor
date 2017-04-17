@@ -29,7 +29,7 @@ namespace ofxUiEditor { namespace PropertiesActuators {
         auto nodeRef = static_pointer_cast<ofxInterface::BitmapTextButton>(nRef);
 
         if(propertiesRef->has("text"))
-            nodeRef->setup(propertiesRef->get("text", ""));
+            nodeRef->setup(propertiesRef->get("text", ""), false /* don't setName */);
 
         // the text property overwrites the size, so let's re-apply is specified
         if(propertiesRef->hasVec2f("size")){

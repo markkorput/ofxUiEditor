@@ -38,15 +38,22 @@ void ofApp::setup(){
     sceneRef->setName("Scene");
 
     // populate our scene
-    auto windowNodeRef = editor.create("window");
-    sceneRef->addChild(windowNodeRef.get()); // ofxInterface doesn't use shared_ptr but regular pointers
-    windowNodeRef->setCentered();
+    auto nodeRef = editor.create("object");
+    sceneRef->addChild(nodeRef.get()); // ofxInterface doesn't use shared_ptr but regular pointers
+    nodeRef->setCentered();
+    
+    nodeRef->getChildWithName("left")->setCenteredV();
+    nodeRef->getChildWithName("left")->setX(nodeRef->getWidth()*0.5f-nodeRef->getChildWithName("left")->getWidth()-5);
+    nodeRef->getChildWithName("right")->setCenteredV();
+    nodeRef->getChildWithName("right")->setX(nodeRef->getWidth()*0.5f+5);
 }
 
 
 void ofApp::draw(){
+    ofBackground(0);
+
     sceneRef->render(); // render like normal, see ofxInterface
-    
+
     if(bShowDebug)
         sceneRef->renderDebug();
 }

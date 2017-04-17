@@ -1,0 +1,6 @@
+<structures>
+    <object class="SolidColorPanel">
+        <left class="BitmapTextButton" />
+        <right class="BitmapTextButton" />
+    </object>
+</structures>

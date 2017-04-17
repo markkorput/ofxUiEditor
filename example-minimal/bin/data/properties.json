@@ -71,11 +71,3 @@ versions of Lorem Ipsum."
         "border_r": 0
     }
 }
-
-
-bool bDrawBackground;
-bool bDrawBorder;
-
-ofColor borderColor;
-ofColor bgColor;
-ofColor labelColor;
