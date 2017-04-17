@@ -74,13 +74,12 @@ namespace ofxUiEditor {
                 std::vector<shared_ptr<ComponentActuator>>* actuatorRefs;
         };
 
-        class EditorSceneData {
+        class Data {
             public:
-                EditorSceneData() : sceneRef(nullptr){
-                    // create scene data instance
-                    this->sceneData = make_shared<EditorSceneData>();
+                Data() : sceneRef(nullptr){
                 }
-                EditorSceneData(shared_ptr<NodeType> scene) : sceneRef(scene){}
+                Data(shared_ptr<NodeType> scene) : sceneRef(scene){
+                }
 
             public:
                 shared_ptr<NodeType> sceneRef;
@@ -99,8 +98,11 @@ namespace ofxUiEditor {
 
     public: // common methods
 
-        Editor() :  sceneData(nullptr),
-                    current(nullptr){}
+        Editor() :  dataRef(nullptr),
+                    current(nullptr){
+            // create scene dataRef instance
+            this->dataRef = make_shared<Data>();
+        }
         ~Editor(){ destroy(); }
 
         void setup();
@@ -116,28 +118,28 @@ namespace ofxUiEditor {
     public: // getters / adders
 
         shared_ptr<Editor<NodeType>> node(const string& name) const;
-        shared_ptr<EditorSceneData> getSceneData() const { return sceneData; }
+        shared_ptr<Data> getData() const { return dataRef; }
         // give the node that this editor instance points to
         NodeType* getCurrent() const { return current; }
         void setCurrent(NodeType* newCurrent){ current = newCurrent; }
 
         void addStructureFile(const string& filePath){
-            if(sceneData->structureManager != NULL)
+            if(dataRef->structureManager != NULL)
                 ofLogWarning() << "For now only one structures file at-a-time supported";
 
-            sceneData->privateStructureManager.setup(filePath);
-            use(sceneData->privateStructureManager);
+            dataRef->privateStructureManager.setup(filePath);
+            use(dataRef->privateStructureManager);
         }
 
         void addPropertiesFile(const string& filePath){
-            sceneData->loadedPropertiesFiles.insert(filePath); // remember which files we have loaded, for ::reload
-            sceneData->propertiesManager.load(filePath);
+            dataRef->loadedPropertiesFiles.insert(filePath); // remember which files we have loaded, for ::reload
+            dataRef->propertiesManager.load(filePath);
         }
 
         void use(StructureManager& structureManager);
         void addActuator(const string& id, ACTUATOR_FUNCTION func);
         inline void addInstantiator(const string& id, INSTANTIATOR_FUNC func){
-            sceneData->instantiator_funcs[id] = func;
+            dataRef->instantiator_funcs[id] = func;
         }
         inline void addType(const string& id, INSTANTIATOR_FUNC instantiator_func, ACTUATOR_FUNCTION actuator_func){
             addActuator(id, actuator_func);
@@ -155,7 +157,7 @@ namespace ofxUiEditor {
         shared_ptr<Editor<NodeType>> dummy() const;
 
     private:
-        shared_ptr<EditorSceneData> sceneData;
+        shared_ptr<Data> dataRef;
         NodeType* current;
     };
 }
@@ -170,7 +172,7 @@ using namespace ofxUiEditor;
 template<class NodeType>
 void Editor<NodeType>::setup(){
     // load default file
-    if(!sceneData->structureManager && ofFile::doesFileExist(DEFAULT_STRUCTURE_FILE))
+    if(!dataRef->structureManager && ofFile::doesFileExist(DEFAULT_STRUCTURE_FILE))
         addStructureFile(DEFAULT_STRUCTURE_FILE);
 
     // load default file
@@ -189,14 +191,14 @@ void Editor<NodeType>::setup(){
 template<class NodeType>
 void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
     setup();
-    sceneData->sceneRef = newScene;
+    dataRef->sceneRef = newScene;
     // set our current node pointer to the given scene node (root)
     current = newScene.get();
 }
 
 template<class NodeType>
 void Editor<NodeType>::use(StructureManager& structureManager){
-    sceneData->structureManager = &structureManager;
+    dataRef->structureManager = &structureManager;
 }
 
 template<class NodeType>
@@ -204,7 +206,7 @@ void Editor<NodeType>::addActuator(const string& id, ACTUATOR_FUNCTION func){
     auto actuator = make_shared<ComponentActuator>();
     actuator->id = id;
     actuator->func = func;
-    sceneData->actuatorsRefs.push_back(actuator);
+    dataRef->actuatorsRefs.push_back(actuator);
 }
 
 template<class NodeType>
@@ -213,22 +215,22 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     shared_ptr<StructureInfo> infoRef;
 
     // try to find structure information
-    if(!sceneData->structureManager){
+    if(!dataRef->structureManager){
         ofLogWarning() << "no StructureManager available to initialize nodePath: " << nodePath;
         infoRef = nullptr;
     } else {
-        infoRef = sceneData->structureManager->get(nodePath);
+        infoRef = dataRef->structureManager->get(nodePath);
 
         if(!infoRef)
-            ofLogWarning() << "no structure data found for nodePath: " << nodePath;
+            ofLogWarning() << "no structure dataRef found for nodePath: " << nodePath;
     }
 
     // create our node instance
-    auto iterator = sceneData->instantiator_funcs.find(nodePath); // based on component id
-    if(iterator == sceneData->instantiator_funcs.end() && infoRef) // based on classname
-        iterator = sceneData->instantiator_funcs.find("."+infoRef->getClass());
+    auto iterator = dataRef->instantiator_funcs.find(nodePath); // based on component id
+    if(iterator == dataRef->instantiator_funcs.end() && infoRef) // based on classname
+        iterator = dataRef->instantiator_funcs.find("."+infoRef->getClass());
 
-    if(iterator != sceneData->instantiator_funcs.end()){
+    if(iterator != dataRef->instantiator_funcs.end()){
         node = (iterator->second)();
     } else {
         node = make_shared<NodeType>();
@@ -240,18 +242,18 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
     {   // try to find and apply properties configurations
         auto propsItemRef = make_shared<PropertiesItem>();
         if(infoRef)
-            propsItemRef->follow(*sceneData->propertiesManager.get("."+infoRef->getClass())); // class-based properties
-        propsItemRef->follow(*sceneData->propertiesManager.get(infoRef->getId())); // component-id-based properties
+            propsItemRef->follow(*dataRef->propertiesManager.get("."+infoRef->getClass())); // class-based properties
+        propsItemRef->follow(*dataRef->propertiesManager.get(infoRef->getId())); // component-id-based properties
 
         // create "link" used to update nodes when properties change at runtime
         auto nodeLinkRef = make_shared<NodeLink>();
-        nodeLinkRef->setup(node, infoRef, propsItemRef, sceneData->actuatorsRefs);
+        nodeLinkRef->setup(node, infoRef, propsItemRef, dataRef->actuatorsRefs);
 
-        if(sceneData){
-            sceneData->nodeLinkRefs.push_back(nodeLinkRef);
+        if(dataRef){
+            dataRef->nodeLinkRefs.push_back(nodeLinkRef);
             // ofLog() << "link added";
         } else {
-            ofLogWarning() << "Editor not setup-ed; no sceneData instance";
+            ofLogWarning() << "Editor not setup-ed; no dataRef instance";
         }
     }
 
@@ -270,14 +272,14 @@ template<class NodeType>
 void Editor<NodeType>::remove(shared_ptr<NodeType> node){
     ofLog() << "Removing node: " << node->getName();
 
-    if(!sceneData){
-        ofLogWarning() << "no sceneData instance; setup should be called first";
+    if(!dataRef){
+        ofLogWarning() << "no dataRef instance; setup should be called first";
         return;
     }
 
-    for(auto it=sceneData->nodeLinkRefs.begin(); it != sceneData->nodeLinkRefs.end(); it++){
+    for(auto it=dataRef->nodeLinkRefs.begin(); it != dataRef->nodeLinkRefs.end(); it++){
         if((*it)->nodeRef == node){
-            sceneData->nodeLinkRefs.erase(it);
+            dataRef->nodeLinkRefs.erase(it);
             return;
         }
     }
@@ -285,8 +287,8 @@ void Editor<NodeType>::remove(shared_ptr<NodeType> node){
 
 template<class NodeType>
 void Editor<NodeType>::reload(){
-    for(auto& filePath : sceneData->loadedPropertiesFiles){
-        sceneData->propertiesManager.load(filePath);
+    for(auto& filePath : dataRef->loadedPropertiesFiles){
+        dataRef->propertiesManager.load(filePath);
     }
 }
 
@@ -301,11 +303,11 @@ void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
     // create lambdaEvent instance and store it in our scene's list
     auto lambdaE = make_shared<LambdaEvent<TouchEvent>>();
 
-    sceneData->lambdaTouchEvents.push_back(lambdaE);
+    dataRef->lambdaTouchEvents.push_back(lambdaE);
     // make our new lambdaEvent listener for, and forward, our node's touchDown event
     lambdaE->forward(current->eventTouchDown);
     // finally register the given listener as listener for our lambda event
-    lambdaE->addListener(func, (void*)sceneData.get() /* use scene data as "owner" of the callback */);
+    lambdaE->addListener(func, (void*)dataRef.get() /* use scene dataRef as "owner" of the callback */);
 }
 
 // returns new cloned instance, pointing at the specified node
@@ -337,7 +339,7 @@ shared_ptr<Editor<NodeType>> Editor<NodeType>::clone() const {
 // make the current instance a clone of the given instance
 template<class NodeType>
 void Editor<NodeType>::clone(const Editor<NodeType> &original){
-    sceneData = original.getSceneData();
+    dataRef = original.getData();
     current = original.getCurrent();
 }
 
