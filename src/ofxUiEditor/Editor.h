@@ -42,6 +42,7 @@ namespace ofxUiEditor {
                     structureRef = _structRef;
                     propertiesRef = _propsRef;
                     actuatorRefs = &componentPropertiesActuators;
+                    ofLogVerbose() << "TODO: cache relevant actuators but also update on newly registered actuators";
 
                     propertiesRef->changeEvent.addListener([this](PropertiesItem &propsItem){
                         // ofLog() << "actuate callback";
@@ -55,8 +56,9 @@ namespace ofxUiEditor {
                     ofLogVerbose() << "NodeLink::actuateProperties - updating node: " << nodeRef->getName();
 
                     bool bCustom = false;
+
                     for(auto actuatorRef : (*actuatorRefs)){
-                        if(actuatorRef->id == propertiesRef->getId() || actuatorRef->id == "."+structureRef->getClass()){
+                        if(actuatorRef->id == propertiesRef->getId() || (structureRef && (actuatorRef->id == ("."+structureRef->getClass())))){
                             bCustom = true;
                             // this could probably be optimized;
                             if(actuatorRef->actuateDefault)
@@ -201,32 +203,37 @@ void Editor<NodeType>::addComponentPropertiesActuator(const string& id, COMPONEN
 template<class NodeType>
 shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
     shared_ptr<NodeType> node;
+    shared_ptr<StructureInfo> infoRef;
+
+    // try to find structure information
+    if(!structureManager){
+        ofLogWarning() << "no StructureManager available to initialize nodePath: " << nodePath;
+        infoRef = nullptr;
+    } else {
+        infoRef = structureManager->get(nodePath);
+
+        if(!infoRef)
+            ofLogWarning() << "no structure data found for nodePath: " << nodePath;
+    }
 
     // create our node instance
-    auto iterator = instantiator_funcs.find(nodePath);
+    auto iterator = instantiator_funcs.find(nodePath); // based on component id
+    if(iterator == instantiator_funcs.end() && infoRef) // based on classname
+        iterator = instantiator_funcs.find("."+infoRef->getClass());
+
     if(iterator != instantiator_funcs.end()){
         node = (iterator->second)();
     } else {
         node = make_shared<NodeType>();
     }
 
-    // try to find structure information
-    if(!structureManager){
-        ofLogWarning() << "no StructureManager available to initialize nodePath: " << nodePath;
-        return node;
-    }
-
-    auto infoRef = structureManager->get(nodePath);
-    if(!infoRef){
-        ofLogWarning() << "no structure data found for nodePath: " << nodePath;
-        return node;
-    }
-
-    node->setName(infoRef->getName());
+    if(infoRef)
+        node->setName(infoRef->getName());
 
     {   // try to find and apply properties configurations
         auto propsItemRef = make_shared<PropertiesItem>();
-        propsItemRef->follow(*propertiesManager.get("."+infoRef->getClass())); // class-based properties
+        if(infoRef)
+            propsItemRef->follow(*propertiesManager.get("."+infoRef->getClass())); // class-based properties
         propsItemRef->follow(*propertiesManager.get(infoRef->getId())); // component-id-based properties
 
         // create "link" used to update nodes when properties change at runtime
@@ -241,7 +248,7 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
         }
     }
 
-    if(recursive){
+    if(recursive && infoRef){
         const vector<string>& childNames = infoRef->getChildNames();
         for(auto& childName : childNames){
             auto childNode = create(nodePath + StructureManager::SEPARATOR + childName, recursive);
