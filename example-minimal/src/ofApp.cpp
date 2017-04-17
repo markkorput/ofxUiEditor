@@ -31,15 +31,8 @@ void ofApp::setup(){
 
     // load our editor and create a node
     editor.setup(); // loads default data files, see structures.xml and properties.json
-
-    editor.addInstantiator(".SolidColorPanel", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::SolidColorPanel>();
-    });
-
-    editor.addInstantiator(".BitmapTextButton", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::BitmapTextButton>();
-    });
-
+    editor.addInstantiator(".SolidColorPanel", OFX_UI_INSTANTIATOR(ofxInterface::SolidColorPanel));
+    editor.addInstantiator(".BitmapTextButton", OFX_UI_INSTANTIATOR(ofxInterface::BitmapTextButton));
 
     // register our custom properties actuator
     editor.addComponentPropertiesActuator(".SolidColorPanel", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){

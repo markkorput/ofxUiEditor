@@ -27,9 +27,7 @@ class ofApp: public ofxUnitTestsApp{
 
         // We're using custom classes for component behaviour, so we need to register
         // an instantiator callbacks the know how to instantiate the types of nodes
-        editor.addInstantiator(".MyProgressBar", []() -> shared_ptr<ofxInterface::Node> {
-            return make_shared<CustomProgressBar>();
-        });
+        editor.addInstantiator(".MyProgressBar", OFX_UI_INSTANTIATOR(CustomProgressBar));
 
         {   ofLog() << "Structure";
             // verify node structure
