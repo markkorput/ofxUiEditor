@@ -21,14 +21,13 @@ namespace ofxUiEditor {
     class Editor {
 
         typedef std::function<shared_ptr<NodeType> ()> INSTANTIATOR_FUNC;
-        typedef std::function<void (shared_ptr<NodeType>, shared_ptr<PropertiesItem>)> COMPONENT_ACTUATOR_FUNC;
+        typedef void (*ACTUATOR_FUNCTION)(shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef);
 
     private: // sub-types
 
         typedef struct {
-            bool actuateDefault;
             string id;
-            COMPONENT_ACTUATOR_FUNC func;
+            ACTUATOR_FUNCTION func;
         } ComponentActuator;
 
         class NodeLink {
@@ -54,22 +53,16 @@ namespace ofxUiEditor {
 
                 void actuateProperties(){
                     ofLogVerbose() << "NodeLink::actuateProperties - updating node: " << nodeRef->getName();
-
                     bool bCustom = false;
 
                     for(auto actuatorRef : (*actuatorRefs)){
                         if(actuatorRef->id == propertiesRef->getId() || (structureRef && (actuatorRef->id == ("."+structureRef->getClass())))){
                             bCustom = true;
-                            // this could probably be optimized;
-                            if(actuatorRef->actuateDefault)
-                                PropertiesActuators::actuateNode(nodeRef, propertiesRef);
-
                             // apply custom actuator
-                            actuatorRef->func(nodeRef, propertiesRef);
+                            (*actuatorRef->func)(nodeRef, propertiesRef);
                         }
                     }
 
-                    // yes, sohuld probably optimize :/
                     if(!bCustom)
                         PropertiesActuators::actuateNode(nodeRef, propertiesRef);
                 }
@@ -127,8 +120,7 @@ namespace ofxUiEditor {
         }
 
         void use(StructureManager& structureManager);
-        void addComponentPropertiesActuator(const string& id, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
-
+        void addActuator(const string& id, ACTUATOR_FUNCTION func);
         void addInstantiator(const string& id, INSTANTIATOR_FUNC func){
             instantiator_funcs[id] = func;
         }
@@ -192,10 +184,9 @@ void Editor<NodeType>::use(StructureManager& structureManager){
 }
 
 template<class NodeType>
-void Editor<NodeType>::addComponentPropertiesActuator(const string& id, COMPONENT_ACTUATOR_FUNC func, bool actuateDefault){
+void Editor<NodeType>::addActuator(const string& id, ACTUATOR_FUNCTION func){
     auto actuator = make_shared<ComponentActuator>();
     actuator->id = id;
-    actuator->actuateDefault = actuateDefault;
     actuator->func = func;
     componentPropertiesActuators.push_back(actuator);
 }

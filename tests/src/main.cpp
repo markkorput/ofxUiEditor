@@ -4,7 +4,9 @@
 class CustomProgressBar : public ofxInterface::Node {
 public: // static methods
 
-    static void actuateProperties(shared_ptr<CustomProgressBar> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+    static void actuateProperties(shared_ptr<ofxInterface::Node> nRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+        ofxUiEditor::PropertiesActuators::actuateNode(nRef, propertiesRef);
+        auto nodeRef = static_pointer_cast<CustomProgressBar>(nRef);
         nodeRef->emptyColor = propertiesRef->get("empty-color", ofColor::black);
         nodeRef->fullColor = propertiesRef->get("full-color", ofColor::white);
     }
@@ -15,6 +17,7 @@ public: // attribute
 
 public:
     CustomProgressBar() : progress(0.0f), emptyColor(ofColor::black), fullColor(ofColor::white){
+        ofLog() << "CONSTRUCTOR";
     }
 };
 
@@ -27,7 +30,7 @@ class ofApp: public ofxUnitTestsApp{
 
         // We're using custom classes for component behaviour, so we need to register
         // an instantiator callbacks the know how to instantiate the types of nodes
-        editor.addInstantiator(".MyProgressBar", OFX_UI_INSTANTIATOR(CustomProgressBar));
+        editor.addInstantiator(".MyProgressBar", OFX_UI_EDITOR_INSTANTIATOR(CustomProgressBar));
 
         {   ofLog() << "Structure";
             // verify node structure
@@ -65,9 +68,7 @@ class ofApp: public ofxUnitTestsApp{
         }
 
         // register our custom properties actuator
-        editor.addComponentPropertiesActuator(".MyProgressBar", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-            CustomProgressBar::actuateProperties(static_pointer_cast<CustomProgressBar>(nodeRef), propertiesRef);
-        });
+        editor.addActuator(".MyProgressBar", CustomProgressBar::actuateProperties);
 
         auto progressBarRef = static_pointer_cast<CustomProgressBar>(
             editor.create("popupDialog/CustomProgressBar"));

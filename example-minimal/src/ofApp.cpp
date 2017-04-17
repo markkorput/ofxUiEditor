@@ -29,20 +29,12 @@ void ofApp::setup(){
     ofSetWindowTitle("ofxUiEditor - example-simple-layout");
     bShowDebug = false;
 
-    // load our editor and create a node
+    // setup our editor and register component types
     editor.setup(); // loads default data files, see structures.xml and properties.json
     editor.addInstantiator(".SolidColorPanel", OFX_UI_INSTANTIATOR(ofxInterface::SolidColorPanel));
     editor.addInstantiator(".BitmapTextButton", OFX_UI_INSTANTIATOR(ofxInterface::BitmapTextButton));
-
-    // register our custom properties actuator
-    editor.addComponentPropertiesActuator(".SolidColorPanel", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-        ofxUiEditor::PropertiesActuators::actuateSolidColorPanel(static_pointer_cast<ofxInterface::SolidColorPanel>(nodeRef), propertiesRef);
-    });
-
-    editor.addComponentPropertiesActuator(".BitmapTextButton", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-        ofxUiEditor::PropertiesActuators::actuateBitmapTextButton(static_pointer_cast<ofxInterface::BitmapTextButton>(nodeRef), propertiesRef);
-    });
-
+    editor.addActuator(".SolidColorPanel", ofxUiEditor::PropertiesActuators::actuateSolidColorPanel);
+    editor.addActuator(".BitmapTextButton", ofxUiEditor::PropertiesActuators::actuateBitmapTextButton);
 
     // create our root scene node, see ofxInterface
     sceneRef = make_shared<ofxInterface::Node>();
