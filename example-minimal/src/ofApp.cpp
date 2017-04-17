@@ -31,13 +31,6 @@ void ofApp::setup(){
 
     // setup our editor and register component types
     editor.setup(); // loads default data files, see structures.xml and properties.json
-    editor.addType(".SolidColorPanel", // classname of the components to apply this type to
-        OFX_UI_EDITOR_INSTANTIATOR(ofxInterface::SolidColorPanel), // instantiator; class that manages this components
-        ofxUiEditor::PropertiesActuators::actuateSolidColorPanel); // actuator; method that applies custom properties
-
-    editor.addType(".BitmapTextButton",
-        OFX_UI_EDITOR_INSTANTIATOR(ofxInterface::BitmapTextButton),
-        ofxUiEditor::PropertiesActuators::actuateBitmapTextButton);
 
     // create our root scene node, see ofxInterface
     sceneRef = make_shared<ofxInterface::Node>();
