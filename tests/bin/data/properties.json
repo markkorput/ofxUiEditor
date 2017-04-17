@@ -10,7 +10,7 @@
         "scale_z": 0.1
     },
 
-    "popupDialog/CustomProgressBar": {
+    ".MyProgressBar": {
         "size_x": 420,
         "size_y": 25,
         "empty-color_r": 140,

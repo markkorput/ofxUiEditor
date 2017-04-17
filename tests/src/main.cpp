@@ -67,14 +67,14 @@ class ofApp: public ofxUnitTestsApp{
         }
 
         // register our custom properties actuator
-        editor.addComponentPropertiesActuator("popupDialog/CustomProgressBar", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+        editor.addComponentPropertiesActuator(".MyProgressBar", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
             CustomProgressBar::actuateProperties(static_pointer_cast<CustomProgressBar>(nodeRef), propertiesRef);
         });
 
         auto progressBarRef = static_pointer_cast<CustomProgressBar>(
             editor.create("popupDialog/CustomProgressBar"));
 
-        {   ofLog() << "Properties actuation";
+        {   ofLog() << "Custom properties actuation";
             test_eq(progressBarRef->getSize(), ofVec2f(420.0f, 25.0f), "");
             test_eq(progressBarRef->fullColor, ofColor(0, 200, 0), "");
             test_eq(progressBarRef->emptyColor, ofColor(140,130,130), "");

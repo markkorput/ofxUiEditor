@@ -5,11 +5,13 @@
 namespace ofxUiEditor {
     class StructureInfo {
     public:
-        string getName(){ return name; }
+        const string& getId(){ return id; }
+        const string& getName(){ return name; }
+        const string& getClass(){ return className; }
         const vector<string>& getChildNames(){ return childNames; }
 
     public:
-        string name;
+        string id, name, className;
         vector<string> childNames;
     };
 

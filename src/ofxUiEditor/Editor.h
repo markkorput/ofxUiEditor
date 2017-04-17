@@ -27,17 +27,19 @@ namespace ofxUiEditor {
 
         typedef struct {
             bool actuateDefault;
-            string componentId;
+            string id;
             COMPONENT_ACTUATOR_FUNC func;
         } ComponentActuator;
 
         class NodeLink {
             public:
                 void setup( shared_ptr<NodeType> _nodeRef,
+                            shared_ptr<StructureInfo> _structRef,
                             shared_ptr<PropertiesItem> _propsRef,
                             std::vector<shared_ptr<ComponentActuator>> &componentPropertiesActuators){
                     // ofLog() << "NodeLink::setup";
                     nodeRef = _nodeRef;
+                    structureRef = _structRef;
                     propertiesRef = _propsRef;
                     actuatorRefs = &componentPropertiesActuators;
 
@@ -54,7 +56,7 @@ namespace ofxUiEditor {
 
                     bool bCustom = false;
                     for(auto actuatorRef : (*actuatorRefs)){
-                        if(actuatorRef->componentId == propertiesRef->getId()){
+                        if(actuatorRef->id == propertiesRef->getId() || actuatorRef->id == "."+structureRef->getClass()){
                             bCustom = true;
                             // this could probably be optimized;
                             if(actuatorRef->actuateDefault)
@@ -71,6 +73,7 @@ namespace ofxUiEditor {
                 }
 
                 shared_ptr<NodeType> nodeRef;
+                shared_ptr<StructureInfo> structureRef;
                 shared_ptr<PropertiesItem> propertiesRef;
                 std::vector<shared_ptr<ComponentActuator>>* actuatorRefs;
         };
@@ -122,10 +125,10 @@ namespace ofxUiEditor {
         }
 
         void use(StructureManager& structureManager);
-        void addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
+        void addComponentPropertiesActuator(const string& id, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
 
-        void addInstantiator(const string& componentId, INSTANTIATOR_FUNC func){
-            instantiator_funcs[componentId] = func;
+        void addInstantiator(const string& id, INSTANTIATOR_FUNC func){
+            instantiator_funcs[id] = func;
         }
 
     public: // register method for lambda register methods
@@ -187,9 +190,9 @@ void Editor<NodeType>::use(StructureManager& structureManager){
 }
 
 template<class NodeType>
-void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC func, bool actuateDefault){
+void Editor<NodeType>::addComponentPropertiesActuator(const string& id, COMPONENT_ACTUATOR_FUNC func, bool actuateDefault){
     auto actuator = make_shared<ComponentActuator>();
-    actuator->componentId = componentId;
+    actuator->id = id;
     actuator->actuateDefault = actuateDefault;
     actuator->func = func;
     componentPropertiesActuators.push_back(actuator);
@@ -221,12 +224,14 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
 
     node->setName(infoRef->getName());
 
-    {   // try to find and apply properties configuration
-        auto propsItemRef = propertiesManager.get(nodePath);
+    {   // try to find and apply properties configurations
+        auto propsItemRef = make_shared<PropertiesItem>();
+        propsItemRef->merge(*propertiesManager.get("."+infoRef->getClass())); // class-based properties
+        propsItemRef->merge(*propertiesManager.get(infoRef->getId())); // component-id-based properties
 
         // create "link" used to update nodes when properties change at runtime
         auto nodeLinkRef = make_shared<NodeLink>();
-        nodeLinkRef->setup(node, propsItemRef, componentPropertiesActuators);
+        nodeLinkRef->setup(node, infoRef, propsItemRef, componentPropertiesActuators);
 
         if(sceneData){
             sceneData->nodeLinkRefs.push_back(nodeLinkRef);

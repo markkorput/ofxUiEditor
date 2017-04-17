@@ -16,8 +16,11 @@ shared_ptr<StructureInfo> StructureManager::get(const string& nodePath){
     if(!el)
         return info;
 
+    info->id = nodePath;
     info->name = el->tagName();
+    info->className = el->getAttribute("class");
 
+    ofLog() << "StructureManager; found class " << info->className << " for " << nodePath;
     auto childNodes = el->childNodes();
     for(int i=0; i<childNodes->length(); i++){
         auto item = childNodes->item(i);
