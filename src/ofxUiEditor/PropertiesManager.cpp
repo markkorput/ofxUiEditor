@@ -38,14 +38,14 @@ shared_ptr<PropertiesItem> PropertiesManager::get(const string& nodePath, bool c
         if(item->getId() == nodePath)
             return item;
 
-    ofLogWarning() << "Could not find properties item for: " << nodePath;
-
     // no existing item
-    if(!create)
+    if(!create){
+        ofLogVerbose() << "Could not find properties item for: " << nodePath;
         return nullptr;
+    }
 
     // create new item
-    ofLogWarning() << "Creating empty properties item for: " << nodePath;
+    ofLogVerbose() << "Creating empty properties item for: " << nodePath;
     auto item = make_shared<PropertiesItem>();
     item->setId(nodePath);
     items.push_back(item);

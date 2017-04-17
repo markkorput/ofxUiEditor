@@ -24,12 +24,19 @@ void PropertiesItem::set(const string& key, const string& value){
 }
 
 void PropertiesItem::merge(const PropertiesItem &other){
-    if(other.getId() != id)
-        ofLogWarning() << "PropertiesItem::merge - merging item with different id (" << other.getId() << " --> " << id << ")";
+    // if(other.getId() != id)
+    //     ofLogWarning() << "PropertiesItem::merge - merging item with different id (" << other.getId() << " --> " << id << ")";
 
     auto otherProps = other.getProperties();
     for(auto it = otherProps.begin(); it != otherProps.end(); it++)
         set(it->first, it->second);
+}
+
+void PropertiesItem::follow(PropertiesItem &other){
+    merge(other);
+    other.changeEvent.addListener([this](PropertiesItem &propsItem){
+        this->merge(propsItem);
+    }, this);
 }
 
 bool PropertiesItem::has(const string& key) const {

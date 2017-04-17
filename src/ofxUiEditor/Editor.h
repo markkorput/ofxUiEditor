@@ -226,8 +226,8 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
 
     {   // try to find and apply properties configurations
         auto propsItemRef = make_shared<PropertiesItem>();
-        propsItemRef->merge(*propertiesManager.get("."+infoRef->getClass())); // class-based properties
-        propsItemRef->merge(*propertiesManager.get(infoRef->getId())); // component-id-based properties
+        propsItemRef->follow(*propertiesManager.get("."+infoRef->getClass())); // class-based properties
+        propsItemRef->follow(*propertiesManager.get(infoRef->getId())); // component-id-based properties
 
         // create "link" used to update nodes when properties change at runtime
         auto nodeLinkRef = make_shared<NodeLink>();
