@@ -4,7 +4,22 @@
         "size_y": 50,
         "background_r": 255,
         "background_g": 130,
-        "background_b": 0
+        "background_b": 0,
+
+        "animations": {
+            "left": {
+                "what": "x",
+                "to": -1500,
+                "duration": 0.2,
+                "after": "left_return"
+            },
+            "left_return": {
+                "what": "x",
+                "from": 1500,
+                "to": 0,
+                "duration": 0.2
+            }
+        }
     },
     ".BitmapTextButton":{
         "background_r": 0,
