@@ -54,24 +54,20 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(nodeRef->getScale(), ofVec3f(0.5f, .25f, .1f), "");
         }
 
-        {   ofLog() << "Custom property defaults";
-            // verify custom properties are NOT properly actuated
-            // because we haven't registered a custom properties actuator
-            // for these properties yet.
-            auto nodeRef = editor.create("popupDialog");
-            auto progressBar = (CustomProgressBar*)nodeRef->getChildWithName(
-                "CustomProgressBar");
-            test_eq(progressBar->getName(), "CustomProgressBar", "");
-            test_eq(progressBar->getSize(), ofVec2f(420, 25), ""); // size IS default property
-            test_eq(progressBar->fullColor, ofColor::white, ""); // custom
-            test_eq(progressBar->emptyColor, ofColor::black, ""); // custom
-        }
+        // {   ofLog() << "Custom property defaults";
+        //     // verify custom properties are NOT properly actuated
+        //     // because we haven't registered a custom properties actuator
+        //     // for these properties yet.
+        //     test_eq(progressBarRef->getName(), "CustomProgressBar", "");
+        //     test_eq(progressBarRef->getSize(), ofVec2f(420, 25), ""); // size IS default property
+        //     test_eq(progressBarRef->fullColor, ofColor::white, ""); // custom
+        //     test_eq(progressBarRef->emptyColor, ofColor::black, ""); // custom
+        // }
 
         // register our custom properties actuator
         editor.addActuator(".MyProgressBar", CustomProgressBar::actuateProperties);
 
-        auto progressBarRef = static_pointer_cast<CustomProgressBar>(
-            editor.create("popupDialog/CustomProgressBar"));
+        auto progressBarRef = static_pointer_cast<CustomProgressBar>(editor.create("popupDialog/CustomProgressBar"));
 
         {   ofLog() << "Custom properties actuation";
             test_eq(progressBarRef->getSize(), ofVec2f(420.0f, 25.0f), "");
@@ -103,7 +99,7 @@ class ofApp: public ofxUnitTestsApp{
         }
 
         {   ofLog() << "operator[]";
-            test_eq(editor["CustomProgressBar"], progressBarRef, "");
+            test_eq((CustomProgressBar*)editor["CustomProgressBar"]->getCurrent(), progressBarRef.get(), "");
         }
     }
 };

@@ -83,6 +83,7 @@ namespace ofxUiEditor {
 
             public:
                 shared_ptr<NodeType> sceneRef;
+                shared_ptr<NodeType> editorRootRef;
                 std::vector<shared_ptr<LambdaEvent<TouchEvent>>> lambdaTouchEvents;
                 std::vector<shared_ptr<NodeLink>> nodeLinkRefs;
 
@@ -101,7 +102,9 @@ namespace ofxUiEditor {
         Editor() :  dataRef(nullptr),
                     current(nullptr){
             // create scene dataRef instance
-            this->dataRef = make_shared<Data>();
+            dataRef = make_shared<Data>();
+            dataRef->editorRootRef = make_shared<NodeType>();
+            current = dataRef->editorRootRef.get();
         }
         ~Editor(){ destroy(); }
 
@@ -117,6 +120,7 @@ namespace ofxUiEditor {
 
     public: // getters / adders
 
+        inline shared_ptr<Editor<NodeType>> operator[](const string& name) const { return this->node(name); }
         shared_ptr<Editor<NodeType>> node(const string& name) const;
         shared_ptr<Data> getData() const { return dataRef; }
         // give the node that this editor instance points to
@@ -150,13 +154,14 @@ namespace ofxUiEditor {
 
         void onTouchDown(std::function<void (TouchEvent&)> func);
 
-    protected:
+    protected: // cloning methods
 
         shared_ptr<Editor<NodeType>> clone() const;
         void clone(const Editor<NodeType> &original);
         shared_ptr<Editor<NodeType>> dummy() const;
 
-    private:
+    private: // attributes
+
         shared_ptr<Data> dataRef;
         NodeType* current;
     };
@@ -265,6 +270,7 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
         }
     }
 
+    dataRef->editorRootRef->addChild(node.get());
     return node;
 }
 
