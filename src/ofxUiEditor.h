@@ -6,3 +6,4 @@
 #include "ofxUiEditor/PropertiesManager.h"
 #include "ofxUiEditor/PropertiesActuators.h"
 #include "ofxUiEditor/BaseNode.h"
+#include "ofxUiEditor/macros.h"

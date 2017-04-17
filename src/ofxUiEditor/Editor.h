@@ -27,19 +27,22 @@ namespace ofxUiEditor {
 
         typedef struct {
             bool actuateDefault;
-            string componentId;
+            string id;
             COMPONENT_ACTUATOR_FUNC func;
         } ComponentActuator;
 
         class NodeLink {
             public:
                 void setup( shared_ptr<NodeType> _nodeRef,
+                            shared_ptr<StructureInfo> _structRef,
                             shared_ptr<PropertiesItem> _propsRef,
                             std::vector<shared_ptr<ComponentActuator>> &componentPropertiesActuators){
                     // ofLog() << "NodeLink::setup";
                     nodeRef = _nodeRef;
+                    structureRef = _structRef;
                     propertiesRef = _propsRef;
                     actuatorRefs = &componentPropertiesActuators;
+                    ofLogVerbose() << "TODO: cache relevant actuators but also update on newly registered actuators";
 
                     propertiesRef->changeEvent.addListener([this](PropertiesItem &propsItem){
                         // ofLog() << "actuate callback";
@@ -53,8 +56,9 @@ namespace ofxUiEditor {
                     ofLogVerbose() << "NodeLink::actuateProperties - updating node: " << nodeRef->getName();
 
                     bool bCustom = false;
+
                     for(auto actuatorRef : (*actuatorRefs)){
-                        if(actuatorRef->componentId == propertiesRef->getId()){
+                        if(actuatorRef->id == propertiesRef->getId() || (structureRef && (actuatorRef->id == ("."+structureRef->getClass())))){
                             bCustom = true;
                             // this could probably be optimized;
                             if(actuatorRef->actuateDefault)
@@ -71,6 +75,7 @@ namespace ofxUiEditor {
                 }
 
                 shared_ptr<NodeType> nodeRef;
+                shared_ptr<StructureInfo> structureRef;
                 shared_ptr<PropertiesItem> propertiesRef;
                 std::vector<shared_ptr<ComponentActuator>>* actuatorRefs;
         };
@@ -122,10 +127,10 @@ namespace ofxUiEditor {
         }
 
         void use(StructureManager& structureManager);
-        void addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
+        void addComponentPropertiesActuator(const string& id, COMPONENT_ACTUATOR_FUNC, bool actuateDefault=true);
 
-        void addInstantiator(const string& componentId, INSTANTIATOR_FUNC func){
-            instantiator_funcs[componentId] = func;
+        void addInstantiator(const string& id, INSTANTIATOR_FUNC func){
+            instantiator_funcs[id] = func;
         }
 
     public: // register method for lambda register methods
@@ -187,9 +192,9 @@ void Editor<NodeType>::use(StructureManager& structureManager){
 }
 
 template<class NodeType>
-void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId, COMPONENT_ACTUATOR_FUNC func, bool actuateDefault){
+void Editor<NodeType>::addComponentPropertiesActuator(const string& id, COMPONENT_ACTUATOR_FUNC func, bool actuateDefault){
     auto actuator = make_shared<ComponentActuator>();
-    actuator->componentId = componentId;
+    actuator->id = id;
     actuator->actuateDefault = actuateDefault;
     actuator->func = func;
     componentPropertiesActuators.push_back(actuator);
@@ -198,35 +203,42 @@ void Editor<NodeType>::addComponentPropertiesActuator(const string& componentId,
 template<class NodeType>
 shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
     shared_ptr<NodeType> node;
+    shared_ptr<StructureInfo> infoRef;
+
+    // try to find structure information
+    if(!structureManager){
+        ofLogWarning() << "no StructureManager available to initialize nodePath: " << nodePath;
+        infoRef = nullptr;
+    } else {
+        infoRef = structureManager->get(nodePath);
+
+        if(!infoRef)
+            ofLogWarning() << "no structure data found for nodePath: " << nodePath;
+    }
 
     // create our node instance
-    auto iterator = instantiator_funcs.find(nodePath);
+    auto iterator = instantiator_funcs.find(nodePath); // based on component id
+    if(iterator == instantiator_funcs.end() && infoRef) // based on classname
+        iterator = instantiator_funcs.find("."+infoRef->getClass());
+
     if(iterator != instantiator_funcs.end()){
         node = (iterator->second)();
     } else {
         node = make_shared<NodeType>();
     }
 
-    // try to find structure information
-    if(!structureManager){
-        ofLogWarning() << "no StructureManager available to initialize nodePath: " << nodePath;
-        return node;
-    }
+    if(infoRef)
+        node->setName(infoRef->getName());
 
-    auto infoRef = structureManager->get(nodePath);
-    if(!infoRef){
-        ofLogWarning() << "no structure data found for nodePath: " << nodePath;
-        return node;
-    }
-
-    node->setName(infoRef->getName());
-
-    {   // try to find and apply properties configuration
-        auto propsItemRef = propertiesManager.get(nodePath);
+    {   // try to find and apply properties configurations
+        auto propsItemRef = make_shared<PropertiesItem>();
+        if(infoRef)
+            propsItemRef->follow(*propertiesManager.get("."+infoRef->getClass())); // class-based properties
+        propsItemRef->follow(*propertiesManager.get(infoRef->getId())); // component-id-based properties
 
         // create "link" used to update nodes when properties change at runtime
         auto nodeLinkRef = make_shared<NodeLink>();
-        nodeLinkRef->setup(node, propsItemRef, componentPropertiesActuators);
+        nodeLinkRef->setup(node, infoRef, propsItemRef, componentPropertiesActuators);
 
         if(sceneData){
             sceneData->nodeLinkRefs.push_back(nodeLinkRef);
@@ -236,7 +248,7 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
         }
     }
 
-    if(recursive){
+    if(recursive && infoRef){
         const vector<string>& childNames = infoRef->getChildNames();
         for(auto& childName : childNames){
             auto childNode = create(nodePath + StructureManager::SEPARATOR + childName, recursive);

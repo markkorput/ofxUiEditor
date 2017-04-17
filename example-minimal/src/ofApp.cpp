@@ -31,63 +31,18 @@ void ofApp::setup(){
 
     // load our editor and create a node
     editor.setup(); // loads default data files, see structures.xml and properties.json
-
-    editor.addInstantiator("window", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::SolidColorPanel>();
-    });
-
-    editor.addInstantiator("window/titlebar", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::SolidColorPanel>();
-    });
-
-    editor.addInstantiator("window/titlebar/title", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::BitmapTextButton>();
-    });
-
-    editor.addInstantiator("window/titlebar/close", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::BitmapTextButton>();
-    });
-
-    editor.addInstantiator("window/message", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::BitmapTextButton>();
-    });
-
-    editor.addInstantiator("window/cancel", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::BitmapTextButton>();
-    });
-
-    editor.addInstantiator("window/submit", []() -> shared_ptr<ofxInterface::Node> {
-        return make_shared<ofxInterface::BitmapTextButton>();
-    });
+    editor.addInstantiator(".SolidColorPanel", OFX_UI_INSTANTIATOR(ofxInterface::SolidColorPanel));
+    editor.addInstantiator(".BitmapTextButton", OFX_UI_INSTANTIATOR(ofxInterface::BitmapTextButton));
 
     // register our custom properties actuator
-    editor.addComponentPropertiesActuator("window", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+    editor.addComponentPropertiesActuator(".SolidColorPanel", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
         ofxUiEditor::PropertiesActuators::actuateSolidColorPanel(static_pointer_cast<ofxInterface::SolidColorPanel>(nodeRef), propertiesRef);
     });
 
-    editor.addComponentPropertiesActuator("window/titlebar", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-        ofxUiEditor::PropertiesActuators::actuateSolidColorPanel(static_pointer_cast<ofxInterface::SolidColorPanel>(nodeRef), propertiesRef);
-    });
-
-    editor.addComponentPropertiesActuator("window/titlebar/title", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
+    editor.addComponentPropertiesActuator(".BitmapTextButton", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
         ofxUiEditor::PropertiesActuators::actuateBitmapTextButton(static_pointer_cast<ofxInterface::BitmapTextButton>(nodeRef), propertiesRef);
     });
 
-    editor.addComponentPropertiesActuator("window/titlebar/close", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-        ofxUiEditor::PropertiesActuators::actuateBitmapTextButton(static_pointer_cast<ofxInterface::BitmapTextButton>(nodeRef), propertiesRef);
-    });
-
-    editor.addComponentPropertiesActuator("window/message", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-        ofxUiEditor::PropertiesActuators::actuateBitmapTextButton(static_pointer_cast<ofxInterface::BitmapTextButton>(nodeRef), propertiesRef);
-    });
-
-    editor.addComponentPropertiesActuator("window/cancel", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-        ofxUiEditor::PropertiesActuators::actuateBitmapTextButton(static_pointer_cast<ofxInterface::BitmapTextButton>(nodeRef), propertiesRef);
-    });
-
-    editor.addComponentPropertiesActuator("window/submit", [](shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef){
-        ofxUiEditor::PropertiesActuators::actuateBitmapTextButton(static_pointer_cast<ofxInterface::BitmapTextButton>(nodeRef), propertiesRef);
-    });
 
     // create our root scene node, see ofxInterface
     sceneRef = make_shared<ofxInterface::Node>();

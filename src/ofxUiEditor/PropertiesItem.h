@@ -21,7 +21,8 @@ namespace ofxUiEditor {
     public: // methods
         void setId(const string& newId){ id = newId; }
         void set(const string& key, const string& value);
-        void merge(const PropertiesItem &other);
+        void merge(const PropertiesItem &other); // copy other's properties into self
+        void follow(PropertiesItem &other); // merge and merge when other changes
 
         string getId() const { return id; }
         const map<string, string>& getProperties() const { return props; }

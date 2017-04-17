@@ -1,15 +1,15 @@
 <structures>
-    <window>
-        <titlebar>
-            <title />
-            <close />
+    <window class="SolidColorPanel">
+        <titlebar class="SolidColorPanel">
+            <title class="BitmapTextButton" />
+            <close class="BitmapTextButton" />
         </titlebar>
-        <message />
-        <cancel />
-        <submit />
+        <message class="BitmapTextButton" />
+        <cancel class="BitmapTextButton" />
+        <submit class="BitmapTextButton" />
     </window>
 
     <popupDialog>
-        <CustomProgressBar />
+        <CustomProgressBar class="MyProgressBar" />
     </popupDialog>
 </structures>
