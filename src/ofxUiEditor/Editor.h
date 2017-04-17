@@ -121,8 +121,12 @@ namespace ofxUiEditor {
 
         void use(StructureManager& structureManager);
         void addActuator(const string& id, ACTUATOR_FUNCTION func);
-        void addInstantiator(const string& id, INSTANTIATOR_FUNC func){
+        inline void addInstantiator(const string& id, INSTANTIATOR_FUNC func){
             instantiator_funcs[id] = func;
+        }
+        inline void addType(const string& id, INSTANTIATOR_FUNC instantiator_func, ACTUATOR_FUNCTION actuator_func){
+            addActuator(id, actuator_func);
+            addInstantiator(id, instantiator_func);
         }
 
     public: // register method for lambda register methods
