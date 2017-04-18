@@ -103,7 +103,7 @@ class ofApp: public ofxUnitTestsApp{
         }
 
         {   ofLog() << ".animate";
-            editor["CustomProgressBar"].animate("flip");
+            editor["CustomProgressBar"]->animate("flip");
             test_eq(progressBarRef->getOrientationEuler().x, 0, "");
             editor.update(0.5); // progress five seconds into the future
             test_eq(progressBarRef->getOrientationEuler().x, 123, "");

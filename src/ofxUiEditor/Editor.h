@@ -110,6 +110,7 @@ namespace ofxUiEditor {
 
         void setup();
         void setup(shared_ptr<NodeType> newScene);
+        void update(float dt);
         void destroy(){ ofLogWarning() << "ofxUiEditor::Editor doesn't UNregister event listeners yet."; }
 
     public: // operations
@@ -122,6 +123,7 @@ namespace ofxUiEditor {
 
         inline shared_ptr<Editor<NodeType>> operator[](const string& name) const { return this->node(name); }
         shared_ptr<Editor<NodeType>> node(const string& name) const;
+        void animate(const string& id);
         shared_ptr<Data> getData() const { return dataRef; }
         // give the node that this editor instance points to
         NodeType* getCurrent() const { return current; }
@@ -199,6 +201,11 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
     dataRef->sceneRef = newScene;
     // set our current node pointer to the given scene node (root)
     current = newScene.get();
+}
+
+template<class NodeType>
+void Editor<NodeType>::update(float dt){
+    ofLogWarning() << "update all active animations";
 }
 
 template<class NodeType>
@@ -332,6 +339,11 @@ shared_ptr<Editor<NodeType>> Editor<NodeType>::node(const string& name) const {
     result->setCurrent(n);
 
     return result;
+}
+
+template<class NodeType>
+void Editor<NodeType>::animate(const string& id){
+    ofLogWarning() << "TODO: initiate animation";
 }
 
 // returns a new instance that is a clone of the current instance
