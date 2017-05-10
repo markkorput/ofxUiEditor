@@ -3,7 +3,7 @@
 // OF/addons
 #include "ofMain.h"
 // local/ofxUiEditor
-#include "LambdaEvent.h"
+#include "ofxLambdaEvent/LambdaEvent.h"
 
 namespace ofxUiEditor {
 

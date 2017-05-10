@@ -2,8 +2,8 @@
 
 #include "ofxInterface.h"
 #include "ofxCMS.h"
+#include "ofxLambdaEvent/LambdaEvent.h"
 
-#include "LambdaEvent.h"
 #include "StructureManager.h"
 #include "PropertiesActuators.h"
 #include "macros.h"
