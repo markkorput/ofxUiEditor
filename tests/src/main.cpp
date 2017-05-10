@@ -1,6 +1,9 @@
 #include "ofxUnitTests.h"
 #include "ofxUiEditor.h"
 
+#define TEST_START(x) {ofLog()<<"CASE: "<<#x;
+#define TEST_END }
+
 class CustomProgressBar : public ofxInterface::Node {
 public: // static methods
 
@@ -108,6 +111,12 @@ class ofApp: public ofxUnitTestsApp{
             // editor.update(0.5); // progress five seconds into the future
             // test_eq(progressBarRef->getOrientationEuler().x, 123, "");
         }
+
+        // TEST_START(propertiesCollection)
+        //     test_eq(editor.dataRef->propertiesCollection.size(), 2, "");
+        //     auto modelRef = edit.dataRef->propertiesCollection.create();
+        //     modelRef = edit.dataRef->propertiesCollection.create();
+        // TEST_END
     }
 };
 

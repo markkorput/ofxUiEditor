@@ -1,5 +1,6 @@
 // ofxAddons
 #include "ofxInterface.h"
+#include "ofxCMS.h"
 // local
 #include "LambdaEvent.h"
 #include "StructureManager.h"
@@ -95,6 +96,7 @@ namespace ofxUiEditor {
                 std::vector<shared_ptr<ComponentActuator>> actuatorsRefs;
 
                 std::set<string> loadedPropertiesFiles;
+                // ofxCMS::Collection<ofxCMS::Model> propertiesCollection;
         };
 
     public: // common methods
@@ -139,7 +141,10 @@ namespace ofxUiEditor {
 
         void addPropertiesFile(const string& filePath){
             dataRef->loadedPropertiesFiles.insert(filePath); // remember which files we have loaded, for ::reload
+            ofLogWarning() << "get rid of propertiesManager (2)";
             dataRef->propertiesManager.load(filePath);
+            // dataRef->propertiesCollection.loadJsonFromFile(filePath);
+            // dataRef->propertiesCollection.create();
         }
 
         void use(StructureManager& structureManager);
@@ -166,6 +171,7 @@ namespace ofxUiEditor {
 
         shared_ptr<Data> dataRef;
         NodeType* current;
+
     };
 }
 
@@ -301,7 +307,10 @@ void Editor<NodeType>::remove(shared_ptr<NodeType> node){
 template<class NodeType>
 void Editor<NodeType>::reload(){
     for(auto& filePath : dataRef->loadedPropertiesFiles){
+        ofLogWarning() << "get rid of propertiesManager (1)";
         dataRef->propertiesManager.load(filePath);
+        // dataRef->propertiesCollection.loadJsonFromFile(filePath);
+
     }
 }
 
