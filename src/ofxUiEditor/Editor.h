@@ -1,7 +1,7 @@
 // ofxAddons
 #include "ofxInterface.h"
 // local
-#include "LambdaEvent.h"
+#include "ofxLambdaEvent/LambdaEvent.h"
 #include "StructureManager.h"
 #include "PropertiesManager.h"
 #include "PropertiesActuators.h"
