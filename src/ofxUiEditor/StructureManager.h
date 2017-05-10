@@ -21,8 +21,11 @@ namespace ofxUiEditor {
         static string SEPARATOR;
 
     public:
+        StructureManager() : filename(""), xmlRef(nullptr){}
         void setup(const string& filename);
         shared_ptr<StructureInfo> get(const string& nodePath);
+
+        bool isLoaded(){ return xmlRef != nullptr; }
 
     private:
         shared_ptr<ofXml> load();

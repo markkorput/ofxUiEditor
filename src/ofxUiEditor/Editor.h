@@ -167,7 +167,7 @@ namespace ofxUiEditor {
         void clone(const Editor<NodeType> &original);
         shared_ptr<Editor<NodeType>> dummy() const;
 
-    private: // attributes
+    public: // attributes
 
         shared_ptr<Data> dataRef;
         NodeType* current;

@@ -25,7 +25,7 @@ public:
 };
 
 class ofApp: public ofxUnitTestsApp{
-    void run(){
+    void runEditor_old(){
         // Create our editor instance with the standard
         // ofxInterface::Node as base Node type
         ofxUiEditor::Editor<ofxInterface::Node> editor;
@@ -117,6 +117,40 @@ class ofApp: public ofxUnitTestsApp{
         //     auto modelRef = edit.dataRef->propertiesCollection.create();
         //     modelRef = edit.dataRef->propertiesCollection.create();
         // TEST_END
+    }
+
+    void runEditorBase(){
+        TEST_START(EditorMain.setup)
+            EditorMain<ofxInterface::Node> editor;
+            editor.setup(); // loads "structures.xml"
+
+            shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
+            test_eq(nodeRef->getName(), "window", "");
+            auto& children = nodeRef->getChildren();
+            test_eq(children.size(), 4, "");
+            test_eq(children[0]->getName(), "titlebar", "");
+            test_eq(children[0]->getChildren()[0]->getName(), "title", "");
+            test_eq(children[0]->getChildren()[1]->getName(), "close", "");
+            test_eq(children[1]->getName(), "message", "");
+            test_eq(children[2]->getName(), "cancel", "");
+            test_eq(children[3]->getName(), "submit", "");
+        TEST_END
+
+        TEST_START(Default property actuation)
+            EditorMain<ofxInterface::Node> editor;
+            editor.setup(); // loads "structures.xml"
+            auto nodeRef = editor.create("window");
+            test_eq(nodeRef->getSize(), ofVec2f(300.0f, 200.0f), "");
+            test_eq(nodeRef->getPosition(), ofVec3f(123.0f, 456.0f, 789.0f), "");
+            test_eq(nodeRef->getScale(), ofVec3f(0.5f, .25f, .1f), "");
+        TEST_END
+
+
+    }
+
+    void run(){
+        runEditorBase();
+        // runEditor_old();
     }
 };
 
