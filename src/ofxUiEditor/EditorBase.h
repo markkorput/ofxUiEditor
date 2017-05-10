@@ -74,7 +74,7 @@ void ofxUiEditor::EditorBase<NodeType>::setup(){
 }
 
 template<class NodeType>
-shared_ptr<NodeType> EditorBase<NodeType>::create(const string& nodePath, bool recursive){
+shared_ptr<NodeType> ofxUiEditor::EditorBase<NodeType>::create(const string& nodePath, bool recursive){
     shared_ptr<NodeType> node;
 
     // try to find structure information
