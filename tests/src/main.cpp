@@ -1,5 +1,4 @@
 #include "ofxUnitTests.h"
-#include "ofxUiEditor/EditorBase.h"
 #include "ofxUiEditor/EditorOld.h"
 #include "ofxUiEditor.h"
 
@@ -121,12 +120,12 @@ class ofApp: public ofxUnitTestsApp{
         // TEST_END
     }
 
-    void runEditorBase(){
+    void runManager(){
         TEST_START(EditorBase.get)
-            ofxUiEditor::EditorBase<ofxInterface::Node> editor;
-            editor.setup();
+            ofxUiEditor::Manager man;
+            man.setup();
+            shared_ptr<NodeModel> modelRef = man.get("window");
 
-            shared_ptr<NodeModel> modelRef = editor.get("window");
             // structure
             test_eq(modelRef->getId(), "window", "");
             test_eq(modelRef->getParent() == nullptr, true, "");
@@ -151,10 +150,16 @@ class ofApp: public ofxUnitTestsApp{
         TEST_END
 
         TEST_START(Generate default ofxInterface nodes)
-            ofxUiEditor::Manager man;
-            man.setup(); // loads data from files
+            ofLogWarning() << "TODO";
+            // ofxUiEditor::Manager man;
+            // man.setup(); // loads data from files
+            //
+            // shared_ptr<ofxInterface::Node> nodeRef = man.instantiate("window");
+            //
+            // man.addType(".MyProgressBar", OFX_UI_EDITOR_INSTANTIATOR(CustomProgressBar));
+            //
+            // shared_ptr<ofxInterface::Node> nodeRef = man.instantiate<ofxInterface::Node>("window");
 
-            // shared_ptr<ofxInterface::Node> nodeRef = man.create("window");
             // test_eq(nodeRef->getName(), "window", "");
             // auto& children = nodeRef->getChildren();
             // test_eq(children.size(), 4, "");
@@ -179,7 +184,7 @@ class ofApp: public ofxUnitTestsApp{
     }
 
     void run(){
-        runEditorBase();
+        runManager();
         // runEditorOld();
     }
 };
