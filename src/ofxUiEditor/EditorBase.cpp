@@ -40,6 +40,8 @@ shared_ptr<NodeModel> EditorBase::get(const string& nodePath, bool recursive){
             return nodeModelRef;
         }
 
+        nodeModelRef->set("class", infoRef->getClass());
+
         if(recursive){
             const vector<string>& childNames = infoRef->getChildNames();
             for(auto& childName : childNames){
