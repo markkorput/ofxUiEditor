@@ -123,7 +123,7 @@ class ofApp: public ofxUnitTestsApp{
 
     void runEditorBase(){
         TEST_START(EditorBase.get)
-            EditorBase<ofxInterface::Node> editor;
+            ofxUiEditor::EditorBase<ofxInterface::Node> editor;
             editor.setup();
 
             shared_ptr<NodeModel> modelRef = editor.get("window");
@@ -150,22 +150,21 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(modelRef->get("scale_z"), "0.1", "");
         TEST_END
 
-        //
-        // TEST_START(EditorBase.create)
-        //     EditorBase<ofxInterface::Node> editor;
-        //     editor.setup(); // loads "structures.xml"
-        //
-        //     shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
-        //     test_eq(nodeRef->getName(), "window", "");
-        //     auto& children = nodeRef->getChildren();
-        //     test_eq(children.size(), 4, "");
-        //     test_eq(children[0]->getName(), "titlebar", "");
-        //     test_eq(children[0]->getChildren()[0]->getName(), "title", "");
-        //     test_eq(children[0]->getChildren()[1]->getName(), "close", "");
-        //     test_eq(children[1]->getName(), "message", "");
-        //     test_eq(children[2]->getName(), "cancel", "");
-        //     test_eq(children[3]->getName(), "submit", "");
-        // TEST_END
+        TEST_START(Generate default ofxInterface nodes)
+            ofxUiEditor::Manager man;
+            man.setup(); // loads data from files
+
+            // shared_ptr<ofxInterface::Node> nodeRef = man.create("window");
+            // test_eq(nodeRef->getName(), "window", "");
+            // auto& children = nodeRef->getChildren();
+            // test_eq(children.size(), 4, "");
+            // test_eq(children[0]->getName(), "titlebar", "");
+            // test_eq(children[0]->getChildren()[0]->getName(), "title", "");
+            // test_eq(children[0]->getChildren()[1]->getName(), "close", "");
+            // test_eq(children[1]->getName(), "message", "");
+            // test_eq(children[2]->getName(), "cancel", "");
+            // test_eq(children[3]->getName(), "submit", "");
+        TEST_END
 
         // TEST_START(Default property actuation)
         //     EditorMain<ofxInterface::Node> editor;
