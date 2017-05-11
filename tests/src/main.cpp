@@ -1,5 +1,6 @@
 #include "ofxUnitTests.h"
 #include "ofxUiEditor/EditorBase.h"
+#include "ofxUiEditor/EditorOld.h"
 #include "ofxUiEditor.h"
 
 #define TEST_START(x) {ofLog()<<"CASE: "<<#x;
@@ -26,10 +27,10 @@ public:
 };
 
 class ofApp: public ofxUnitTestsApp{
-    void runEditor_old(){
+    void runEditorOld(){
         // Create our editor instance with the standard
         // ofxInterface::Node as base Node type
-        ofxUiEditor::Editor<ofxInterface::Node> editor;
+        ofxUiEditor::EditorOld<ofxInterface::Node> editor;
         editor.setup();
 
         // We're using custom classes for component behaviour, so we need to register
@@ -180,7 +181,7 @@ class ofApp: public ofxUnitTestsApp{
 
     void run(){
         runEditorBase();
-        // runEditor_old();
+        // runEditorOld();
     }
 };
 
