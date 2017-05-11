@@ -10,8 +10,21 @@
 #include "macros.h"
 
 #define OFXUIEDITOR_DEFAULT_STRUCTURE_FILE "structures.xml"
+#define OFXUIEDITOR_DEFAULT_PROPERTIES_FILE "properties.json"
 
 namespace ofxUiEditor {
+
+    class PropertiesModel : public ofxCMS::Model {
+    public:
+        void follow(shared_ptr<PropertiesModel> other){
+            if(other == nullptr){
+                ofLogWarning() << "got nullptr";
+                return;
+            }
+
+            ofLogWarning() << "TODO: implement PropertiesModel.follow";
+        }
+    };
 
     template<class NodeType>
     class EditorBase {
@@ -31,6 +44,8 @@ namespace ofxUiEditor {
         shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
         shared_ptr<NodeModel> get(const string& nodePath, bool recursive=true);
 
+        void addPropertiesFile(const string& filePath);
+
         inline void addInstantiator(const string& id, INSTANTIATOR_FUNC func){
             instantiator_funcs[id] = func;
         }
@@ -45,6 +60,8 @@ namespace ofxUiEditor {
 
     private:
         StructureManager structureManager;
+        ofxCMS::Collection<PropertiesModel> propertiesCollection;
+        std::set<string> loadedPropertiesFiles;
 
         //! list lambda routines that can create appropriate node instances
         std::map<string, INSTANTIATOR_FUNC> instantiator_funcs;
@@ -64,6 +81,9 @@ void ofxUiEditor::EditorBase<NodeType>::setup(){
     if(!structureManager.isLoaded() && ofFile::doesFileExist(OFXUIEDITOR_DEFAULT_STRUCTURE_FILE))
         structureManager.setup(OFXUIEDITOR_DEFAULT_STRUCTURE_FILE);
 
+    if(propertiesCollection.size() == 0 && ofFile::doesFileExist(OFXUIEDITOR_DEFAULT_PROPERTIES_FILE))
+        addPropertiesFile(OFXUIEDITOR_DEFAULT_PROPERTIES_FILE);
+
     // NodeTypes supported by default (as they are part of the ofxInterface dependency)
     addType(".SolidColorPanel",
         OFX_UI_EDITOR_INSTANTIATOR(ofxInterface::SolidColorPanel)/*,
@@ -75,24 +95,44 @@ void ofxUiEditor::EditorBase<NodeType>::setup(){
 }
 
 template<class NodeType>
+void ofxUiEditor::EditorBase<NodeType>::addPropertiesFile(const string& filePath){
+    // remember which files we have loaded, for ::reload
+    loadedPropertiesFiles.insert(filePath);
+
+    // ofLogWarning() << "get rid of propertiesManager (2)";
+    // dataRef->propertiesManager.load(filePath);
+    propertiesCollection.loadJsonFromFile(filePath);
+}
+
+template<class NodeType>
 shared_ptr<ofxUiEditor::NodeModel> ofxUiEditor::EditorBase<NodeType>::get(const string& nodePath, bool recursive){
     auto nodeModelRef = make_shared<NodeModel>();
     nodeModelRef->set("id", nodePath);
 
-    // try to find structure information
-    auto infoRef = structureManager.get(nodePath);
-    if(!infoRef){
-        ofLogWarning() << "no structure infoRef found for nodePath: " << nodePath;
-        return nodeModelRef;
-    }
-
-    if(recursive){
-        const vector<string>& childNames = infoRef->getChildNames();
-        for(auto& childName : childNames){
-            nodeModelRef->addChild(get(nodePath + StructureManager::SEPARATOR + childName, recursive));
+    // try to find properties information
+    {
+        auto propertiesModelRef = propertiesCollection.findById(nodePath);
+        if(propertiesModelRef){
+            ofLogWarning() << "TODO: make he nodeModelRef actively 'follow' the propertiesModelRef";
+            nodeModelRef->copy(propertiesModelRef);
         }
     }
 
+    // try to find structure information
+    {
+        auto infoRef = structureManager.get(nodePath);
+        if(!infoRef){
+            ofLogWarning() << "no structure infoRef found for nodePath: " << nodePath;
+            return nodeModelRef;
+        }
+
+        if(recursive){
+            const vector<string>& childNames = infoRef->getChildNames();
+            for(auto& childName : childNames){
+                nodeModelRef->addChild(get(nodePath + StructureManager::SEPARATOR + childName, recursive));
+            }
+        }
+    }
     return nodeModelRef;
 }
 
