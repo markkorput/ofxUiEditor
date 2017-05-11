@@ -6,6 +6,7 @@
 
 #include "StructureManager.h"
 #include "PropertiesActuators.h"
+#include "NodeModel.h"
 #include "macros.h"
 
 #define OFXUIEDITOR_DEFAULT_STRUCTURE_FILE "structures.xml"
@@ -28,7 +29,7 @@ namespace ofxUiEditor {
         void setup();
 
         shared_ptr<NodeType> create(const string& nodePath, bool recursive=true);
-
+        shared_ptr<NodeModel> get(const string& nodePath, bool recursive=true);
 
         inline void addInstantiator(const string& id, INSTANTIATOR_FUNC func){
             instantiator_funcs[id] = func;
@@ -71,6 +72,28 @@ void ofxUiEditor::EditorBase<NodeType>::setup(){
     addType(".BitmapTextButton",
         OFX_UI_EDITOR_INSTANTIATOR(ofxInterface::BitmapTextButton)/*,
         PropertiesActuators::actuateBitmapTextButton*/);
+}
+
+template<class NodeType>
+shared_ptr<ofxUiEditor::NodeModel> ofxUiEditor::EditorBase<NodeType>::get(const string& nodePath, bool recursive){
+    auto nodeModelRef = make_shared<NodeModel>();
+    nodeModelRef->set("id", nodePath);
+
+    // try to find structure information
+    auto infoRef = structureManager.get(nodePath);
+    if(!infoRef){
+        ofLogWarning() << "no structure infoRef found for nodePath: " << nodePath;
+        return nodeModelRef;
+    }
+
+    if(recursive){
+        const vector<string>& childNames = infoRef->getChildNames();
+        for(auto& childName : childNames){
+            nodeModelRef->addChild(get(nodePath + StructureManager::SEPARATOR + childName, recursive));
+        }
+    }
+
+    return nodeModelRef;
 }
 
 template<class NodeType>

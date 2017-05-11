@@ -121,21 +121,40 @@ class ofApp: public ofxUnitTestsApp{
     }
 
     void runEditorBase(){
-        TEST_START(EditorMain.setup)
+        TEST_START(EditorBase.get)
             EditorBase<ofxInterface::Node> editor;
-            editor.setup(); // loads "structures.xml"
+            editor.setup();
 
-            shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
-            test_eq(nodeRef->getName(), "window", "");
-            auto& children = nodeRef->getChildren();
-            test_eq(children.size(), 4, "");
-            test_eq(children[0]->getName(), "titlebar", "");
-            test_eq(children[0]->getChildren()[0]->getName(), "title", "");
-            test_eq(children[0]->getChildren()[1]->getName(), "close", "");
-            test_eq(children[1]->getName(), "message", "");
-            test_eq(children[2]->getName(), "cancel", "");
-            test_eq(children[3]->getName(), "submit", "");
+            shared_ptr<NodeModel> modelRef = editor.get("window");
+
+            test_eq(modelRef->getId(), "window", "");
+            test_eq(modelRef->getParent() == nullptr, true, "");
+            test_eq(modelRef->getChildren().size(), 4, "");
+            test_eq(modelRef->getChildren()[0]->getId(), "window/titlebar", "");
+            test_eq(modelRef->getChildren()[0]->getChildren().size(), 2, "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[0]->getId(), "window/titlebar/title", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[1]->getId(), "window/titlebar/close", "");
+            test_eq(modelRef->getChildren()[1]->getId(), "window/message", "");
+            test_eq(modelRef->getChildren()[2]->getId(), "window/cancel", "");
+            test_eq(modelRef->getChildren()[3]->getId(), "window/submit", "");
         TEST_END
+
+        //
+        // TEST_START(EditorBase.create)
+        //     EditorBase<ofxInterface::Node> editor;
+        //     editor.setup(); // loads "structures.xml"
+        //
+        //     shared_ptr<ofxInterface::Node> nodeRef = editor.create("window");
+        //     test_eq(nodeRef->getName(), "window", "");
+        //     auto& children = nodeRef->getChildren();
+        //     test_eq(children.size(), 4, "");
+        //     test_eq(children[0]->getName(), "titlebar", "");
+        //     test_eq(children[0]->getChildren()[0]->getName(), "title", "");
+        //     test_eq(children[0]->getChildren()[1]->getName(), "close", "");
+        //     test_eq(children[1]->getName(), "message", "");
+        //     test_eq(children[2]->getName(), "cancel", "");
+        //     test_eq(children[3]->getName(), "submit", "");
+        // TEST_END
 
         // TEST_START(Default property actuation)
         //     EditorMain<ofxInterface::Node> editor;
