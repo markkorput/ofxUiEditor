@@ -1,36 +1,38 @@
+#pragma once
+
 #include "MeshDataManager.h"
 
 namespace ofxUiEditor {
 
     template<class NodeType>
     class DataToNodeActuator {
-        
+
     private: // callbacks
-        
+
         void onDataChange(MeshData& data){
             performApply();
             ofNotifyEvent(appliedEvent, *this);
         }
-        
+
     public: // commond methods
 
         DataToNodeActuator() : meshDataRef(nullptr), nodeRef(nullptr){
         }
-        
+
         ~DataToNodeActuator(){
             destroy();
         }
-        
+
         void setup(shared_ptr<MeshData> meshData, shared_ptr<NodeType> node){
             meshDataRef = meshData;
             nodeRef = node;
             ofAddListener(meshDataRef->changeEvent, this, &DataToNodeActuator<NodeType>::onDataChange);
         }
-        
+
         void destroy(){
             if(meshDataRef)
                 ofRemoveListener(meshDataRef->changeEvent, this, &DataToNodeActuator<NodeType>::onDataChange);
-            
+
             nodeRef = nullptr;
             meshDataRef = nullptr;
         }
@@ -40,19 +42,19 @@ namespace ofxUiEditor {
                 ofLogWarning() << "DataToNodeActuator can't apply when either node or mesh data is missing";
                 return;
             }
-            
+
             performApply();
-            
+
             if(notify)
                 ofNotifyEvent(appliedEvent, *this);
         }
-        
+
         shared_ptr<NodeType> getNode() const {
             return nodeRef;
         }
 
     private:
-        
+
         void performApply(){
             // apply orientation, scale, position and size
             nodeRef->setName(meshDataRef->getName());
@@ -61,9 +63,9 @@ namespace ofxUiEditor {
             nodeRef->setPosition(meshDataRef->getPosition());
             nodeRef->setSize(meshDataRef->getVertBoundsSize());
         }
-        
+
     public: // events
-        
+
         ofEvent<DataToNodeActuator<NodeType>> appliedEvent;
 
     private:
@@ -75,17 +77,17 @@ namespace ofxUiEditor {
     template<class NodeType>
     class NodeGenerator {
     public:
-        
+
         NodeGenerator(){
             params.setName("NodeGenerator");
             params.add(realtimeUpdatesParam.set("realtime-updates", true));
             instantiatorMethod = nullptr;
         }
-        
+
         ~NodeGenerator(){
             destroy();
         }
-        
+
         void setup(MeshDataManager& meshDataManager){
             this->meshDataManager = &meshDataManager;
         }
@@ -103,7 +105,7 @@ namespace ofxUiEditor {
                 ofLogWarning() << "Can't find layout data for id: " << layoutId << ". Can't generate node.";
                 return nullptr;
             }
-            
+
             return generateNode(meshDataRef, recursive);
         }
 
@@ -140,7 +142,7 @@ namespace ofxUiEditor {
             if(recursive){
                 // get data
                 vector<shared_ptr<MeshData>> childMeshDataRefs = meshDataManager->getChildren(meshDataRef->getId());
-                
+
                 for(auto childMeshDataRef : childMeshDataRefs){
                     // recursively call this method to generate child elements
                     auto childNode = generateNode(childMeshDataRef, recursive);
@@ -149,7 +151,7 @@ namespace ofxUiEditor {
                         node->addChild(childNode.get());
                 }
             }
-            
+
             return node;
         }
 
@@ -158,7 +160,7 @@ namespace ofxUiEditor {
         }
 
     private: // callbacks
-        
+
         void onActuatorApplied(DataToNodeActuator<NodeType>& actuator){
             ofNotifyEvent(nodeUpdatedEvent, *actuator.getNode().get());
         }
