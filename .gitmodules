@@ -4,3 +4,6 @@
 [submodule "dependencies/ofxLambdaEvent"]
 	path = dependencies/ofxLambdaEvent
 	url = git@github.com:markkorput/ofxLambdaEvent.git
+[submodule "dependencies/ofxInterface"]
+	path = dependencies/ofxInterface
+	url = git@github.com:markkorput/ofxInterface.git
