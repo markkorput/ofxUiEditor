@@ -1,0 +1,3 @@
+[submodule "dependencies/ofxCMS"]
+	path = dependencies/ofxCMS
+	url = git@github.com:markkorput/ofxCMS.git
