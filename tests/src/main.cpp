@@ -126,7 +126,7 @@ class ofApp: public ofxUnitTestsApp{
             editor.setup();
 
             shared_ptr<NodeModel> modelRef = editor.get("window");
-
+            // structure
             test_eq(modelRef->getId(), "window", "");
             test_eq(modelRef->getParent() == nullptr, true, "");
             test_eq(modelRef->getChildren().size(), 4, "");
@@ -137,6 +137,16 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(modelRef->getChildren()[1]->getId(), "window/message", "");
             test_eq(modelRef->getChildren()[2]->getId(), "window/cancel", "");
             test_eq(modelRef->getChildren()[3]->getId(), "window/submit", "");
+
+            // properties
+            test_eq(modelRef->get("size_x"), "300", "");
+            test_eq(modelRef->get("size_y"), "200", "");
+            test_eq(modelRef->get("position_x"), "123", "");
+            test_eq(modelRef->get("position_y"), "456", "");
+            test_eq(modelRef->get("position_z"), "789", "");
+            test_eq(modelRef->get("scale_x"), "0.5", "");
+            test_eq(modelRef->get("scale_y"), "0.25", "");
+            test_eq(modelRef->get("scale_z"), "0.1", "");
         TEST_END
 
         //
