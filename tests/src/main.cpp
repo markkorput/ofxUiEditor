@@ -201,6 +201,26 @@ class ofApp: public ofxUnitTestsApp{
             auto nodeRef = man.instantiate("window");
             test_eq(nodeRef->getSize(), ofVec2f(150,400), "");
         TEST_END
+
+        TEST_START(Actuate property updates in realtime)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            auto nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getSize(), ofVec2f(300,200), "");
+
+            ofFile::moveFromTo("properties.json", "properties.json.bak");
+            ofFile::moveFromTo("properties2.json", "properties.json");
+
+            man.reload();
+            test_eq(nodeRef->getSize(), ofVec2f(400,250), "");
+
+            // restore original properties.json
+            ofFile::moveFromTo("properties.json", "properties2.json");
+            ofFile::moveFromTo("properties.json.bak", "properties.json");
+
+            man.reload();
+            test_eq(nodeRef->getSize(), ofVec2f(300,200), "");
+        TEST_END
     }
 
     void run(){

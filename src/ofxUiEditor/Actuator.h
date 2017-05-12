@@ -181,52 +181,31 @@ namespace ofxUiEditor {
 
     template<class BaseType>
     void Actuator<BaseType>::actuate(shared_ptr<BaseType> instanceRef, shared_ptr<ofxUiEditor::NodeModel> nodeModelRef, bool active){
-        std::vector<shared_ptr<PropsModel>> propModelRefs;
-        std::vector<shared_ptr<ActuatorModel<BaseType>>> actuatorModelRefs;
+        std::vector<string> _ids;
+        _ids.push_back("."+nodeModelRef->getClass());
+        _ids.push_back(nodeModelRef->getId());
 
-        // find relevant property models, general ones first, more specific (higher priority) ones later
-        {
-            auto propModelRef = propertiesCollection.findById("."+nodeModelRef->getClass());
-            if(propModelRef)
-                propModelRefs.push_back(propModelRef);
-
-            propModelRef = propertiesCollection.findById(nodeModelRef->getId());
-            if(propModelRef)
-                propModelRefs.push_back(propModelRef);
-        }
-
-        // find relevant actuator models
-        {
-            auto actuatorModelRef = actuatorCollection.findById("."+nodeModelRef->getClass());
-            if(actuatorModelRef)
-                actuatorModelRefs.push_back(actuatorModelRef);
-
-            actuatorModelRef = actuatorCollection.findById(nodeModelRef->getId());
-            if(actuatorModelRef)
-                actuatorModelRefs.push_back(actuatorModelRef);
-        }
-
-        // ofLog() << "prop models: "<<propModelRefs.size();
-        // ofLog() << "act models: "<<actuatorModelRefs.size();
-
-        // loop over and apply all found property models
-        for(auto propModelRef : propModelRefs){
-            // apply using all found actuator models
-            for(auto actuatorModelRef : actuatorModelRefs){
+        // loop over and apply all relevant property models
+        for(auto propModelRef : propertiesCollection.findByIds(_ids)){
+            // apply using all relevant registered actuator models
+            for(auto actuatorModelRef : actuatorCollection.findByIds(_ids)){
                 actuatorModelRef->actuate(instanceRef, propModelRef);
             }
-        }
 
-        if(active){
-            ofLogWarning() << "TODO: active realtime property actuation";
-            // nodeModelRef->attributeChangeEvent.addListener([actuatorModelRef, instanceRef](ofxUiEditor::NodeModel::AttrChangeArgs& args){
-            //     ofLog() << "Detected change to attribute `" << args.attr << "` of ofxUiEditor::NodeModel " << args.model->get("id") << ", actuating linked view-object";
-            //     // AttrChangeArgs:
-            //     //  Model *model;
-            //     //  string attr;
-            //     //  string value;
-            //     actuatorModelRef->actuateAttribute(instanceRef, args.attr, args.value);
-            // }, this);
+            if(active){
+                propModelRef->attributeChangeEvent.addListener([this, _ids, instanceRef](PropsModel::AttrChangeArgs& args){
+                    ofLogVerbose() << "Detected change to attribute `" << args.attr << "` of ofxUiEditor::PropsModel " << args.model->get("id") << ", actuating linked view-object";
+                    // AttrChangeArgs:
+                    //  Model *model;
+                    //  string attr;
+                    //  string value;
+
+                    // find all currently registeredrelevant actuatorModels and apply them
+                    for(auto actuatorModelRef : this->actuatorCollection.findByIds(_ids)){
+                        actuatorModelRef->actuateAttribute(instanceRef, args.attr, args.value);
+                    }
+                }, this);
+            }
         }
     }
 }
