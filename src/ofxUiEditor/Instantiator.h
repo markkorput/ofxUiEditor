@@ -5,15 +5,18 @@
 namespace ofxUiEditor {
 
     template<class BaseType>
+    struct InstantiationArgs {
+        shared_ptr<BaseType> instanceRef;
+        shared_ptr<NodeModel> nodeModelRef;
+    };
+
+    template<class BaseType>
     class Instantiator {
 
     public: // sub-types
         typedef FUNCTION<shared_ptr<BaseType>(shared_ptr<NodeModel>)> InstantiatorFunc;
 
-        typedef struct {
-            shared_ptr<BaseType> instanceRef;
-            shared_ptr<NodeModel> nodeModelRef;
-        } InstantiationArgs;
+        typedef InstantiationArgs<BaseType> InstantiationArgs;
 
     public: // methods
         shared_ptr<BaseType> instantiate(shared_ptr<NodeModel> nodeModelRef, bool recursive=true);

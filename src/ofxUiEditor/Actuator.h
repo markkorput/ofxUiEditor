@@ -111,7 +111,7 @@ namespace ofxUiEditor {
 
     template<class BaseType>
     void Actuator<BaseType>::setup(){
-        // TODO: Refactor this class into ofxUiEditor and let all these actuators be added by an external caller
+        // register some default actuators
         addActuator(".Node", "position_x", [](shared_ptr<BaseType> instanceRef, const string& value){
             instanceRef->setX(ofToFloat(value));
         });

@@ -11,6 +11,8 @@ namespace ofxUiEditor {
         typedef FUNCTION<shared_ptr<NodeType>(shared_ptr<NodeModel>)> InstantiatorFunc;
 
     public:
+        void setup();
+
         // instantiating
         shared_ptr<NodeType> instantiate(const string& nodePath, bool recursive=true);
         void addInstantiator(const string& identifier, InstantiatorFunc func);
@@ -18,7 +20,24 @@ namespace ofxUiEditor {
 
     private:
         Instantiator<NodeType> instantiator;
+        Actuator<NodeType> actuator;
     };
+}
+
+template<class NodeType>
+void ofxUiEditor::Manager<NodeType>::setup(){
+    EditorBase::setup();
+    actuator.setup();
+
+    // register listener that applies the properties in nodeModelRef to every view object that is being instantiated
+    instantiator.instantiationEvent.addListener([this](InstantiationArgs<NodeType>& args){
+        ofLog() << "instantiationEvent listener";
+        this->actuator.actuate(
+            args.instanceRef, // view-object; target that all the properties need to be applied to
+            args.nodeModelRef, // the nodeModel contains layout information
+            true // active; this also updates our view object when property configurations change at runtime (for example because the proeprties.json get reloaded), mostly for debugging
+        );
+    }, this);
 }
 
 template<class NodeType>
