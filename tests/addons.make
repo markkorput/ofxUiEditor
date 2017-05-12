@@ -3,3 +3,4 @@ ofxInterface
 ofxLambdaEvent
 ofxUiEditor
 ofxJSON
+ofxCMS

@@ -1,5 +1,5 @@
-// ofxAddons
 #include "ofxInterface.h"
+#include "ofxCMS.h"
 // local
 #include "ofxLambdaEvent/LambdaEvent.h"
 #include "StructureManager.h"
@@ -19,7 +19,7 @@ using namespace ofxInterface;
 namespace ofxUiEditor {
 
     template<class NodeType>
-    class Editor {
+    class EditorOld {
 
         typedef std::function<shared_ptr<NodeType> ()> INSTANTIATOR_FUNC;
         typedef void (*ACTUATOR_FUNCTION)(shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<ofxUiEditor::PropertiesItem> propertiesRef);
@@ -95,23 +95,24 @@ namespace ofxUiEditor {
                 std::vector<shared_ptr<ComponentActuator>> actuatorsRefs;
 
                 std::set<string> loadedPropertiesFiles;
+                // ofxCMS::Collection<ofxCMS::Model> propertiesCollection;
         };
 
     public: // common methods
 
-        Editor() :  dataRef(nullptr),
+        EditorOld() :  dataRef(nullptr),
                     current(nullptr){
             // create scene dataRef instance
             dataRef = make_shared<Data>();
             dataRef->editorRootRef = make_shared<NodeType>();
             current = dataRef->editorRootRef.get();
         }
-        ~Editor(){ destroy(); }
+        ~EditorOld(){ destroy(); }
 
         void setup();
         void setup(shared_ptr<NodeType> newScene);
         void update(float dt);
-        void destroy(){ ofLogWarning() << "ofxUiEditor::Editor doesn't UNregister event listeners yet."; }
+        void destroy(){ ofLogWarning() << "ofxUiEditor::EditorOld doesn't UNregister event listeners yet."; }
 
     public: // operations
 
@@ -121,8 +122,8 @@ namespace ofxUiEditor {
 
     public: // getters / adders
 
-        inline shared_ptr<Editor<NodeType>> operator[](const string& name) const { return this->node(name); }
-        shared_ptr<Editor<NodeType>> node(const string& name) const;
+        inline shared_ptr<EditorOld<NodeType>> operator[](const string& name) const { return this->node(name); }
+        shared_ptr<EditorOld<NodeType>> node(const string& name) const;
         void animate(const string& id);
         shared_ptr<Data> getData() const { return dataRef; }
         // give the node that this editor instance points to
@@ -139,7 +140,10 @@ namespace ofxUiEditor {
 
         void addPropertiesFile(const string& filePath){
             dataRef->loadedPropertiesFiles.insert(filePath); // remember which files we have loaded, for ::reload
+            ofLogWarning() << "get rid of propertiesManager (2)";
             dataRef->propertiesManager.load(filePath);
+            // dataRef->propertiesCollection.loadJsonFromFile(filePath);
+            // dataRef->propertiesCollection.create();
         }
 
         void use(StructureManager& structureManager);
@@ -158,14 +162,15 @@ namespace ofxUiEditor {
 
     protected: // cloning methods
 
-        shared_ptr<Editor<NodeType>> clone() const;
-        void clone(const Editor<NodeType> &original);
-        shared_ptr<Editor<NodeType>> dummy() const;
+        shared_ptr<EditorOld<NodeType>> clone() const;
+        void clone(const EditorOld<NodeType> &original);
+        shared_ptr<EditorOld<NodeType>> dummy() const;
 
-    private: // attributes
+    public: // attributes
 
         shared_ptr<Data> dataRef;
         NodeType* current;
+
     };
 }
 
@@ -177,7 +182,7 @@ namespace ofxUiEditor {
 using namespace ofxUiEditor;
 
 template<class NodeType>
-void Editor<NodeType>::setup(){
+void EditorOld<NodeType>::setup(){
     // load default file
     if(!dataRef->structureManager && ofFile::doesFileExist(DEFAULT_STRUCTURE_FILE))
         addStructureFile(DEFAULT_STRUCTURE_FILE);
@@ -196,7 +201,7 @@ void Editor<NodeType>::setup(){
 }
 
 template<class NodeType>
-void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
+void EditorOld<NodeType>::setup(shared_ptr<NodeType> newScene){
     setup();
     dataRef->sceneRef = newScene;
     // set our current node pointer to the given scene node (root)
@@ -204,17 +209,17 @@ void Editor<NodeType>::setup(shared_ptr<NodeType> newScene){
 }
 
 template<class NodeType>
-void Editor<NodeType>::update(float dt){
+void EditorOld<NodeType>::update(float dt){
     ofLogWarning() << "update all active animations";
 }
 
 template<class NodeType>
-void Editor<NodeType>::use(StructureManager& structureManager){
+void EditorOld<NodeType>::use(StructureManager& structureManager){
     dataRef->structureManager = &structureManager;
 }
 
 template<class NodeType>
-void Editor<NodeType>::addActuator(const string& id, ACTUATOR_FUNCTION func){
+void EditorOld<NodeType>::addActuator(const string& id, ACTUATOR_FUNCTION func){
     auto actuator = make_shared<ComponentActuator>();
     actuator->id = id;
     actuator->func = func;
@@ -222,7 +227,7 @@ void Editor<NodeType>::addActuator(const string& id, ACTUATOR_FUNCTION func){
 }
 
 template<class NodeType>
-shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recursive){
+shared_ptr<NodeType> EditorOld<NodeType>::create(const string& nodePath, bool recursive){
     shared_ptr<NodeType> node;
     shared_ptr<StructureInfo> infoRef;
 
@@ -282,7 +287,7 @@ shared_ptr<NodeType> Editor<NodeType>::create(const string& nodePath, bool recur
 }
 
 template<class NodeType>
-void Editor<NodeType>::remove(shared_ptr<NodeType> node){
+void EditorOld<NodeType>::remove(shared_ptr<NodeType> node){
     ofLog() << "Removing node: " << node->getName();
 
     if(!dataRef){
@@ -299,14 +304,17 @@ void Editor<NodeType>::remove(shared_ptr<NodeType> node){
 }
 
 template<class NodeType>
-void Editor<NodeType>::reload(){
+void EditorOld<NodeType>::reload(){
     for(auto& filePath : dataRef->loadedPropertiesFiles){
+        ofLogWarning() << "get rid of propertiesManager (1)";
         dataRef->propertiesManager.load(filePath);
+        // dataRef->propertiesCollection.loadJsonFromFile(filePath);
+
     }
 }
 
 template<class NodeType>
-void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
+void EditorOld<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
     // we'll need a node to listen to
     if(!current){
         ofLogWarning() << "onTouchDown without a current node";
@@ -325,7 +333,7 @@ void Editor<NodeType>::onTouchDown(std::function<void (TouchEvent&)> func){
 
 // returns new cloned instance, pointing at the specified node
 template<class NodeType>
-shared_ptr<Editor<NodeType>> Editor<NodeType>::node(const string& name) const {
+shared_ptr<EditorOld<NodeType>> EditorOld<NodeType>::node(const string& name) const {
     if(!current)
         return dummy();
 
@@ -342,27 +350,27 @@ shared_ptr<Editor<NodeType>> Editor<NodeType>::node(const string& name) const {
 }
 
 template<class NodeType>
-void Editor<NodeType>::animate(const string& id){
+void EditorOld<NodeType>::animate(const string& id){
     ofLogWarning() << "TODO: initiate animation";
 }
 
 // returns a new instance that is a clone of the current instance
 template<class NodeType>
-shared_ptr<Editor<NodeType>> Editor<NodeType>::clone() const {
-    auto c = make_shared<Editor<NodeType>>();
+shared_ptr<EditorOld<NodeType>> EditorOld<NodeType>::clone() const {
+    auto c = make_shared<EditorOld<NodeType>>();
     c->clone(*this);
     return c;
 }
 
 // make the current instance a clone of the given instance
 template<class NodeType>
-void Editor<NodeType>::clone(const Editor<NodeType> &original){
+void EditorOld<NodeType>::clone(const EditorOld<NodeType> &original){
     dataRef = original.getData();
     current = original.getCurrent();
 }
 
 template<class NodeType>
-shared_ptr<Editor<NodeType>> Editor<NodeType>::dummy() const {
-    auto c = make_shared<Editor<NodeType>>();
+shared_ptr<EditorOld<NodeType>> EditorOld<NodeType>::dummy() const {
+    auto c = make_shared<EditorOld<NodeType>>();
     return c;
 }

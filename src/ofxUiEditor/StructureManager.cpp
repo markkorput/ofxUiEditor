@@ -11,6 +11,12 @@ void StructureManager::setup(const string& filename){
 
 shared_ptr<StructureInfo> StructureManager::get(const string& nodePath){
     auto info = make_shared<StructureInfo>();
+
+    if(!xmlRef){
+        ofLogWarning() << "not setupped yet";
+        return info;
+    }
+
     auto el = xmlRef->getPocoElement(nodePath);
 
     if(!el)
