@@ -105,82 +105,122 @@ class ofApp: public ofxUnitTestsApp{
         {   ofLog() << "operator[]";
             test_eq((CustomProgressBar*)editor["CustomProgressBar"]->getCurrent(), progressBarRef.get(), "");
         }
-
-        {   ofLog() << ".animate DISABLED";
-            // editor["CustomProgressBar"]->animate("flip");
-            // test_eq(progressBarRef->getOrientationEuler().x, 0, "");
-            // editor.update(0.5); // progress five seconds into the future
-            // test_eq(progressBarRef->getOrientationEuler().x, 123, "");
-        }
-
-        // TEST_START(propertiesCollection)
-        //     test_eq(editor.dataRef->propertiesCollection.size(), 2, "");
-        //     auto modelRef = edit.dataRef->propertiesCollection.create();
-        //     modelRef = edit.dataRef->propertiesCollection.create();
-        // TEST_END
     }
 
     void runManager(){
-        TEST_START(EditorBase.get)
-            ofxUiEditor::Manager man;
+        TEST_START(get layout data)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
             man.setup();
             shared_ptr<NodeModel> modelRef = man.get("window");
 
             // structure
             test_eq(modelRef->getId(), "window", "");
+            test_eq(modelRef->getClass(), "SolidColorPanel", "");
             test_eq(modelRef->getParent() == nullptr, true, "");
             test_eq(modelRef->getChildren().size(), 4, "");
             test_eq(modelRef->getChildren()[0]->getId(), "window/titlebar", "");
+            test_eq(modelRef->getChildren()[0]->getName(), "titlebar", "");
+            test_eq(modelRef->getChildren()[0]->getClass(), "SolidColorPanel", "");
             test_eq(modelRef->getChildren()[0]->getChildren().size(), 2, "");
+
             test_eq(modelRef->getChildren()[0]->getChildren()[0]->getId(), "window/titlebar/title", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[0]->getName(), "title", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[0]->getClass(), "BitmapTextButton", "");
+
             test_eq(modelRef->getChildren()[0]->getChildren()[1]->getId(), "window/titlebar/close", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[1]->getName(), "close", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[1]->getClass(), "BitmapTextButton", "");
+
             test_eq(modelRef->getChildren()[1]->getId(), "window/message", "");
+            test_eq(modelRef->getChildren()[1]->getName(), "message", "");
+            test_eq(modelRef->getChildren()[1]->getClass(), "BitmapTextButton", "");
+
             test_eq(modelRef->getChildren()[2]->getId(), "window/cancel", "");
+            test_eq(modelRef->getChildren()[2]->getName(), "cancel", "");
+            test_eq(modelRef->getChildren()[2]->getClass(), "BitmapTextButton", "");
+
             test_eq(modelRef->getChildren()[3]->getId(), "window/submit", "");
-
-            // properties
-            test_eq(modelRef->get("size_x"), "300", "");
-            test_eq(modelRef->get("size_y"), "200", "");
-            test_eq(modelRef->get("position_x"), "123", "");
-            test_eq(modelRef->get("position_y"), "456", "");
-            test_eq(modelRef->get("position_z"), "789", "");
-            test_eq(modelRef->get("scale_x"), "0.5", "");
-            test_eq(modelRef->get("scale_y"), "0.25", "");
-            test_eq(modelRef->get("scale_z"), "0.1", "");
+            test_eq(modelRef->getChildren()[3]->getName(), "submit", "");
+            test_eq(modelRef->getChildren()[3]->getClass(), "BitmapTextButton", "");
         TEST_END
 
-        TEST_START(Generate default ofxInterface nodes)
-            ofLogWarning() << "TODO";
-            // ofxUiEditor::Manager man;
-            // man.setup(); // loads data from files
-            //
-            // shared_ptr<ofxInterface::Node> nodeRef = man.instantiate("window");
-            //
-            // man.addType(".MyProgressBar", OFX_UI_EDITOR_INSTANTIATOR(CustomProgressBar));
-            //
-            // shared_ptr<ofxInterface::Node> nodeRef = man.instantiate<ofxInterface::Node>("window");
-
-            // test_eq(nodeRef->getName(), "window", "");
-            // auto& children = nodeRef->getChildren();
-            // test_eq(children.size(), 4, "");
-            // test_eq(children[0]->getName(), "titlebar", "");
-            // test_eq(children[0]->getChildren()[0]->getName(), "title", "");
-            // test_eq(children[0]->getChildren()[1]->getName(), "close", "");
-            // test_eq(children[1]->getName(), "message", "");
-            // test_eq(children[2]->getName(), "cancel", "");
-            // test_eq(children[3]->getName(), "submit", "");
+        TEST_START(Instantiate base-type nodes)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            shared_ptr<ofxInterface::Node> nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getNumChildren(), 4, "");
+            test_eq(nodeRef->getName(), "window", "");
+            test_eq(nodeRef->getChildren()[0]->getName(), "titlebar", "");
+            test_eq(nodeRef->getChildren()[0]->getNumChildren(), 2, "");
+            test_eq(nodeRef->getChildren()[0]->getChildren()[0]->getName(), "title", "");
+            test_eq(nodeRef->getChildren()[0]->getChildren()[1]->getName(), "close", "");
+            test_eq(nodeRef->getChildren()[1]->getName(), "message", "");
+            test_eq(nodeRef->getChildren()[2]->getName(), "cancel", "");
+            test_eq(nodeRef->getChildren()[3]->getName(), "submit", "");
         TEST_END
 
-        // TEST_START(Default property actuation)
-        //     EditorMain<ofxInterface::Node> editor;
-        //     editor.setup(); // loads "structures.xml"
-        //     auto nodeRef = editor.create("window");
-        //     test_eq(nodeRef->getSize(), ofVec2f(300.0f, 200.0f), "");
-        //     test_eq(nodeRef->getPosition(), ofVec3f(123.0f, 456.0f, 789.0f), "");
-        //     test_eq(nodeRef->getScale(), ofVec3f(0.5f, .25f, .1f), "");
-        // TEST_END
+        TEST_START(Instantiate custom node types)
+            class HierarchyAnalyserNode : public ofxInterface::Node {
+                public:
+                    const string& getMyType(){ return customTypeValue; }
 
+                private:
+                    string customTypeValue = "I'm a HierarchyAnalyserNode";
+            };
 
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+
+            // add id-based instantiator
+            man.addInstantiator("window", [](shared_ptr<ofxUiEditor::NodeModel> nodeModel){
+                return make_shared<HierarchyAnalyserNode>();
+            });
+
+            auto nodeRef = man.instantiate("window");
+            test_eq(static_pointer_cast<HierarchyAnalyserNode>(nodeRef)->getMyType(), "I'm a HierarchyAnalyserNode", "");
+        }
+
+        TEST_START(Actuate properties from properties.json)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            auto nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getSize(), ofVec2f(300,200), "");
+            test_eq(nodeRef->getPosition(), ofVec3f(123,456,789), "");
+            test_eq(nodeRef->getScale(), ofVec3f(0.5,0.25,0.1), "");
+        TEST_END
+
+        TEST_START(Actuate properties with custom actuator)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            man.addActuator("window", "size_x", [](shared_ptr<ofxInterface::Node> instanceRef, const string& value){
+                instanceRef->setWidth(ofToFloat(value) * 0.5f);
+            });
+            man.addActuator("window", "size_y", [](shared_ptr<ofxInterface::Node> instanceRef, const string& value){
+                instanceRef->setHeight(ofToFloat(value) * 2.0f);
+            });
+            auto nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getSize(), ofVec2f(150,400), "");
+        TEST_END
+
+        TEST_START(Actuate property updates in realtime)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            auto nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getSize(), ofVec2f(300,200), "");
+
+            ofFile::moveFromTo("properties.json", "properties.json.bak");
+            ofFile::moveFromTo("properties2.json", "properties.json");
+
+            man.reload();
+            test_eq(nodeRef->getSize(), ofVec2f(400,250), "");
+
+            // restore original properties.json
+            ofFile::moveFromTo("properties.json", "properties2.json");
+            ofFile::moveFromTo("properties.json.bak", "properties.json");
+
+            man.reload();
+            test_eq(nodeRef->getSize(), ofVec2f(300,200), "");
+        TEST_END
     }
 
     void run(){

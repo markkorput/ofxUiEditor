@@ -13,17 +13,17 @@ namespace ofxUiEditor {
     private: // sub-types
         EditorMain();
 
-        class PropertiesModel : public ofxCMS::Model {
-        public:
-            void follow(shared_ptr<PropertiesModel> other){
-                if(other == nullptr){
-                    ofLogWarning() << "got nullptr";
-                    return;
-                }
-
-                ofLogWarning() << "TODO: implement PropertiesModel.follow";
-            }
-        };
+        // class PropertiesModel : public ofxCMS::Model {
+        // public:
+        //     void follow(shared_ptr<PropertiesModel> other){
+        //         if(other == nullptr){
+        //             ofLogWarning() << "got nullptr";
+        //             return;
+        //         }
+        //
+        //         ofLogWarning() << "TODO: implement PropertiesModel.follow";
+        //     }
+        // };
 
         typedef void (*ACTUATOR_FUNCTION)(shared_ptr<ofxInterface::Node> nodeRef, shared_ptr<PropertiesModel> propertiesModelRef);
 

@@ -14,20 +14,14 @@
 
 namespace ofxUiEditor {
 
-    class PropertiesModel : public ofxCMS::Model {
-    };
-
     class EditorBase {
 
     public:
         void setup();
         shared_ptr<NodeModel> get(const string& nodePath, bool recursive=true);
-        void addPropertiesFile(const string& filePath);
         void reload();
 
     private:
         StructureManager structureManager;
-        ofxCMS::Collection<PropertiesModel> propertiesCollection;
-        std::set<string> loadedPropertiesFiles;
     };
 }
