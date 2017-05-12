@@ -45,8 +45,6 @@ namespace ofxUiEditor {
 
         public:
             void actuate(shared_ptr<BaseType> instanceRef, shared_ptr<PropsModel> propModelRef){
-                ofLog() << "ActuatorModel.actuate";
-
                 // loop over each key/value pair (attribute) in the node model, and apply any attribute actuator we can find
                 propModelRef->each([this, instanceRef](const string& attr, const string& val){
                     actuateAttribute(instanceRef, attr, val);
