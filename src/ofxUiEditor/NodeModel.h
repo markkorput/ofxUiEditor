@@ -21,6 +21,17 @@ namespace ofxUiEditor {
         shared_ptr<NodeModel> getParent() const { return parentRef; }
         const std::vector<shared_ptr<NodeModel>> &getChildren() const { return childrenRefs; }
 
+        size_t size(bool recursive=false){
+            size_t count = childrenRefs.size();
+            if(recursive){
+                for(auto childRef : childrenRefs){
+                    count += childRef->size(recursive);
+                }
+            }
+
+            return count;
+        }
+
     private:
         shared_ptr<NodeModel> parentRef;
         std::vector<shared_ptr<NodeModel>> childrenRefs;
