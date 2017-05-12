@@ -2,6 +2,7 @@
 
 #include "EditorBase.h"
 #include "Instantiator.h"
+#include "Actuator.h"
 
 namespace ofxUiEditor {
     template<class NodeType>
@@ -10,9 +11,10 @@ namespace ofxUiEditor {
         typedef FUNCTION<shared_ptr<NodeType>(shared_ptr<NodeModel>)> InstantiatorFunc;
 
     public:
+        // instantiating
         shared_ptr<NodeType> instantiate(const string& nodePath, bool recursive=true);
-
         void addInstantiator(const string& identifier, InstantiatorFunc func);
+
 
     private:
         Instantiator<NodeType> instantiator;

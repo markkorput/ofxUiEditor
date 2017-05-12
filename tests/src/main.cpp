@@ -209,9 +209,12 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(nodeRef->getChildren()[0]->getNumChildren(), 2, "");
             test_eq(nodeRef->getChildren()[0]->getChildren()[0]->getName(), "title", "");
             test_eq(nodeRef->getChildren()[0]->getChildren()[1]->getName(), "close", "");
+            test_eq(nodeRef->getChildren()[1]->getName(), "message", "");
+            test_eq(nodeRef->getChildren()[2]->getName(), "cancel", "");
+            test_eq(nodeRef->getChildren()[3]->getName(), "submit", "");
         TEST_END
 
-        TEST_START(Instatiate custom node types)
+        TEST_START(Instantiate custom node types)
             class HierarchyAnalyserNode : public ofxInterface::Node {
                 public:
                     const string& getMyType(){ return customTypeValue; }
@@ -231,6 +234,15 @@ class ofApp: public ofxUnitTestsApp{
             auto nodeRef = man.instantiate("window");
             test_eq(static_pointer_cast<HierarchyAnalyserNode>(nodeRef)->getMyType(), "I'm a HierarchyAnalyserNode", "");
         }
+
+        TEST_START(Actuate properties from properties.json)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            auto nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getSize(), ofVec2f(300,200), "");
+            test_eq(nodeRef->getPosition(), ofVec3f(123,456,789), "");
+            test_eq(nodeRef->getScale(), ofVec3f(0.5,0.25,0.1), "");
+        TEST_END
     }
 
     void run(){
