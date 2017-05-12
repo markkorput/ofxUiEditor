@@ -1,97 +1,75 @@
 #pragma once
 
-#include "EditorBase.h"
+#include "ofxLambdaEvent.h"
 
 namespace ofxUiEditor {
 
-    template<class NodeType>
+    template<class BaseType>
     class Instantiator {
 
     public: // sub-types
-
-        typedef std::function<shared_ptr<NodeType> ()> INSTANTIATOR_FUNC;
+        typedef FUNCTION<shared_ptr<BaseType>(shared_ptr<ofxUiEditor::NodeModel>)> InstantiatorFunc;
 
         typedef struct {
-            shared_ptr<NodeType> nodeRef;
-            shared_ptr<StructureInfo> infoRef;
-        } NodeCreatedArgs;
+            shared_ptr<BaseType> instanceRef;
+            shared_ptr<ofxUiEditor::NodeModel> nodeModelRef;
+        } InstantiationArgs;
 
-    public:
-        Instantiator();
-        void setup(EditorBase* editorBase);
+    public: // methods
+        shared_ptr<BaseType> instantiate(shared_ptr<ofxUiEditor::NodeModel> nodeModelRef, bool recursive=true);
+        void addInstantiator(const string& identifier, InstantiatorFunc func);
 
-        shared_ptr<NodeType> instantiate(const string& nodePath, bool recursive=true);
+    public: // events
+        LambdaEvent<InstantiationArgs> instantiationEvent;
 
-    private:
-        EditorBase* editorBase;
-        shared_ptr<NodeType> rootRef;
-
-        // //! list lambda routines that can create appropriate node instances
-        // std::map<string, INSTANTIATOR_FUNC> instantiator_funcs;
-        // shared_ptr<NodeType> editorRootRef;
-        // std::vector<shared_ptr<NodeType>> createdNodeRefs;
-
+    private: // attributes
+        std::map<string, InstantiatorFunc> instantiatorFuncs;
+        // since ofxInterface currently doesn't use shared_ptr but raw pointers, we need to store the shared pointers somewhere,
+        // otherwise the self-destruct. TODO: patch ofxInterface to work with shared_ptrs so we don't need thise redundant pointer management
+        std::vector<shared_ptr<BaseType>> createdInstancesRefs;
     };
 }
 
-template<class NodeType>
-ofxUiEditor::Instantiator<NodeType>::Instantiator(){
-    rootRef = make_shared<NodeType>();
+template<class BaseType>
+shared_ptr<BaseType> ofxUiEditor::Instantiator<BaseType>::instantiate(shared_ptr<ofxUiEditor::NodeModel> nodeModelRef, bool recursive){
+    shared_ptr<BaseType> instanceRef;
+
+    // try to find custom instantiator based on id
+    auto it = instantiatorFuncs.find(nodeModelRef->getId());
+    // couldn't find id-based instantiator, try class-based
+    if(it == instantiatorFuncs.end())
+        it = instantiatorFuncs.find("."+nodeModelRef->get("class"));
+
+    if(it == instantiatorFuncs.end()){
+        // use default instantiator
+        instanceRef = make_shared<BaseType>();
+    } else {
+        // use found custom instantiator
+        instanceRef = it->second(nodeModelRef);
+    }
+
+    ofLogWarning() << "Using ofxInterface::Node's net setDeleteChildren(false) feature, TODO: perform cleanup maintenance ourselves!";
+    instanceRef->setDeleteChildren(false);
+
+    InstantiationArgs args;
+    args.instanceRef = instanceRef;
+    args.nodeModelRef = nodeModelRef;
+    instantiationEvent.notifyListeners(args);
+
+    if(recursive){
+        for(auto childRef : nodeModelRef->getChildren()){
+            instanceRef->addChild(instantiate(childRef, recursive).get());
+        }
+    }
+
+    // we need to remember them, otherwise they might deallocate immediately...
+    // TODO; create fork of ofxInterface that uses shared_ptr internally
+    createdInstancesRefs.push_back(instanceRef);
+
+    return instanceRef;
 }
 
-template<class NodeType>
-void ofxUiEditor::Instantiator<NodeType>::setup(EditorBase* editorBase){
-    this->editorBase = editorBase;
-
-    // // NodeTypes supported by default (as they are part of the ofxInterface dependency)
-    // addType(".SolidColorPanel",
-    //     OFX_UI_EDITOR_INSTANTIATOR(ofxInterface::SolidColorPanel)/*,
-    //     PropertiesActuators::actuateSolidColorPanel*/);
-    //
-    // addType(".BitmapTextButton",
-    //     OFX_UI_EDITOR_INSTANTIATOR(ofxInterface::BitmapTextButton)/*,
-    //     PropertiesActuators::actuateBitmapTextButton*/);
-}
-
-template<class NodeType>
-shared_ptr<NodeType> ofxUiEditor::Instantiator<NodeType>::instantiate(const string& nodePath, bool recursive){
-    // shared_ptr<NodeType> node;
-    //
-    // // try to find structure information
-    // auto infoRef = structureManager.get(nodePath);
-    // if(!infoRef)
-    //     ofLogWarning() << "no structure infoRef found for nodePath: " << nodePath;
-    //
-    // // try to find instantiator func
-    // auto iterator = instantiator_funcs.find(nodePath); // based on component id
-    // if(iterator == instantiator_funcs.end() && infoRef) // based on classname
-    //     iterator = instantiator_funcs.find("."+infoRef->getClass());
-    //
-    // // create our node instance; either through found instantiator lambda, or by generating default node type
-    // if(iterator != instantiator_funcs.end()){
-    //     node = (iterator->second)();
-    // } else {
-    //     // couldn't find custom node type, use default node type
-    //     node = make_shared<NodeType>();
-    // }
-    //
-    // if(infoRef){
-    //     node->setName(infoRef->getName());
-    //
-    //     if(recursive){
-    //         const vector<string>& childNames = infoRef->getChildNames();
-    //         for(auto& childName : childNames){
-    //             auto childNode = create(nodePath + StructureManager::SEPARATOR + childName, recursive);
-    //             node->addChild(childNode.get());
-    //         }
-    //     }
-    // }
-    //
-    // createdNodeRefs.push_back(node);
-    // NodeCreatedArgs args;
-    // args.nodeRef = node;
-    // args.infoRef = infoRef;
-    // nodeCreatedEvent.notifyListeners(args);
-    // // editorRootRef->addChild(node.get());
-    // return node;
+template<class BaseType>
+void ofxUiEditor::Instantiator<BaseType>::addInstantiator(const string& identifier, InstantiatorFunc func){
+    instantiatorFuncs[identifier] = func;
 }

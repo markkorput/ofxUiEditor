@@ -121,8 +121,8 @@ class ofApp: public ofxUnitTestsApp{
     }
 
     void runManager(){
-        TEST_START(EditorBase.get)
-            ofxUiEditor::Manager man;
+        TEST_START(get layout data)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
             man.setup();
             shared_ptr<NodeModel> modelRef = man.get("window");
 
@@ -179,6 +179,7 @@ class ofApp: public ofxUnitTestsApp{
         //     test_eq(nodeRef->getPosition(), ofVec3f(123.0f, 456.0f, 789.0f), "");
         //     test_eq(nodeRef->getScale(), ofVec3f(0.5f, .25f, .1f), "");
         // TEST_END
+
 
 
     }
