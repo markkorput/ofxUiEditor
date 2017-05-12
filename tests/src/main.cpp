@@ -223,7 +223,26 @@ class ofApp: public ofxUnitTestsApp{
         TEST_END
 
         TEST_START(Animator)
-            ofLogWarning() << "TODO";
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+
+            auto nodeRef = man.instantiate("window");
+            float curX = nodeRef->getX();
+            test_eq(curX, 123.0, "");
+
+            // move left out of view
+            man.startAnimation("left_out")
+                ->onUpdate([nodeRef, curX](float value){
+                    // offste based animation
+                    nodeRef->setX(curX+value);
+                })
+                // move back into view from the right
+                ->whenDone([&man, nodeRef, curX](){
+                    man.startAnimation("left_in")->onUpdate([nodeRef, curX](float value){
+                        // offset based animation
+                        nodeRef->setX(curX+value);
+                    });
+                });
         TEST_END
     }
 
