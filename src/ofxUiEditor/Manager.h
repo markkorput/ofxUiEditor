@@ -37,6 +37,7 @@ namespace ofxUiEditor {
 template<class NodeType>
 void ofxUiEditor::Manager<NodeType>::setup(){
     EditorBase::setup();
+    instantiator.setup();
     actuator.setup();
 
     // register listener that applies the properties in nodeModelRef to every view object that is being instantiated
