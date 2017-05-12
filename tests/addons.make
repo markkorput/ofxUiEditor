@@ -1,5 +1,6 @@
 ofxUnitTests
 ofxInterface
-ofxLiquidEvent
+ofxLambdaEvent
 ofxUiEditor
 ofxJSON
+ofxCMS

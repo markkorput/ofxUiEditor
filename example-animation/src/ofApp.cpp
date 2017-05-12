@@ -10,10 +10,18 @@ class ofApp : public ofBaseApp{
 
 public:
     void setup();
+    void update();
     void draw();
     void keyPressed(int key);
 
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+    
+    void onLeftClick(ofxInterface::TouchEvent& touchEvent);
+
 private: // attributes
+    ofxInterface::TouchManager touchManager;
     ofxUiEditor::Editor<ofxInterface::Node> editor;
     shared_ptr<ofxInterface::Node> sceneRef;
     bool bShowDebug;
@@ -26,7 +34,7 @@ private: // attributes
 
 void ofApp::setup(){
     // window
-    ofSetWindowTitle("ofxUiEditor - example-simple-layout");
+    ofSetWindowTitle("ofxUiEditor - example-animation");
     bShowDebug = false;
 
     // setup our editor and register component types
@@ -38,17 +46,35 @@ void ofApp::setup(){
     sceneRef->setName("Scene");
 
     // populate our scene
-    auto windowNodeRef = editor.create("window");
-    sceneRef->addChild(windowNodeRef.get()); // ofxInterface doesn't use shared_ptr but regular pointers
-    windowNodeRef->setCentered();
+    auto nodeRef = editor.create("object");
+    sceneRef->addChild(nodeRef.get()); // ofxInterface doesn't use shared_ptr but regular pointers
+    nodeRef->setCentered();
+    
+    auto left = nodeRef->getChildWithName("left");
+    left->setCenteredV();
+    left->setX(nodeRef->getWidth()*0.5f - left->getWidth() - 5);
+    auto right = nodeRef->getChildWithName("right");
+    right->setCenteredV();
+    right->setX(nodeRef->getWidth()*0.5f+5);
+
+    touchManager.setup(sceneRef.get());
+    
+    ofAddListener(left->eventClick, this, &ofApp::onLeftClick);
 }
 
+void ofApp::update(){
+    touchManager.update();
+}
 
 void ofApp::draw(){
+    ofBackground(0);
+
     sceneRef->render(); // render like normal, see ofxInterface
-    
-    if(bShowDebug)
+
+    if(bShowDebug){
         sceneRef->renderDebug();
+        touchManager.draw();
+    }
 }
 
 void ofApp::keyPressed(int key){
@@ -66,6 +92,23 @@ void ofApp::keyPressed(int key){
 
         return;
     }
+}
+
+void ofApp::mouseDragged(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchMove(button, ofVec2f(x, y));
+}
+
+void ofApp::mousePressed(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchDown(button, ofVec2f(x, y));
+}
+
+void ofApp::mouseReleased(int x, int y, int button){
+    ofxInterface::TouchManager::one().touchUp(button, ofVec2f(x, y));
+}
+
+void ofApp::onLeftClick(ofxInterface::TouchEvent& touchEvent){
+    // start animation "left" on the "object" node
+    editor["object"].animate("left");
 }
 
 //--------------------------------------------------------------
