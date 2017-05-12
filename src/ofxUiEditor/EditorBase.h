@@ -23,6 +23,7 @@ namespace ofxUiEditor {
         void setup();
         shared_ptr<NodeModel> get(const string& nodePath, bool recursive=true);
         void addPropertiesFile(const string& filePath);
+        void reload();
 
     private:
         StructureManager structureManager;

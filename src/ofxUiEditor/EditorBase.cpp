@@ -11,11 +11,10 @@ void EditorBase::setup(){
 }
 
 void EditorBase::addPropertiesFile(const string& filePath){
-    // remember which files we have loaded, for ::reload
+    // remember which files we have loaded, for our .reload method
     loadedPropertiesFiles.insert(filePath);
 
-    // ofLogWarning() << "get rid of propertiesManager (2)";
-    // dataRef->propertiesManager.load(filePath);
+    ofLog() << "Loading ofUiEditor properties file: " << filePath;
     propertiesCollection.loadJsonFromFile(filePath);
 }
 
@@ -50,4 +49,13 @@ shared_ptr<NodeModel> EditorBase::get(const string& nodePath, bool recursive){
         }
     }
     return nodeModelRef;
+}
+
+void EditorBase::reload(){
+    ofLogWarning() << "TODO: also reload structureManager?"; // First have structure manager work ofxCMS::Collection-based as well?
+
+    for(auto& propFile : loadedPropertiesFiles){
+        ofLog() << "Loading ofUiEditor properties file: " << propFile;
+        propertiesCollection.loadJsonFromFile(propFile);
+    }
 }
