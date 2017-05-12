@@ -38,7 +38,7 @@ shared_ptr<BaseType> ofxUiEditor::Instantiator<BaseType>::instantiate(shared_ptr
     auto it = instantiatorFuncs.find(nodeModelRef->getId());
     // couldn't find id-based instantiator, try class-based
     if(it == instantiatorFuncs.end())
-        it = instantiatorFuncs.find("."+nodeModelRef->get("class"));
+        it = instantiatorFuncs.find("."+nodeModelRef->getClass());
 
     if(it == instantiatorFuncs.end()){
         // use default instantiator
@@ -48,6 +48,7 @@ shared_ptr<BaseType> ofxUiEditor::Instantiator<BaseType>::instantiate(shared_ptr
         instanceRef = it->second(nodeModelRef);
     }
 
+    instanceRef->setName(nodeModelRef->getName());
     ofLogWarning() << "Using ofxInterface::Node's net setDeleteChildren(false) feature, TODO: perform cleanup maintenance ourselves!";
     instanceRef->setDeleteChildren(false);
 

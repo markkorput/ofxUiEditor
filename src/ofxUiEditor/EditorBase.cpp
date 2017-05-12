@@ -22,14 +22,14 @@ shared_ptr<NodeModel> EditorBase::get(const string& nodePath, bool recursive){
     auto nodeModelRef = make_shared<NodeModel>();
     nodeModelRef->set("id", nodePath);
 
-    // try to find properties information
-    {
-        auto propertiesModelRef = propertiesCollection.findById(nodePath);
-        if(propertiesModelRef){
-            ofLogWarning() << "TODO: make he nodeModelRef actively 'follow' the propertiesModelRef";
-            nodeModelRef->copy(propertiesModelRef);
-        }
-    }
+    // // try to find properties information
+    // {
+    //     auto propertiesModelRef = propertiesCollection.findById(nodePath);
+    //     if(propertiesModelRef){
+    //         ofLogWarning() << "TODO: make he nodeModelRef actively 'follow' the propertiesModelRef";
+    //         nodeModelRef->copy(propertiesModelRef);
+    //     }
+    // }
 
     // try to find structure information
     {

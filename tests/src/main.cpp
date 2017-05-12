@@ -128,25 +128,43 @@ class ofApp: public ofxUnitTestsApp{
 
             // structure
             test_eq(modelRef->getId(), "window", "");
+            test_eq(modelRef->getClass(), "SolidColorPanel", "");
             test_eq(modelRef->getParent() == nullptr, true, "");
             test_eq(modelRef->getChildren().size(), 4, "");
             test_eq(modelRef->getChildren()[0]->getId(), "window/titlebar", "");
+            test_eq(modelRef->getChildren()[0]->getName(), "titlebar", "");
+            test_eq(modelRef->getChildren()[0]->getClass(), "SolidColorPanel", "");
             test_eq(modelRef->getChildren()[0]->getChildren().size(), 2, "");
+
             test_eq(modelRef->getChildren()[0]->getChildren()[0]->getId(), "window/titlebar/title", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[0]->getName(), "title", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[0]->getClass(), "BitmapTextButton", "");
+
             test_eq(modelRef->getChildren()[0]->getChildren()[1]->getId(), "window/titlebar/close", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[1]->getName(), "close", "");
+            test_eq(modelRef->getChildren()[0]->getChildren()[1]->getClass(), "BitmapTextButton", "");
+
             test_eq(modelRef->getChildren()[1]->getId(), "window/message", "");
+            test_eq(modelRef->getChildren()[1]->getName(), "message", "");
+            test_eq(modelRef->getChildren()[1]->getClass(), "BitmapTextButton", "");
+
             test_eq(modelRef->getChildren()[2]->getId(), "window/cancel", "");
+            test_eq(modelRef->getChildren()[2]->getName(), "cancel", "");
+            test_eq(modelRef->getChildren()[2]->getClass(), "BitmapTextButton", "");
+
             test_eq(modelRef->getChildren()[3]->getId(), "window/submit", "");
+            test_eq(modelRef->getChildren()[3]->getName(), "submit", "");
+            test_eq(modelRef->getChildren()[3]->getClass(), "BitmapTextButton", "");
 
             // properties
-            test_eq(modelRef->get("size_x"), "300", "");
-            test_eq(modelRef->get("size_y"), "200", "");
-            test_eq(modelRef->get("position_x"), "123", "");
-            test_eq(modelRef->get("position_y"), "456", "");
-            test_eq(modelRef->get("position_z"), "789", "");
-            test_eq(modelRef->get("scale_x"), "0.5", "");
-            test_eq(modelRef->get("scale_y"), "0.25", "");
-            test_eq(modelRef->get("scale_z"), "0.1", "");
+            // test_eq(modelRef->get("size_x"), "300", "");
+            // test_eq(modelRef->get("size_y"), "200", "");
+            // test_eq(modelRef->get("position_x"), "123", "");
+            // test_eq(modelRef->get("position_y"), "456", "");
+            // test_eq(modelRef->get("position_z"), "789", "");
+            // test_eq(modelRef->get("scale_x"), "0.5", "");
+            // test_eq(modelRef->get("scale_y"), "0.25", "");
+            // test_eq(modelRef->get("scale_z"), "0.1", "");
         TEST_END
 
         TEST_START(Generate default ofxInterface nodes)
@@ -181,7 +199,17 @@ class ofApp: public ofxUnitTestsApp{
         // TEST_END
 
 
-
+        TEST_START(Instantiate base-type nodes)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            shared_ptr<ofxInterface::Node> nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getNumChildren(), 4, "");
+            test_eq(nodeRef->getName(), "window", "");
+            test_eq(nodeRef->getChildren()[0]->getName(), "titlebar", "");
+            test_eq(nodeRef->getChildren()[0]->getNumChildren(), 2, "");
+            test_eq(nodeRef->getChildren()[0]->getChildren()[0]->getName(), "title", "");
+            test_eq(nodeRef->getChildren()[0]->getChildren()[1]->getName(), "close", "");
+        TEST_END
     }
 
     void run(){
