@@ -105,19 +105,6 @@ class ofApp: public ofxUnitTestsApp{
         {   ofLog() << "operator[]";
             test_eq((CustomProgressBar*)editor["CustomProgressBar"]->getCurrent(), progressBarRef.get(), "");
         }
-
-        {   ofLog() << ".animate DISABLED";
-            // editor["CustomProgressBar"]->animate("flip");
-            // test_eq(progressBarRef->getOrientationEuler().x, 0, "");
-            // editor.update(0.5); // progress five seconds into the future
-            // test_eq(progressBarRef->getOrientationEuler().x, 123, "");
-        }
-
-        // TEST_START(propertiesCollection)
-        //     test_eq(editor.dataRef->propertiesCollection.size(), 2, "");
-        //     auto modelRef = edit.dataRef->propertiesCollection.create();
-        //     modelRef = edit.dataRef->propertiesCollection.create();
-        // TEST_END
     }
 
     void runManager(){
@@ -155,49 +142,7 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(modelRef->getChildren()[3]->getId(), "window/submit", "");
             test_eq(modelRef->getChildren()[3]->getName(), "submit", "");
             test_eq(modelRef->getChildren()[3]->getClass(), "BitmapTextButton", "");
-
-            // properties
-            // test_eq(modelRef->get("size_x"), "300", "");
-            // test_eq(modelRef->get("size_y"), "200", "");
-            // test_eq(modelRef->get("position_x"), "123", "");
-            // test_eq(modelRef->get("position_y"), "456", "");
-            // test_eq(modelRef->get("position_z"), "789", "");
-            // test_eq(modelRef->get("scale_x"), "0.5", "");
-            // test_eq(modelRef->get("scale_y"), "0.25", "");
-            // test_eq(modelRef->get("scale_z"), "0.1", "");
         TEST_END
-
-        TEST_START(Generate default ofxInterface nodes)
-            ofLogWarning() << "TODO";
-            // ofxUiEditor::Manager man;
-            // man.setup(); // loads data from files
-            //
-            // shared_ptr<ofxInterface::Node> nodeRef = man.instantiate("window");
-            //
-            // man.addType(".MyProgressBar", OFX_UI_EDITOR_INSTANTIATOR(CustomProgressBar));
-            //
-            // shared_ptr<ofxInterface::Node> nodeRef = man.instantiate<ofxInterface::Node>("window");
-
-            // test_eq(nodeRef->getName(), "window", "");
-            // auto& children = nodeRef->getChildren();
-            // test_eq(children.size(), 4, "");
-            // test_eq(children[0]->getName(), "titlebar", "");
-            // test_eq(children[0]->getChildren()[0]->getName(), "title", "");
-            // test_eq(children[0]->getChildren()[1]->getName(), "close", "");
-            // test_eq(children[1]->getName(), "message", "");
-            // test_eq(children[2]->getName(), "cancel", "");
-            // test_eq(children[3]->getName(), "submit", "");
-        TEST_END
-
-        // TEST_START(Default property actuation)
-        //     EditorMain<ofxInterface::Node> editor;
-        //     editor.setup(); // loads "structures.xml"
-        //     auto nodeRef = editor.create("window");
-        //     test_eq(nodeRef->getSize(), ofVec2f(300.0f, 200.0f), "");
-        //     test_eq(nodeRef->getPosition(), ofVec3f(123.0f, 456.0f, 789.0f), "");
-        //     test_eq(nodeRef->getScale(), ofVec3f(0.5f, .25f, .1f), "");
-        // TEST_END
-
 
         TEST_START(Instantiate base-type nodes)
             ofxUiEditor::Manager<ofxInterface::Node> man;

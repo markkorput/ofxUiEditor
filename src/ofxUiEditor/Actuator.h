@@ -4,7 +4,12 @@
 #include "ofxCMS.h"
 #include "NodeModel.h"
 
+#define OFXUIEDITOR_DEFAULT_PROPERTIES_FILE "properties.json"
+
 namespace ofxUiEditor {
+    class PropsModel : public ofxCMS::Model {
+    };
+
     //! \brief A class for updating a specific attribute of an arbitrary type of object using provided lambdas
     //!
     //! \description AttributeActuatorModel is a container for a (collection of) lambda(s) that know how to update a specific attribute from
@@ -39,18 +44,11 @@ namespace ofxUiEditor {
             typedef FUNCTION<void(shared_ptr<BaseType>, const string&)> AttrActuatorFunc;
 
         public:
-            void actuate(shared_ptr<BaseType> instanceRef, shared_ptr<ofxUiEditor::NodeModel> nodeModelRef){
-                // // first apply all parents, effectively "inheriting" their actuator behaviour
-                // for(auto parentRef : parentRefs)
-                //     parentRef->actuate(instanceRef, nodeModelRef);
+            void actuate(shared_ptr<BaseType> instanceRef, shared_ptr<PropsModel> propModelRef){
+                ofLog() << "ActuatorModel.actuate";
 
                 // loop over each key/value pair (attribute) in the node model, and apply any attribute actuator we can find
-                nodeModelRef->each([this, instanceRef](const string& attr, const string& val){
-                    // // find actuator for this attribute
-                    // auto attrActuatorModelRef = this->attributeActuatorCollection.findById(attr);
-                    // // if found, apply actuator
-                    // if(attrActuatorModelRef)
-                    //     attrActuatorModelRef->actuate(instanceRef, val);
+                propModelRef->each([this, instanceRef](const string& attr, const string& val){
                     actuateAttribute(instanceRef, attr, val);
                 });
             }
@@ -90,6 +88,10 @@ namespace ofxUiEditor {
 
         public:
             void setup();
+            void addPropertiesFile(const string& filePath);
+
+            void reload();
+
             void actuate(shared_ptr<BaseType> instanceRef, shared_ptr<ofxUiEditor::NodeModel> nodeModelRef, bool active=true);
 
             void addActuator(const string& identifier, const string& attribute_name, AttrActuatorFunc func){
@@ -106,11 +108,17 @@ namespace ofxUiEditor {
         private:
             std::vector<shared_ptr<BaseType>> createdInstancesRefs;
             ofxCMS::Collection<ActuatorModel<BaseType>> actuatorCollection;
+
+            ofxCMS::Collection<PropsModel> propertiesCollection;
+            std::set<string> loadedPropertiesFiles;
     };
 
 
     template<class BaseType>
     void Actuator<BaseType>::setup(){
+        if(propertiesCollection.size() == 0 && ofFile::doesFileExist(OFXUIEDITOR_DEFAULT_PROPERTIES_FILE))
+            addPropertiesFile(OFXUIEDITOR_DEFAULT_PROPERTIES_FILE);
+
         // register some default actuators
         addActuator(".Node", "position_x", [](shared_ptr<BaseType> instanceRef, const string& value){
             instanceRef->setX(ofToFloat(value));
@@ -132,28 +140,93 @@ namespace ofxUiEditor {
             instanceRef->setHeight(ofToFloat(value));
         });
 
+        addActuator(".Node", "scale_x", [](shared_ptr<BaseType> instanceRef, const string& value){
+            ofVec3f vec3 = instanceRef->getScale();
+            vec3.x = ofToFloat(value);
+            instanceRef->setScale(vec3);
+        });
+
+        addActuator(".Node", "scale_y", [](shared_ptr<BaseType> instanceRef, const string& value){
+            ofVec3f vec3 = instanceRef->getScale();
+            vec3.y = ofToFloat(value);
+            instanceRef->setScale(vec3);
+        });
+
+        addActuator(".Node", "scale_z", [](shared_ptr<BaseType> instanceRef, const string& value){
+            ofVec3f vec3 = instanceRef->getScale();
+            vec3.z = ofToFloat(value);
+            instanceRef->setScale(vec3);
+        });
+
         addActuator(".SolidColorPanel", ".Node"); // ".SolidColorPanel" copies all behaviour of the ".Node" Actuator
     }
 
     template<class BaseType>
-    void Actuator<BaseType>::actuate(shared_ptr<BaseType> instanceRef, shared_ptr<ofxUiEditor::NodeModel> nodeModelRef, bool active){
-        auto actuatorModelRef = actuatorCollection.findById("."+nodeModelRef->get("class"));
-        if(actuatorModelRef)
-            actuatorModelRef->actuate(instanceRef, nodeModelRef);
+    void Actuator<BaseType>::addPropertiesFile(const string& filePath){
+        // remember which files we have loaded, for our .reload method
+        loadedPropertiesFiles.insert(filePath);
 
-        actuatorModelRef = actuatorCollection.findById(nodeModelRef->get("id"));
-        if(actuatorModelRef)
-            actuatorModelRef->actuate(instanceRef, nodeModelRef);
+        ofLog() << "Loading ofUiEditor properties file: " << filePath;
+        propertiesCollection.loadJsonFromFile(filePath);
+        // ofLog() << "PropertiesCollection size: "<<propertiesCollection.size();
+    }
+
+    template<class BaseType>
+    void Actuator<BaseType>::reload(){
+        for(auto& propFile : loadedPropertiesFiles){
+            ofLog() << "Loading ofUiEditor properties file: " << propFile;
+            propertiesCollection.loadJsonFromFile(propFile);
+        }
+    }
+
+    template<class BaseType>
+    void Actuator<BaseType>::actuate(shared_ptr<BaseType> instanceRef, shared_ptr<ofxUiEditor::NodeModel> nodeModelRef, bool active){
+        std::vector<shared_ptr<PropsModel>> propModelRefs;
+        std::vector<shared_ptr<ActuatorModel<BaseType>>> actuatorModelRefs;
+
+        // find relevant property models, general ones first, more specific (higher priority) ones later
+        {
+            auto propModelRef = propertiesCollection.findById("."+nodeModelRef->getClass());
+            if(propModelRef)
+                propModelRefs.push_back(propModelRef);
+
+            propModelRef = propertiesCollection.findById(nodeModelRef->getId());
+            if(propModelRef)
+                propModelRefs.push_back(propModelRef);
+        }
+
+        // find relevant actuator models
+        {
+            auto actuatorModelRef = actuatorCollection.findById("."+nodeModelRef->getClass());
+            if(actuatorModelRef)
+                actuatorModelRefs.push_back(actuatorModelRef);
+
+            actuatorModelRef = actuatorCollection.findById(nodeModelRef->getId());
+            if(actuatorModelRef)
+                actuatorModelRefs.push_back(actuatorModelRef);
+        }
+
+        // ofLog() << "prop models: "<<propModelRefs.size();
+        // ofLog() << "act models: "<<actuatorModelRefs.size();
+
+        // loop over and apply all found property models
+        for(auto propModelRef : propModelRefs){
+            // apply using all found actuator models
+            for(auto actuatorModelRef : actuatorModelRefs){
+                actuatorModelRef->actuate(instanceRef, propModelRef);
+            }
+        }
 
         if(active){
-            nodeModelRef->attributeChangeEvent.addListener([actuatorModelRef, instanceRef](ofxUiEditor::NodeModel::AttrChangeArgs& args){
-                ofLog() << "Detected change to attribute `" << args.attr << "` of ofxUiEditor::NodeModel " << args.model->get("id") << ", actuating linked view-object";
-                // AttrChangeArgs:
-                //  Model *model;
-                //  string attr;
-                //  string value;
-                actuatorModelRef->actuateAttribute(instanceRef, args.attr, args.value);
-            }, this);
+            ofLogWarning() << "TODO: active realtime property actuation";
+            // nodeModelRef->attributeChangeEvent.addListener([actuatorModelRef, instanceRef](ofxUiEditor::NodeModel::AttrChangeArgs& args){
+            //     ofLog() << "Detected change to attribute `" << args.attr << "` of ofxUiEditor::NodeModel " << args.model->get("id") << ", actuating linked view-object";
+            //     // AttrChangeArgs:
+            //     //  Model *model;
+            //     //  string attr;
+            //     //  string value;
+            //     actuatorModelRef->actuateAttribute(instanceRef, args.attr, args.value);
+            // }, this);
         }
     }
 }

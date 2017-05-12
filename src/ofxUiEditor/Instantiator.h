@@ -52,7 +52,7 @@ shared_ptr<BaseType> ofxUiEditor::Instantiator<BaseType>::instantiate(shared_ptr
     }
 
     instanceRef->setName(nodeModelRef->getName());
-    ofLogWarning() << "Using ofxInterface::Node's net setDeleteChildren(false) feature, TODO: perform cleanup maintenance ourselves!";
+    // ofLogWarning() << "Using ofxInterface::Node's net setDeleteChildren(false) feature, TODO: perform cleanup maintenance ourselves!";
     instanceRef->setDeleteChildren(false);
 
     InstantiationArgs args;
