@@ -9,14 +9,24 @@ namespace ofxUiEditor {
     class Manager : public EditorBase {
     public:
         typedef FUNCTION<shared_ptr<NodeType>(shared_ptr<NodeModel>)> InstantiatorFunc;
+        typedef FUNCTION<void(shared_ptr<NodeType>, const string&)> AttrActuatorFunc;
 
     public:
         void setup();
         void reload();
+
         // instantiating
         shared_ptr<NodeType> instantiate(const string& nodePath, bool recursive=true);
         void addInstantiator(const string& identifier, InstantiatorFunc func);
 
+        // actuating
+        void addActuator(const string& identifier, const string& attribute_name, AttrActuatorFunc func){
+            actuator.addActuator(identifier, attribute_name, func);
+        }
+
+        void addActuator(const string& identifier, const string& parent_identifier){
+            actuator.addActuator(identifier, parent_identifier);
+        }
 
     private:
         Instantiator<NodeType> instantiator;

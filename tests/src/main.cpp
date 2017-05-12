@@ -188,6 +188,19 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(nodeRef->getPosition(), ofVec3f(123,456,789), "");
             test_eq(nodeRef->getScale(), ofVec3f(0.5,0.25,0.1), "");
         TEST_END
+
+        TEST_START(Actuate properties with custom actuator)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            man.addActuator("window", "size_x", [](shared_ptr<ofxInterface::Node> instanceRef, const string& value){
+                instanceRef->setWidth(ofToFloat(value) * 0.5f);
+            });
+            man.addActuator("window", "size_y", [](shared_ptr<ofxInterface::Node> instanceRef, const string& value){
+                instanceRef->setHeight(ofToFloat(value) * 2.0f);
+            });
+            auto nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getSize(), ofVec2f(150,400), "");
+        TEST_END
     }
 
     void run(){
