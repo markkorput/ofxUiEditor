@@ -8,15 +8,15 @@ namespace ofxUiEditor {
     class Instantiator {
 
     public: // sub-types
-        typedef FUNCTION<shared_ptr<BaseType>(shared_ptr<ofxUiEditor::NodeModel>)> InstantiatorFunc;
+        typedef FUNCTION<shared_ptr<BaseType>(shared_ptr<NodeModel>)> InstantiatorFunc;
 
         typedef struct {
             shared_ptr<BaseType> instanceRef;
-            shared_ptr<ofxUiEditor::NodeModel> nodeModelRef;
+            shared_ptr<NodeModel> nodeModelRef;
         } InstantiationArgs;
 
     public: // methods
-        shared_ptr<BaseType> instantiate(shared_ptr<ofxUiEditor::NodeModel> nodeModelRef, bool recursive=true);
+        shared_ptr<BaseType> instantiate(shared_ptr<NodeModel> nodeModelRef, bool recursive=true);
         void addInstantiator(const string& identifier, InstantiatorFunc func);
 
     public: // events

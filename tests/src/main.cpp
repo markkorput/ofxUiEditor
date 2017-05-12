@@ -210,6 +210,27 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(nodeRef->getChildren()[0]->getChildren()[0]->getName(), "title", "");
             test_eq(nodeRef->getChildren()[0]->getChildren()[1]->getName(), "close", "");
         TEST_END
+
+        TEST_START(Instatiate custom node types)
+            class HierarchyAnalyserNode : public ofxInterface::Node {
+                public:
+                    const string& getMyType(){ return customTypeValue; }
+
+                private:
+                    string customTypeValue = "I'm a HierarchyAnalyserNode";
+            };
+
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+
+            // add id-based instantiator
+            man.addInstantiator("window", [](shared_ptr<ofxUiEditor::NodeModel> nodeModel){
+                return make_shared<HierarchyAnalyserNode>();
+            });
+
+            auto nodeRef = man.instantiate("window");
+            test_eq(static_pointer_cast<HierarchyAnalyserNode>(nodeRef)->getMyType(), "I'm a HierarchyAnalyserNode", "");
+        }
     }
 
     void run(){
