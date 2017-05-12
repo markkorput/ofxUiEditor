@@ -1,6 +1,9 @@
 #pragma once
 
+#include "ofUtils.h" // ofSplitString
 #include "ofxCMS.h"
+
+#define OFXUIEDITOR_ID_PATH_SEPARATOR ("/")
 
 namespace ofxUiEditor {
     class NodeModel : public ofxCMS::Model {
@@ -20,6 +23,13 @@ namespace ofxUiEditor {
 
         shared_ptr<NodeModel> getParent() const { return parentRef; }
         const std::vector<shared_ptr<NodeModel>> &getChildren() const { return childrenRefs; }
+        string getClass(){ return get("class"); }
+        string getName(){
+            vector<string> parts = ofSplitString(getId(), OFXUIEDITOR_ID_PATH_SEPARATOR, true, true);
+            if(parts.empty())
+                return "";
+            return parts[parts.size()-1];
+        }
 
         size_t size(bool recursive=false){
             size_t count = childrenRefs.size();
