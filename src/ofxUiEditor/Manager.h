@@ -3,8 +3,10 @@
 #include "EditorBase.h"
 #include "Instantiator.h"
 #include "Actuator.h"
+#include "Animator.h"
 
 namespace ofxUiEditor {
+
     template<class NodeType>
     class Manager : public EditorBase {
     public:
@@ -31,6 +33,7 @@ namespace ofxUiEditor {
     private:
         Instantiator<NodeType> instantiator;
         Actuator<NodeType> actuator;
+        Animator animator;
     };
 }
 

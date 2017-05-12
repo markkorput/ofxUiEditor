@@ -221,6 +221,10 @@ class ofApp: public ofxUnitTestsApp{
             man.reload();
             test_eq(nodeRef->getSize(), ofVec2f(300,200), "");
         TEST_END
+
+        TEST_START(Animator)
+            ofLogWarning() << "TODO";
+        TEST_END
     }
 
     void run(){
