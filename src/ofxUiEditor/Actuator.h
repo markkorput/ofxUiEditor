@@ -181,6 +181,7 @@ namespace ofxUiEditor {
         addActuator(".SolidColorPanel", "background", [](shared_ptr<BaseType> instanceRef, const string& value){
             vector<string> parts = ofSplitString(value, ",");
             if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBackground(true);
                 static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBGColor(
                     ofColor( ofToFloat(parts[0]),
                             ofToFloat(parts[1]),
@@ -190,6 +191,7 @@ namespace ofxUiEditor {
             }
 
             if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBackground(true);
                 static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBGColor(
                     ofColor( ofToFloat(parts[0]),
                             ofToFloat(parts[1]),
@@ -203,6 +205,7 @@ namespace ofxUiEditor {
         addActuator(".SolidColorPanel", "border", [](shared_ptr<BaseType> instanceRef, const string& value){
             vector<string> parts = ofSplitString(value, ",");
             if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBorder(true);
                 static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setStrokeColor(
                     ofColor( ofToFloat(parts[0]),
                             ofToFloat(parts[1]),
@@ -212,6 +215,7 @@ namespace ofxUiEditor {
             }
 
             if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBorder(true);
                 static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setStrokeColor(
                     ofColor( ofToFloat(parts[0]),
                             ofToFloat(parts[1]),
@@ -228,6 +232,7 @@ namespace ofxUiEditor {
         addActuator(".BitmapTextButton", "background", [](shared_ptr<BaseType> instanceRef, const string& value){
             vector<string> parts = ofSplitString(value, ",");
             if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBackground(true);
                 static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBGColor(
                     ofColor( ofToFloat(parts[0]),
                             ofToFloat(parts[1]),
@@ -237,6 +242,7 @@ namespace ofxUiEditor {
             }
 
             if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBackground(true);
                 static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBGColor(
                     ofColor( ofToFloat(parts[0]),
                             ofToFloat(parts[1]),
@@ -250,6 +256,7 @@ namespace ofxUiEditor {
         addActuator(".BitmapTextButton", "border", [](shared_ptr<BaseType> instanceRef, const string& value){
             vector<string> parts = ofSplitString(value, ",");
             if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBorder(true);
                 static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBorderColor(
                     ofColor( ofToFloat(parts[0]),
                             ofToFloat(parts[1]),
@@ -259,6 +266,7 @@ namespace ofxUiEditor {
             }
 
             if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBorder(true);
                 static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBorderColor(
                     ofColor( ofToFloat(parts[0]),
                             ofToFloat(parts[1]),
@@ -292,7 +300,7 @@ namespace ofxUiEditor {
         });
 
         addActuator(".BitmapTextButton", "text", [](shared_ptr<BaseType> instanceRef, const string& value){
-            static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setup(value, false /* don't change node name */);
+            static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setLabel(value, false /* don't change node name */);
         });
     }
 
