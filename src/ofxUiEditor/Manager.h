@@ -71,6 +71,7 @@ template<class NodeType>
 void ofxUiEditor::Manager<NodeType>::reload(){
     EditorBase::reload();
     actuator.reload();
+    animator.reload();
 }
 
 template<class NodeType>

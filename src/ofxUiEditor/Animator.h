@@ -23,6 +23,7 @@ namespace ofxUiEditor {
         void setup(shared_ptr<AnimationModel> animModelRef);
         // updates insternal animation instance and returns if the animation is still active
         bool update(float dt);
+
         AnimationFloat* onUpdate(UpdateFunc func);
         AnimationFloat* whenDone(DoneFunc func);
 
@@ -43,6 +44,7 @@ namespace ofxUiEditor {
 
             //! updates all active animations and removes finished animations from internal memory
             void update(float dt);
+            void reload();
 
             //! creates and starts a new animation based on data from the json file
             shared_ptr<AnimationFloat> startAnimation(const string& identifier);

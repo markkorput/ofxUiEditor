@@ -53,13 +53,8 @@ AnimationFloat* AnimationFloat::whenDone(DoneFunc func){
 
 
 void Animator::setup(){
-    string filePath = OFXUIEDITOR_DEFAULT_ANIMATIONS_FILE;
-
-    if(animationCollection.size() == 0 && ofFile::doesFileExist(filePath)){
-        ofLog() << "Loading animations data from: " << filePath;
-        animationCollection.loadJsonFromFile(filePath);
-        ofLogVerbose() << "Loaded " << animationCollection.size() << " animations";
-    }
+    if(animationCollection.size() == 0)
+        reload();
 }
 
 void Animator::update(float dt){
@@ -75,6 +70,16 @@ void Animator::update(float dt){
 
     for(int removeIdx : removeIndexes)
         activeAnimationRefs.erase(activeAnimationRefs.begin()+removeIdx);
+}
+
+void Animator::reload(){
+    string filePath = OFXUIEDITOR_DEFAULT_ANIMATIONS_FILE;
+
+    if(ofFile::doesFileExist(filePath)){
+        ofLog() << "Loading animations data from: " << filePath;
+        animationCollection.loadJsonFromFile(filePath);
+        ofLogVerbose() << animationCollection.size() << " animations in collection";
+    }
 }
 
 shared_ptr<AnimationFloat> Animator::startAnimation(const string& identifier){
