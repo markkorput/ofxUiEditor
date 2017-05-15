@@ -7,4 +7,6 @@ meta:
 
 common:
 	ADDON_DEPENDENCIES = ofxLambdaEvent
-	# ADDON_DEPENDENCIES += ofxJSON ## OPTIONAL, features enabled with OFXCMS_JSON macro
+	ADDON_DEPENDENCIES += ofxCMS
+	ADDON_DEPENDENCIES += ofxInterface
+	# ADDON_DEPENDENCIES += ofxAnimatable ## OPTIONAL, features enabled with OFXUIEDITOR_ANIMATIONS macro

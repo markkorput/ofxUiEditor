@@ -3,8 +3,10 @@
 #include "EditorBase.h"
 #include "Instantiator.h"
 #include "Actuator.h"
+#include "Animator.h"
 
 namespace ofxUiEditor {
+
     template<class NodeType>
     class Manager : public EditorBase {
     public:
@@ -13,6 +15,7 @@ namespace ofxUiEditor {
 
     public:
         void setup();
+        void update(float dt);
         void reload();
 
         // instantiating
@@ -28,9 +31,15 @@ namespace ofxUiEditor {
             actuator.addActuator(identifier, parent_identifier);
         }
 
+        // animation
+        shared_ptr<AnimationFloat> startAnimation(const string& identifier){
+            return animator.startAnimation(identifier);
+        }
+
     private:
         Instantiator<NodeType> instantiator;
         Actuator<NodeType> actuator;
+        Animator animator;
     };
 }
 
@@ -39,6 +48,7 @@ void ofxUiEditor::Manager<NodeType>::setup(){
     EditorBase::setup();
     instantiator.setup();
     actuator.setup();
+    animator.setup();
 
     // register listener that applies the properties in nodeModelRef to every view object that is being instantiated
     instantiator.instantiationEvent.addListener([this](InstantiationArgs<NodeType>& args){
@@ -48,6 +58,11 @@ void ofxUiEditor::Manager<NodeType>::setup(){
             true // active; this also updates our view object when property configurations change at runtime (for example because the proeprties.json get reloaded), mostly for debugging
         );
     }, this);
+}
+
+template<class NodeType>
+void ofxUiEditor::Manager<NodeType>::update(float dt){
+    animator.update(dt);
 }
 
 template<class NodeType>
