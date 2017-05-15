@@ -54,9 +54,12 @@ AnimationFloat* AnimationFloat::whenDone(DoneFunc func){
 
 void Animator::setup(){
     string filePath = OFXUIEDITOR_DEFAULT_ANIMATIONS_FILE;
-    ofLog() << "Loading animations data from: " << filePath;
-    animationCollection.loadJsonFromFile(filePath);
-    ofLogVerbose() << "Loaded " << animationCollection.size() << " animations";
+
+    if(animationCollection.size() == 0 && ofFile::doesFileExist(filePath)){
+        ofLog() << "Loading animations data from: " << filePath;
+        animationCollection.loadJsonFromFile(filePath);
+        ofLogVerbose() << "Loaded " << animationCollection.size() << " animations";
+    }
 }
 
 void Animator::update(float dt){
