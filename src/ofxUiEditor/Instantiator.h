@@ -56,15 +56,25 @@ void ofxUiEditor::Instantiator<BaseType>::setup(){
 template<class BaseType>
 shared_ptr<BaseType> ofxUiEditor::Instantiator<BaseType>::instantiate(shared_ptr<ofxUiEditor::NodeModel> nodeModelRef, bool recursive){
     shared_ptr<BaseType> instanceRef;
+    ofLogVerbose() << "Instantiating node with id: " << nodeModelRef->getId() << " and class: " << nodeModelRef->getClass();
 
     // try to find custom instantiator based on id
     auto it = instantiatorFuncs.find(nodeModelRef->getId());
+
     // couldn't find id-based instantiator, try class-based
-    if(it == instantiatorFuncs.end())
+    if(it != instantiatorFuncs.end()){
+        ofLogVerbose() << "using instantiator: " << nodeModelRef->getId();
+    } else {
         it = instantiatorFuncs.find("."+nodeModelRef->getClass());
+
+        if(it != instantiatorFuncs.end()){
+            ofLogVerbose() << "using instantiator: " << ("." + nodeModelRef->getClass());
+        }
+    }
 
     if(it == instantiatorFuncs.end()){
         // use default instantiator
+        ofLogVerbose() << "using default instantiator";
         instanceRef = make_shared<BaseType>();
     } else {
         // use found custom instantiator

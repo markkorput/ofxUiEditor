@@ -159,7 +159,7 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(nodeRef->getChildren()[3]->getName(), "submit", "");
         TEST_END
 
-        TEST_START(Instantiate custom node types)
+        TEST_START(Instantiate custom id-based node)
             class HierarchyAnalyserNode : public ofxInterface::Node {
                 public:
                     const string& getMyType(){ return customTypeValue; }
@@ -178,6 +178,27 @@ class ofApp: public ofxUnitTestsApp{
 
             auto nodeRef = man.instantiate("window");
             test_eq(static_pointer_cast<HierarchyAnalyserNode>(nodeRef)->getMyType(), "I'm a HierarchyAnalyserNode", "");
+        }
+
+        TEST_START(Instantiate custom class-based node)
+            class SomeProgressBarKlass : public ofxInterface::Node {
+                public:
+                    const string& getMyType(){ return customTypeValue; }
+
+                private:
+                    string customTypeValue = "I'm a progress bar";
+            };
+
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+
+            // add class-based instantiator
+            man.addInstantiator(".MyProgressBar", [](shared_ptr<ofxUiEditor::NodeModel> nodeModel){
+                return make_shared<SomeProgressBarKlass>();
+            });
+
+            auto nodeRef = man.instantiate("popupDialog/CustomProgressBar");
+            test_eq(static_pointer_cast<SomeProgressBarKlass>(nodeRef)->getMyType(), "I'm a progress bar", "");
         }
 
         TEST_START(Actuate properties from properties.json)
