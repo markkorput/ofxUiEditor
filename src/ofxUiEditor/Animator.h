@@ -38,15 +38,20 @@ namespace ofxUiEditor {
 
     class Animator {
         public:
+            //! loads the default animations data file: "animations.json"
             void setup();
+
+            //! updates all active animations and removes finished animations from internal memory
             void update(float dt);
 
-            //Animator();
+            //! creates and starts a new animation based on data from the json file
             shared_ptr<AnimationFloat> startAnimation(const string& identifier);
 
         private:
+            //! this collection holds the data loaded from data files. Every model basically represents an animation template.
             ofxCMS::Collection<AnimationModel> animationCollection;
-            std::vector<shared_ptr<AnimationFloat>> activeAnimationRefs;
 
+            //! this list holds all currently active animations
+            std::vector<shared_ptr<AnimationFloat>> activeAnimationRefs;
     };
 }
