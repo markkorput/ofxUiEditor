@@ -36,6 +36,8 @@ namespace ofxUiEditor {
             return animator.startAnimation(identifier);
         }
 
+        size_t activeAnimationCount(){ return animator.activeAnimationCount(); }
+
     private:
         Instantiator<NodeType> instantiator;
         Actuator<NodeType> actuator;

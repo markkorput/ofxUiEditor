@@ -88,6 +88,8 @@ shared_ptr<AnimationFloat> Animator::startAnimation(const string& identifier){
         ofLogWarning() << "unknown animation: " << identifier;
     }
 
+    ofLogVerbose() << "animation created: identifier: " << identifier;
     activeAnimationRefs.push_back(animRef);
+    ofLogVerbose() << "active anims: " << activeAnimationRefs.size();
     return animRef;
 }

@@ -47,6 +47,8 @@ namespace ofxUiEditor {
             //! creates and starts a new animation based on data from the json file
             shared_ptr<AnimationFloat> startAnimation(const string& identifier);
 
+            size_t activeAnimationCount() const { return activeAnimationRefs.size(); }
+
         private:
             //! this collection holds the data loaded from data files. Every model basically represents an animation template.
             ofxCMS::Collection<AnimationModel> animationCollection;
