@@ -19,6 +19,7 @@ namespace ofxUiEditor {
         typedef InstantiationArgs<BaseType> InstantiationArgs;
 
     public: // methods
+        void setup();
         shared_ptr<BaseType> instantiate(shared_ptr<NodeModel> nodeModelRef, bool recursive=true);
         void addInstantiator(const string& identifier, InstantiatorFunc func);
 
@@ -31,6 +32,25 @@ namespace ofxUiEditor {
         // otherwise the self-destruct. TODO: patch ofxInterface to work with shared_ptrs so we don't need thise redundant pointer management
         std::vector<shared_ptr<BaseType>> createdInstancesRefs;
     };
+}
+
+template<class BaseType>
+void ofxUiEditor::Instantiator<BaseType>::setup(){
+    addInstantiator(".Node", [](shared_ptr<ofxUiEditor::NodeModel> nodeModel){
+        return make_shared<ofxInterface::Node>();
+    });
+
+    addInstantiator(".SolidColorPanel", [](shared_ptr<ofxUiEditor::NodeModel> nodeModel){
+        return make_shared<ofxInterface::SolidColorPanel>();
+    });
+
+    addInstantiator(".BitmapTextButton", [](shared_ptr<ofxUiEditor::NodeModel> nodeModel){
+        return make_shared<ofxInterface::BitmapTextButton>();
+    });
+
+    addInstantiator(".TextureButton", [](shared_ptr<ofxUiEditor::NodeModel> nodeModel){
+        return make_shared<ofxInterface::TextureButton>();
+    });
 }
 
 template<class BaseType>

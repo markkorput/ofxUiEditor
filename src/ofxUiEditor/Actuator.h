@@ -45,8 +45,6 @@ namespace ofxUiEditor {
 
         public:
             void actuate(shared_ptr<BaseType> instanceRef, shared_ptr<PropsModel> propModelRef){
-                ofLog() << "ActuatorModel.actuate";
-
                 // loop over each key/value pair (attribute) in the node model, and apply any attribute actuator we can find
                 propModelRef->each([this, instanceRef](const string& attr, const string& val){
                     actuateAttribute(instanceRef, attr, val);
@@ -158,7 +156,152 @@ namespace ofxUiEditor {
             instanceRef->setScale(vec3);
         });
 
+        addActuator(".Node", "orientation_x", [](shared_ptr<BaseType> instanceRef, const string& value){
+            ofVec3f vec3 = instanceRef->getOrientationEuler();
+            vec3.x = ofToFloat(value);
+            instanceRef->setOrientation(vec3);
+        });
+
+        addActuator(".Node", "orientation_y", [](shared_ptr<BaseType> instanceRef, const string& value){
+            ofVec3f vec3 = instanceRef->getOrientationEuler();
+            vec3.y = ofToFloat(value);
+            instanceRef->setOrientation(vec3);
+        });
+
+        addActuator(".Node", "orientation_z", [](shared_ptr<BaseType> instanceRef, const string& value){
+            ofVec3f vec3 = instanceRef->getOrientationEuler();
+            vec3.z = ofToFloat(value);
+            instanceRef->setOrientation(vec3);
+        });
+
+
+
         addActuator(".SolidColorPanel", ".Node"); // ".SolidColorPanel" copies all behaviour of the ".Node" Actuator
+
+        addActuator(".SolidColorPanel", "background", [](shared_ptr<BaseType> instanceRef, const string& value){
+            vector<string> parts = ofSplitString(value, ",");
+            if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBackground(true);
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBGColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2]),
+                            ofToFloat(parts[3])));
+                return;
+            }
+
+            if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBackground(true);
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBGColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2])));
+                return;
+            }
+
+            ofLogWarning() << "Can't process .SolidColorPanel.background value: " << value;
+        });
+
+        addActuator(".SolidColorPanel", "border", [](shared_ptr<BaseType> instanceRef, const string& value){
+            vector<string> parts = ofSplitString(value, ",");
+            if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBorder(true);
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setStrokeColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2]),
+                            ofToFloat(parts[3])));
+                return;
+            }
+
+            if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setBorder(true);
+                static_pointer_cast<ofxInterface::SolidColorPanel>(instanceRef)->setStrokeColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2])));
+                return;
+            }
+
+            ofLogWarning() << "Can't process .SolidColorPanel.border value: " << value;
+        });
+
+
+        addActuator(".BitmapTextButton", ".Node"); // ".BitmapTextButton" inherits all behaviour of the ".Node" Actuator
+
+        addActuator(".BitmapTextButton", "background", [](shared_ptr<BaseType> instanceRef, const string& value){
+            vector<string> parts = ofSplitString(value, ",");
+            if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBackground(true);
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBGColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2]),
+                            ofToFloat(parts[3])));
+                return;
+            }
+
+            if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBackground(true);
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBGColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2])));
+                return;
+            }
+
+            ofLogWarning() << "Can't process .BitmapTextButton.background value: " << value;
+        });
+
+        addActuator(".BitmapTextButton", "border", [](shared_ptr<BaseType> instanceRef, const string& value){
+            vector<string> parts = ofSplitString(value, ",");
+            if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBorder(true);
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBorderColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2]),
+                            ofToFloat(parts[3])));
+                return;
+            }
+
+            if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBorder(true);
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setBorderColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2])));
+                return;
+            }
+
+            ofLogWarning() << "Can't process .BitmapTextButton.border value: " << value;
+        });
+
+        addActuator(".BitmapTextButton", "color", [](shared_ptr<BaseType> instanceRef, const string& value){
+            vector<string> parts = ofSplitString(value, ",");
+            if(parts.size() == 4){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setLabelColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2]),
+                            ofToFloat(parts[3])));
+                return;
+            }
+
+            if(parts.size() == 3){
+                static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setLabelColor(
+                    ofColor( ofToFloat(parts[0]),
+                            ofToFloat(parts[1]),
+                            ofToFloat(parts[2])));
+                return;
+            }
+
+            ofLogWarning() << "Can't process .BitmapTextButton.color value: " << value;
+        });
+
+        addActuator(".BitmapTextButton", "text", [](shared_ptr<BaseType> instanceRef, const string& value){
+            static_pointer_cast<ofxInterface::BitmapTextButton>(instanceRef)->setLabel(value, false /* don't change node name */);
+        });
     }
 
     template<class BaseType>

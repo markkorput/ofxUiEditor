@@ -1,0 +1,11 @@
+{
+    "left_out": {
+        "duration": 1.0,
+        "to": -200
+    },
+    "left_in": {
+        "duration": 1.0,
+        "from": 200,
+        "to": 0
+    }
+}
