@@ -4,3 +4,4 @@ ofxLambdaEvent
 ofxUiEditor
 ofxJSON
 ofxCMS
+ofxAnimatable

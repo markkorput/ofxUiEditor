@@ -230,19 +230,29 @@ class ofApp: public ofxUnitTestsApp{
             float curX = nodeRef->getX();
             test_eq(curX, 123.0, "");
 
-            // move left out of view
+            // move from original position 200 pixels left in 1.0 seconds
             man.startAnimation("left_out")
                 ->onUpdate([nodeRef, curX](float value){
                     // offste based animation
                     nodeRef->setX(curX+value);
                 })
-                // move back into view from the right
                 ->whenDone([&man, nodeRef, curX](){
+                    // move 200 pixels left from 200 pixels to the right to original position in 1.0 seconds
                     man.startAnimation("left_in")->onUpdate([nodeRef, curX](float value){
                         // offset based animation
                         nodeRef->setX(curX+value);
                     });
                 });
+
+            test_eq(nodeRef->getX(), 123.0, "");
+            man.update(0.5); // progress animations 0.5 seconds
+            test_eq(nodeRef->getX(), 23, "");
+            man.update(0.5); // progress animations 0.5 seconds
+            test_eq(nodeRef->getX(), -77, "");
+            man.update(0.5); // progress animations 0.5 seconds
+            test_eq(nodeRef->getX(), 223, "");
+            man.update(0.5); // progress animations 0.5 seconds
+            test_eq(nodeRef->getX(), 123, "");
         TEST_END
     }
 
