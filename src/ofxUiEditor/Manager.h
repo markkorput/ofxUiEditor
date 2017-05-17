@@ -12,6 +12,7 @@ namespace ofxUiEditor {
     public:
         typedef FUNCTION<shared_ptr<NodeType>(shared_ptr<NodeModel>)> InstantiatorFunc;
         typedef FUNCTION<void(shared_ptr<NodeType>, const string&)> AttrActuatorFunc;
+        typedef FUNCTION<void(shared_ptr<NodeType>, shared_ptr<PropsModel>)> ModelActuatorFunc;
 
     public:
         void setup();
@@ -23,10 +24,18 @@ namespace ofxUiEditor {
         void addInstantiator(const string& identifier, InstantiatorFunc func);
 
         // actuating
+
+        // attribute
         void addActuator(const string& identifier, const string& attribute_name, AttrActuatorFunc func){
             actuator.addActuator(identifier, attribute_name, func);
         }
 
+        // model
+        void addActuator(const string& identifier, ModelActuatorFunc func){
+            actuator.addActuator(identifier, func);
+        }
+
+        // parent (inherit)
         void addActuator(const string& identifier, const string& parent_identifier){
             actuator.addActuator(identifier, parent_identifier);
         }

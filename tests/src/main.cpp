@@ -210,7 +210,7 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(nodeRef->getScale(), ofVec3f(0.5,0.25,0.1), "");
         TEST_END
 
-        TEST_START(Actuate properties with custom actuator)
+        TEST_START(Actuate properties with custom attribute actuator)
             ofxUiEditor::Manager<ofxInterface::Node> man;
             man.setup();
             man.addActuator("window", "size_x", [](shared_ptr<ofxInterface::Node> instanceRef, const string& value){
@@ -223,6 +223,20 @@ class ofApp: public ofxUnitTestsApp{
             test_eq(nodeRef->getSize(), ofVec2f(150,400), "");
         TEST_END
 
+        TEST_START(Actuate properties with custom model actuator)
+            ofxUiEditor::Manager<ofxInterface::Node> man;
+            man.setup();
+            man.addActuator("window", [](shared_ptr<ofxInterface::Node> instanceRef, shared_ptr<ofxUiEditor::PropsModel> propsRef){
+                instanceRef->setWidth(ofToFloat(propsRef->get("size_x")) * 100.0f);
+            });
+
+            man.addActuator("window", [](shared_ptr<ofxInterface::Node> instanceRef, shared_ptr<ofxUiEditor::PropsModel> propsRef){
+                instanceRef->setHeight(ofToFloat(propsRef->get("size_y")) * 10.0f);
+            });
+            auto nodeRef = man.instantiate("window");
+            test_eq(nodeRef->getSize(), ofVec2f(30000,2000), "");
+        TEST_END
+
         TEST_START(Actuate property updates in realtime)
             ofxUiEditor::Manager<ofxInterface::Node> man;
             man.setup();
@@ -232,7 +246,9 @@ class ofApp: public ofxUnitTestsApp{
             ofFile::moveFromTo("properties.json", "properties.json.bak");
             ofFile::moveFromTo("properties2.json", "properties.json");
 
+            ofLog() << " --- RELOAD --- ";
             man.reload();
+
             test_eq(nodeRef->getSize(), ofVec2f(400,250), "");
 
             // restore original properties.json

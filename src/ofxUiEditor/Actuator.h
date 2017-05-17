@@ -42,19 +42,30 @@ namespace ofxUiEditor {
         public: // types
 
             typedef FUNCTION<void(shared_ptr<BaseType>, const string&)> AttrActuatorFunc;
+            typedef FUNCTION<void(shared_ptr<BaseType>, shared_ptr<PropsModel>)> ModelActuatorFunc;
 
         public:
             void actuate(shared_ptr<BaseType> instanceRef, shared_ptr<PropsModel> propModelRef){
+                // first apply all parents, effectively "inheriting" their actuator behaviour
+                for(auto parentRef : parentRefs)
+                    parentRef->actuate(instanceRef, propModelRef);
+
                 // loop over each key/value pair (attribute) in the node model, and apply any attribute actuator we can find
                 propModelRef->each([this, instanceRef](const string& attr, const string& val){
                     actuateAttribute(instanceRef, attr, val);
                 });
+
+                for(auto func : modelActuatorFuncs){
+                    func(instanceRef, propModelRef);
+                }
             }
 
             void actuateAttribute(shared_ptr<BaseType> instanceRef, const string& attr, const string& value){
-                // first apply all parents, effectively "inheriting" their actuator behaviour
-                for(auto parentRef : parentRefs)
+                for(auto parentRef : parentRefs){
+                    // TODO: this shouldn't be necessary anymore since we call parentRef->actuate in this->actuate
+                    // but removing these lines gives a failing test...
                     parentRef->actuateAttribute(instanceRef, attr, value);
+                }
 
                 // find actuator for this attribute
                 auto attrActuatorModelRef = this->attributeActuatorCollection.findById(attr);
@@ -73,9 +84,14 @@ namespace ofxUiEditor {
                 attributeActuatorModelRef->addActuator(func);
             }
 
+            void addModelActuator(ModelActuatorFunc func){
+                modelActuatorFuncs.push_back(func);
+            }
+
         private:
             std::vector<shared_ptr<ActuatorModel<BaseType>>> parentRefs;
             ofxCMS::Collection<AttributeActuatorModel<BaseType>> attributeActuatorCollection;
+            std::vector<ModelActuatorFunc> modelActuatorFuncs;
     };
 
     template<class BaseType>
@@ -83,6 +99,7 @@ namespace ofxUiEditor {
         public:
             // typedef ActuatorModel<BaseType>::AttrActuatorFunc AttrActuatorFunc;
             typedef FUNCTION<void(shared_ptr<BaseType>, const string&)> AttrActuatorFunc;
+            typedef FUNCTION<void(shared_ptr<BaseType>, shared_ptr<PropsModel>)> ModelActuatorFunc;
 
         public:
             void setup();
@@ -101,6 +118,11 @@ namespace ofxUiEditor {
                 auto actuatorModelRef = actuatorCollection.findById(identifier, true /* create if not found */);
                 auto parentRef = actuatorCollection.findById(parent_identifier, true /* create if not found */);
                 actuatorModelRef->addParent(parentRef);
+            }
+
+            void addActuator(const string& identifier, ModelActuatorFunc func){
+                auto actuatorModelRef = actuatorCollection.findById(identifier, true /* create if not found */);
+                actuatorModelRef->addModelActuator(func);
             }
 
         private:
