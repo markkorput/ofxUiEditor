@@ -299,8 +299,55 @@ class ofApp: public ofxUnitTestsApp{
         TEST_END
     }
 
+    void testActuate(){
+        TEST_START(register actuator on custom object)
+            class CustomObject {
+                public:
+                    float value;
+                    string name;
+                    void setName(const string& newName){ name = newName; }
+
+                    ~CustomObject(){
+                        if(propsModelRef){
+                            propsModelRef->stopTransform(this);
+                            propsModelRef = nullptr;
+                        }
+                    }
+
+                    void setPropsModel(shared_ptr<ofxUiEditor::PropsModel> newRef){
+                        if(propsModelRef)
+                            propsModelRef->stopTransform(this);
+
+                        propsModelRef = newRef;
+
+                        auto transformerRef = propsModelRef->transform("name", [this](const string& value){
+                            this->setName(value);
+                        }, this);
+                    }
+
+                private:
+                    shared_ptr<ofxUiEditor::PropsModel> propsModelRef;
+            };
+
+            ofxUiEditor::Manager<ofxInterface::Node> manager;
+
+            { // obj1 scope
+                CustomObject obj1;
+                manager.propertiesCollection.findById(".CustomObject")->set("name", "John");
+                obj1.setPropsModel(manager.propertiesCollection.findById(".CustomObject", true /* create if not existing */));
+                test_eq(obj1.name, "John", "");
+                manager.propertiesCollection.findById(".CustomObject")->set("name", "Jane");
+                test_eq(obj1.name, "Jane", "");
+            }
+
+            // perform an attribute chnage to see if the obj1 change listeners were properly cleaned up
+            manager.propertiesCollection.findById(".CustomObject")->set("name", "Jackson");
+        TEST_END
+
+    }
     void run(){
         runManager();
+
         // runEditorOld();
     }
 };

@@ -40,6 +40,9 @@ namespace ofxUiEditor {
             actuator.addActuator(identifier, parent_identifier);
         }
 
+        // properties actuating
+        void addPropertiesFile(const string& filePath);
+
         // animation
         shared_ptr<AnimationFloat> startAnimation(const string& identifier){
             return animator.startAnimation(identifier);
@@ -47,9 +50,13 @@ namespace ofxUiEditor {
 
         size_t activeAnimationCount(){ return animator.activeAnimationCount(); }
 
+    public:
+        ofxCMS::Collection<PropsModel> propertiesCollection;
+
     private:
         Instantiator<NodeType> instantiator;
         Actuator<NodeType> actuator;
+        std::set<string> loadedPropertiesFiles;
         Animator animator;
     };
 }
@@ -59,6 +66,9 @@ void ofxUiEditor::Manager<NodeType>::setup(){
     EditorBase::setup();
     instantiator.setup();
     actuator.setup();
+    if(propertiesCollection.size() == 0 && ofFile::doesFileExist(OFXUIEDITOR_DEFAULT_PROPERTIES_FILE))
+        addPropertiesFile(OFXUIEDITOR_DEFAULT_PROPERTIES_FILE);
+
     animator.setup();
 
     // register listener that applies the properties in nodeModelRef to every view object that is being instantiated
@@ -80,6 +90,10 @@ template<class NodeType>
 void ofxUiEditor::Manager<NodeType>::reload(){
     EditorBase::reload();
     actuator.reload();
+    for(auto& propFile : loadedPropertiesFiles){
+        ofLog() << "Loading ofUiEditor properties file: " << propFile;
+        propertiesCollection.loadJsonFromFile(propFile);
+    }
     animator.reload();
 }
 
@@ -94,4 +108,14 @@ shared_ptr<NodeType> ofxUiEditor::Manager<NodeType>::instantiate(const string& n
 template<class NodeType>
 void ofxUiEditor::Manager<NodeType>::addInstantiator(const string& identifier, InstantiatorFunc func){
     instantiator.addInstantiator(identifier, func);
+}
+
+template<class NodeType>
+void ofxUiEditor::Manager<NodeType>::addPropertiesFile(const string& filePath){
+    // remember which files we have loaded, for our .reload method
+    loadedPropertiesFiles.insert(filePath);
+
+    ofLog() << "Loading ofUiEditor properties file: " << filePath;
+    propertiesCollection.loadJsonFromFile(filePath);
+    // ofLog() << "PropertiesCollection size: "<<propertiesCollection.size();
 }

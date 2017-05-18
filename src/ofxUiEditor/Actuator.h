@@ -7,7 +7,7 @@
 #define OFXUIEDITOR_DEFAULT_PROPERTIES_FILE "properties.json"
 
 namespace ofxUiEditor {
-    class PropsModel : public ofxCMS::Model {
+    class PropsModel : public ofxCMS::ExtendedModel {
     };
 
     //! \brief A class for updating a specific attribute of an arbitrary type of object using provided lambdas
